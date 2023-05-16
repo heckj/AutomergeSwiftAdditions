@@ -1,0 +1,26 @@
+{
+  "configurations" : [
+    {
+      "id" : "4D906F51-AB6E-4FA8-8524-EE8E9DAEFB50",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testExecutionOrdering" : "random",
+    "uiTestingScreenshotsLifetime" : "keepNever"
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "AutomergeSwiftAdditionsTests",
+        "name" : "AutomergeSwiftAdditionsTests"
+      }
+    }
+  ],
+  "version" : 1
+}
