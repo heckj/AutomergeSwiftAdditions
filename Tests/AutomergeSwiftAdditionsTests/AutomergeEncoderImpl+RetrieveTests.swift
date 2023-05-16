@@ -5,9 +5,9 @@
 //  Created by Joseph Heck on 5/16/23.
 //
 
-import XCTest
 import Automerge
 @testable import AutomergeSwiftAdditions
+import XCTest
 
 final class RetrieveObjectIdTests: XCTestCase {
     var doc: Document!

@@ -5,8 +5,8 @@
 //  Created by Joseph Heck on 3/21/23.
 //
 
-import AutomergeSwiftAdditions
 import Automerge
+import AutomergeSwiftAdditions
 import XCTest
 
 final class AMTravelNotesTests: XCTestCase {

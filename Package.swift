@@ -10,7 +10,8 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "AutomergeSwiftAdditions",
-            targets: ["AutomergeSwiftAdditions"]),
+            targets: ["AutomergeSwiftAdditions"]
+        ),
     ],
     dependencies: [
         .package(path: "../automerge-swifter"),
@@ -22,14 +23,15 @@ let package = Package(
         .target(
             name: "AutomergeSwiftAdditions",
             dependencies: [
-                .product(name: "Automerge", package: "automerge-swifter")
+                .product(name: "Automerge", package: "automerge-swifter"),
             ]
         ),
         .testTarget(
             name: "AutomergeSwiftAdditionsTests",
             dependencies: [
                 "AutomergeSwiftAdditions",
-                .product(name: "Automerge", package: "automerge-swifter")
-            ]),
+                .product(name: "Automerge", package: "automerge-swifter"),
+            ]
+        ),
     ]
 )

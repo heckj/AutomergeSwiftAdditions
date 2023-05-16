@@ -5,9 +5,9 @@
 //  Created by Joseph Heck on 3/23/23.
 //
 
-import XCTest
 import Automerge
 @testable import AutomergeSwiftAdditions
+import XCTest
 
 final class AutomergeExplorationTests: XCTestCase {
     func testPathAtRoot() throws {
