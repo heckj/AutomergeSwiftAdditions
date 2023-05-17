@@ -8,3 +8,5 @@ Every time you invoke a test to see overall coverage, the apps launch and hang -
 
 Most of the code within this repository is exploratory - use utterly at your own risk. 
 Anything that seems to be effective and useful I am intending to propose for merging into Automerge Swift language project: `Automerge-swifter`.
+At the moment, it uses code beyond the current release, and as such has a local reference dependency. 
+This expects the Automerge-swifter project at the relevant branch to be checked out locally and in parallel with this repository.
