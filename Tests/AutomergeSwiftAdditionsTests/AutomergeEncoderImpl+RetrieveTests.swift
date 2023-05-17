@@ -52,4 +52,24 @@ final class RetrieveObjectIdTests: XCTestCase {
         // Caching not yet implemented
         // XCTAssertEqual(encoderImpl.cache.count, 2)
     }
+
+    func testCreateSchemaWhereNull() throws {
+        let newCodingPath: [AnyCodingKey] = [
+            AnyCodingKey("list"),
+            AnyCodingKey(1),
+        ]
+        let encoderImpl = AutomergeEncoderImpl(userInfo: [:], codingPath: newCodingPath, doc: doc)
+
+        let result = encoderImpl.retrieveObjectId(path: newCodingPath, containerType: .Key)
+        switch result {
+        case let .success((objectId, codingKeyInstance)):
+            XCTAssertEqual(codingKeyInstance, AnyCodingKey.ROOT)
+            let pathToNewMap = try! doc.path(obj: objectId).stringPath()
+            XCTAssertEqual(pathToNewMap, ".list.[1]")
+        case let .failure(err):
+            XCTFail("Failure looking up new path location: \(err)")
+        }
+        // Caching not yet implemented
+        // XCTAssertEqual(encoderImpl.cache.count, 2)
+    }
 }

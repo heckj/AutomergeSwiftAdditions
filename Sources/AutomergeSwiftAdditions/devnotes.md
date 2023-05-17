@@ -233,3 +233,7 @@ I'm thinking something like a dictionary of `[[CodingKey] : ObjectId]` - if I ca
 With that in place, I may be able to dump ObjecId from the various method calls and implement what's needed only on the relevant container creation (`KeyedEncodingContainer` or `UnkeyedEncodingContainer`), and hopefully that works.
 At the moment, I'm following the footsteps of JSONEncoderImpl and creating a shadow type structure, but I think I can get away with NOT building that. 
 I don't need to walk that structure later to get the final encoding - instead I'm writing as that structure would otherwise be built into an existing Automerge document.
+
+17 May 2023
+
+

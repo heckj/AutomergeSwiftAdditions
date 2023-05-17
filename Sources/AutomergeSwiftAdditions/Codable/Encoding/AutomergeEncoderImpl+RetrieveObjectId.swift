@@ -290,7 +290,7 @@ extension AutomergeEncoderImpl {
         // - on KeyedContainer or UnkeyedContainer, we look up and return the final objectId
         let finalpiece = path[path.count - 1]
         switch containerType {
-        case .Index:
+        case .Index: // the element that we're looking up or creating is a key/obj
             if let indexValue = finalpiece.intValue {
                 // short circuit beyond-length of array
                 if indexValue > self.document.length(obj: previousObjectId) {
@@ -355,8 +355,8 @@ extension AutomergeEncoderImpl {
                                     )
                             )
                         } else {
-                            // need to create a list
-                            let newObjectId = try self.document.putObject(
+                            // need to create a list within the list
+                            let newObjectId = try self.document.insertObject(
                                 obj: previousObjectId,
                                 index: UInt64(indexValue),
                                 ty: .List
@@ -415,7 +415,7 @@ extension AutomergeEncoderImpl {
                                     )
                             )
                         } else {
-                            // need to create a list
+                            // need to create a list within the map
                             let newObjectId = try self.document.putObject(
                                 obj: previousObjectId,
                                 key: keyValue,
@@ -429,7 +429,7 @@ extension AutomergeEncoderImpl {
                     return .failure(error)
                 }
             }
-        case .Key:
+        case .Key: // the element that we're looking up or creating is a key/obj
             if let indexValue = finalpiece.intValue {
                 // short circuit beyond-length of array
                 if indexValue > self.document.length(obj: previousObjectId) {
@@ -495,7 +495,7 @@ extension AutomergeEncoderImpl {
                             )
                         } else {
                             // need to create a map
-                            let newObjectId = try self.document.putObject(
+                            let newObjectId = try self.document.insertObject(
                                 obj: previousObjectId,
                                 index: UInt64(indexValue),
                                 ty: .Map
@@ -552,7 +552,7 @@ extension AutomergeEncoderImpl {
                                     )
                             )
                         } else {
-                            // need to create a list
+                            // need to create a map within a map
                             let newObjectId = try self.document.putObject(
                                 obj: previousObjectId,
                                 key: keyValue,
