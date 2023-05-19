@@ -5,13 +5,13 @@ import class Automerge.Document
 import struct Automerge.ObjId
 import enum Automerge.ScalarValue
 
-class AutomergeList<T: AutomergeRepresentable>: ObservableAutomergeContainer, Sequence {
-    internal var doc: Document
-    internal var obj: ObjId?
-    internal var unboundStorage: [String: Automerge.ScalarValue] = [:] // un-used, req by ObservableAutomergeContainer
+open class AutomergeList<T: AutomergeRepresentable>: ObservableAutomergeContainer, Sequence {
+    public var doc: Document
+    public var obj: ObjId?
+    public var unboundStorage: [String: Automerge.ScalarValue] = [:] // un-used, req by ObservableAutomergeContainer
     private var length: UInt64
 
-    required init(doc: Document, obj: ObjId?) {
+    public required init(doc: Document, obj: ObjId?) {
         self.doc = doc
         if let obj {
             precondition(obj != ObjId.ROOT, "A list object can't be bound to the Root of an Automerge document.")
@@ -25,7 +25,7 @@ class AutomergeList<T: AutomergeRepresentable>: ObservableAutomergeContainer, Se
         // TODO: add validation of schema - that all list entries are convertible to type `T`
     }
 
-    init?(doc: Document, path: String) throws {
+    public init?(doc: Document, path: String) throws {
         self.doc = doc
         if let objId = try doc.lookupPath(path: path), doc.objectType(obj: objId) == .List {
             self.obj = objId
@@ -39,11 +39,11 @@ class AutomergeList<T: AutomergeRepresentable>: ObservableAutomergeContainer, Se
     // MARK: Sequence Conformance
 
     /// Returns an iterator over the elements of this sequence.
-    func makeIterator() -> AmListIterator<T> {
+    public func makeIterator() -> AmListIterator<T> {
         AmListIterator(doc: self.doc, objId: self.obj)
     }
 
-    struct AmListIterator<Element>: IteratorProtocol {
+    public struct AmListIterator<Element>: IteratorProtocol {
         private let doc: Document
         private let objId: ObjId?
         private var cursorIndex: UInt64
@@ -60,7 +60,7 @@ class AutomergeList<T: AutomergeRepresentable>: ObservableAutomergeContainer, Se
             }
         }
 
-        mutating func next() -> Element? {
+        public mutating func next() -> Element? {
             if cursorIndex >= length {
                 return nil
             }
@@ -83,26 +83,26 @@ class AutomergeList<T: AutomergeRepresentable>: ObservableAutomergeContainer, Se
 
 extension AutomergeList: RandomAccessCollection {
     // TODO: implement MutableAccessCollection
-    typealias Index = UInt64 // inferred
-    typealias Iterator = AmListIterator<T>
+    public typealias Index = UInt64 // inferred
+    public typealias Iterator = AmListIterator<T>
 
-    var startIndex: UInt64 {
+    public var startIndex: UInt64 {
         0
     }
 
-    func index(after i: UInt64) -> UInt64 {
+    public func index(after i: UInt64) -> UInt64 {
         i + 1
     }
 
-    func index(before i: UInt64) -> UInt64 {
+    public func index(before i: UInt64) -> UInt64 {
         i - 1
     }
 
-    var endIndex: UInt64 {
+    public var endIndex: UInt64 {
         length
     }
 
-    subscript(position: UInt64) -> T {
+    public subscript(position: UInt64) -> T {
         do {
             guard let amvalue = try self.doc.get(obj: self.obj!, index: position) else {
                 fatalError("Unable to access list \(self.obj!) at index \(position)")

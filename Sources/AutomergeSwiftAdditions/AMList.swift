@@ -12,7 +12,7 @@ import enum Automerge.Value
 public struct AmList<Value: ObservableAutomergeContainer> {
     var key: String
 
-    init(_ key: String) {
+    public init(_ key: String) {
         self.key = key
     }
 

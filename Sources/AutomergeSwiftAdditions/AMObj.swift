@@ -15,7 +15,7 @@ public struct AmObj<Value: ObservableAutomergeContainer> {
 
     /// Creates a wrapper that returns a reference to a type that maps to an Automerge object.
     /// - Parameter key: The string that represents the key within the Automerge map for this property.
-    init(_ key: String) {
+    public init(_ key: String) {
         self.key = key
     }
 

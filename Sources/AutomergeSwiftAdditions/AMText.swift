@@ -11,7 +11,7 @@ import enum Automerge.Value
 public struct AmText {
     var key: String
 
-    init(_ key: String) {
+    public init(_ key: String) {
         self.key = key
     }
 

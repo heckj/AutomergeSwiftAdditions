@@ -19,7 +19,7 @@ public struct AmScalarProp<Value: ScalarValueRepresentable> {
     // TODO: convert to something that allows pathing into nested CRDT objects, not only top-level items
     var key: String
 
-    init(_ key: String) {
+    public init(_ key: String) {
         self.key = key
     }
 

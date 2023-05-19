@@ -6,7 +6,7 @@ import struct Automerge.ObjId
 import enum Automerge.ScalarValue
 
 /// A base class for classes that reference Automerge containers.
-public class BaseAutomergeObject: ObservableAutomergeContainer {
+open class BaseAutomergeObject: ObservableAutomergeContainer {
     public var doc: Document
     public var obj: ObjId?
     public var unboundStorage: [String: ScalarValue]
