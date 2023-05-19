@@ -9,7 +9,7 @@ import enum Automerge.ScalarValue
 import enum Automerge.Value
 
 @propertyWrapper
-struct AmList<Value: ObservableAutomergeContainer> {
+public struct AmList<Value: ObservableAutomergeContainer> {
     var key: String
 
     init(_ key: String) {
@@ -18,7 +18,7 @@ struct AmList<Value: ObservableAutomergeContainer> {
 
     // MARK: wrapped value subscript
 
-    static subscript<T: ObservableAutomergeContainer>(
+    public static subscript<T: ObservableAutomergeContainer>(
         _enclosingInstance instance: T,
         wrapped _: KeyPath<T, Value>,
         storage storageKeyPath: KeyPath<T, Self>
@@ -59,12 +59,12 @@ struct AmList<Value: ObservableAutomergeContainer> {
 //    }
 
     @available(*, unavailable)
-    var wrappedValue: Value {
+    public var wrappedValue: Value {
         fatalError("not available")
     }
 
     @available(*, unavailable)
-    var projectedValue: Binding<Value> {
+    public var projectedValue: Binding<Value> {
         fatalError("not available")
     }
 }

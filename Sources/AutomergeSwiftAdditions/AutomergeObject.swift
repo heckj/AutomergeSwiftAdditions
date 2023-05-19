@@ -6,17 +6,17 @@ import struct Automerge.ObjId
 import enum Automerge.ScalarValue
 
 /// A base class for classes that reference Automerge containers.
-class BaseAutomergeObject: ObservableAutomergeContainer {
-    internal var doc: Document
-    internal var obj: ObjId?
-    internal var unboundStorage: [String: ScalarValue]
+public class BaseAutomergeObject: ObservableAutomergeContainer {
+    public var doc: Document
+    public var obj: ObjId?
+    public var unboundStorage: [String: ScalarValue]
 
     /// Creates a new instance of a class that references a container with an Automerge document.
     /// - Parameters:
     ///   - doc: The Automerge document associated with this reference.
     ///   - obj: An optional objectId of a `Map` type of container within an Automerge document. If `nil`, the root of
     /// the Automerge document is used.
-    required init(doc: Document, obj: ObjId? = ObjId.ROOT) {
+    public required init(doc: Document, obj: ObjId? = ObjId.ROOT) {
         self.doc = doc
         self.unboundStorage = [:]
         if let obj {
@@ -32,7 +32,7 @@ class BaseAutomergeObject: ObservableAutomergeContainer {
     ///
     ///   The initializer fails if the path doesn't match any schema within the Automerge document, or if the container
     ///   referenced by the path is a List type of container.
-    init?(doc: Document, path: String) throws {
+    public init?(doc: Document, path: String) throws {
         self.doc = doc
         self.unboundStorage = [:]
         if let objId = try doc.lookupPath(path: path), doc.objectType(obj: objId) == .Map {
@@ -55,7 +55,7 @@ class BaseAutomergeObject: ObservableAutomergeContainer {
 //        return nil
 //    }
 
-    class func bind(doc: Document, path: String) throws -> Self? {
+    public class func bind(doc: Document, path: String) throws -> Self? {
         if let objId = try doc.lookupPath(path: path), doc.objectType(obj: objId) == .Map {
             return Self(doc: doc, obj: objId)
         }

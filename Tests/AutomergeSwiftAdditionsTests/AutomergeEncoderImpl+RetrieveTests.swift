@@ -144,7 +144,7 @@ final class RetrieveObjectIdTests: XCTestCase {
 
         let result = encoderImpl.retrieveObjectId(path: newCodingPath, containerType: .Value)
         switch result {
-        case let .success((objectId, codingKeyInstance)):
+        case .success:
             XCTFail("Expected this to fail with index 5 in a new array")
         case let .failure(err):
             XCTAssertEqual(

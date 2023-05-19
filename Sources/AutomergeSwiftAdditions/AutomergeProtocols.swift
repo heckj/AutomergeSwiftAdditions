@@ -5,13 +5,13 @@ import struct Automerge.ObjId
 import enum Automerge.ScalarValue
 
 /// A type that has a reference to an Automerge document.
-protocol HasDoc {
+public protocol HasDoc {
     /// The reference to an Automerge document.
     var doc: Document { get }
 }
 
 /// A type that may have a reference to the Id of a container in an Automerge document.
-protocol HasObj {
+public protocol HasObj {
     /// The optional reference to a container within an Automerge document.
     var obj: ObjId? { get }
 
@@ -30,7 +30,7 @@ extension HasObj {
 }
 
 /// A type that represents an observable Automerge container.
-protocol ObservableAutomergeContainer: ObservableObject, HasDoc, HasObj {
+public protocol ObservableAutomergeContainer: ObservableObject, HasDoc, HasObj {
     /// A publisher that provides a signal that indicates the container object is about to change.
     var objectWillChange: ObservableObjectPublisher { get }
     // By using the type `ObservableObjectPublisher`, the conforming type can

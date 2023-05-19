@@ -9,7 +9,7 @@ import enum Automerge.ScalarValue
 import enum Automerge.Value
 
 @propertyWrapper
-struct AmObj<Value: ObservableAutomergeContainer> {
+public struct AmObj<Value: ObservableAutomergeContainer> {
     //              ^^ a constraint on the type of the object that the wrapper returns
     var key: String
 
@@ -21,7 +21,7 @@ struct AmObj<Value: ObservableAutomergeContainer> {
 
     // MARK: wrapped value subscript
 
-    static subscript<T: ObservableAutomergeContainer>(
+    public static subscript<T: ObservableAutomergeContainer>(
         _enclosingInstance instance: T,
         wrapped _: KeyPath<T, Value>,
         storage storageKeyPath: KeyPath<T, Self>
@@ -62,12 +62,12 @@ struct AmObj<Value: ObservableAutomergeContainer> {
 //    }
 
     @available(*, unavailable)
-    var wrappedValue: Value {
+    public var wrappedValue: Value {
         fatalError("not available")
     }
 
     @available(*, unavailable)
-    var projectedValue: Binding<Value> {
+    public var projectedValue: Binding<Value> {
         fatalError("not available")
     }
 }

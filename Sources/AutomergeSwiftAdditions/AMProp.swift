@@ -15,7 +15,7 @@ import protocol Automerge.ScalarValueRepresentable
 import enum Automerge.Value
 
 @propertyWrapper
-struct AmScalarProp<Value: ScalarValueRepresentable> {
+public struct AmScalarProp<Value: ScalarValueRepresentable> {
     // TODO: convert to something that allows pathing into nested CRDT objects, not only top-level items
     var key: String
 
@@ -23,7 +23,7 @@ struct AmScalarProp<Value: ScalarValueRepresentable> {
         self.key = key
     }
 
-    static subscript<T: ObservableAutomergeContainer>(
+    public static subscript<T: ObservableAutomergeContainer>(
         _enclosingInstance instance: T,
         wrapped _: KeyPath<T, Value>,
         storage storageKeyPath: KeyPath<T, Self>
@@ -77,7 +77,7 @@ struct AmScalarProp<Value: ScalarValueRepresentable> {
         }
     }
 
-    static subscript<T: ObservableAutomergeContainer>(
+    public static subscript<T: ObservableAutomergeContainer>(
         _enclosingInstance instance: T,
         projected _: KeyPath<T, Binding<Value>>,
         storage storageKeyPath: KeyPath<T, Self>
@@ -106,12 +106,12 @@ struct AmScalarProp<Value: ScalarValueRepresentable> {
     }
 
     @available(*, unavailable)
-    var wrappedValue: Value {
+    public var wrappedValue: Value {
         fatalError("AmScalarProp is only available for reference types (classes).")
     }
 
     @available(*, unavailable)
-    var projectedValue: Binding<Value> {
+    public var projectedValue: Binding<Value> {
         fatalError("AmScalarProp is only available for reference types (classes).")
     }
 }

@@ -69,7 +69,7 @@ extension AutomergeEncoderImpl {
         // Iterate from the N-1 end of path, backwards - checking [] -> (ObjectId, ObjType) cache,
         // checking until we get a positive hit from the cache. Worst case there'll be nothing in
         // the cache and we iterate to the bottom. Save that as the starting cursor position.
-        var startingPosition = 0
+        let startingPosition = 0
         var previousObjectId = ObjId.ROOT
 
         if strategy == .override {

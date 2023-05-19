@@ -8,14 +8,14 @@ import enum Automerge.ScalarValue
 import enum Automerge.Value
 
 @propertyWrapper
-struct AmText {
+public struct AmText {
     var key: String
 
     init(_ key: String) {
         self.key = key
     }
 
-    static subscript<T: ObservableAutomergeContainer>(
+    public static subscript<T: ObservableAutomergeContainer>(
         _enclosingInstance instance: T,
         wrapped _: KeyPath<T, String>,
         storage storageKeyPath: KeyPath<T, Self>
@@ -59,7 +59,7 @@ struct AmText {
         }
     }
 
-    static subscript<T: ObservableAutomergeContainer>(
+    public static subscript<T: ObservableAutomergeContainer>(
         _enclosingInstance instance: T,
         projected _: KeyPath<T, Binding<String>>,
         storage storageKeyPath: KeyPath<T, Self>
@@ -84,12 +84,12 @@ struct AmText {
     // Constrains the property wrapper from being used with value types
     // Forces the usage of subscripted access
     @available(*, unavailable)
-    var wrappedValue: String {
+    public var wrappedValue: String {
         fatalError("not available")
     }
 
     @available(*, unavailable)
-    var projectedValue: Binding<String> {
+    public var projectedValue: Binding<String> {
         fatalError("not available")
     }
 }
