@@ -14,7 +14,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../automerge-swifter"),
+        .package(url: "https://github.com/automerge/automerge-swifter", branch: "pathFix")
 //        .package(url: "https://github.com/automerge/automerge-swifter", from: "0.0.1")
     ],
     targets: [
@@ -24,7 +24,8 @@ let package = Package(
             name: "AutomergeSwiftAdditions",
             dependencies: [
                 .product(name: "Automerge", package: "automerge-swifter"),
-            ]
+            ],
+            exclude: ["devnotes.md"]
         ),
         .testTarget(
             name: "AutomergeSwiftAdditionsTests",
