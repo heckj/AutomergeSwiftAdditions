@@ -117,7 +117,9 @@ extension AutomergeEncoderImpl {
             // Automerge. Adding additional values (to a map, or to a list) would be invalid in these cases.
             // In a large sense, it's an "update values only" kind of scenario.
 
-            // Determine if the current path element we're processing is an index or key.
+            // Determine the type of the previous element by inspecting the current path.
+            // If it's got an index value, then it's a reference in a list.
+            // Otherwise it's a key on an object.
             if let indexValue = path[position].intValue {
                 // If it's an index, verify that it doesn't represent an element beyond the end of an existing list.
                 if indexValue > self.document.length(obj: previousObjectId) {
@@ -177,11 +179,12 @@ extension AutomergeEncoderImpl {
                                         "Nothing in schema exists at \(path[0 ... position]) - look u returns nil"
                                     )
                             )
-                        } else {
-                            // Look up the kind of "next path" element - list or object.
+                        } else { // couldn't find the object via lookup, so we need to create it
+
+                            // Look up the kind of object to create by inspecting the "next path" element
                             if let _ = path[position + 1].intValue {
-                                // need to create a list
-                                let newObjectId = try self.document.putObject(
+                                // the next item is a list, so create a new list within this list at the index value the current position indicates.
+                                let newObjectId = try self.document.insertObject(
                                     obj: previousObjectId,
                                     index: UInt64(indexValue),
                                     ty: .List
@@ -189,19 +192,19 @@ extension AutomergeEncoderImpl {
                                 matchingObjectIds[position] = newObjectId
                                 previousObjectId = newObjectId
                                 // add to cache
-                                //                        EncoderPathCache.upsert(extendedPath, value: (newObjectId,
+                                //                        EncoderPathCache.upsert(extendedPath,value: (newObjectId,
                                 //                        .List))
                             } else {
                                 // need to create an object
-                                let newObjectId = try self.document.putObject(
+                                let newObjectId = try self.document.insertObject(
                                     obj: previousObjectId,
-                                    key: path[position + 1].stringValue,
+                                    index: UInt64(indexValue),
                                     ty: .Map
                                 )
                                 matchingObjectIds[position] = newObjectId
                                 previousObjectId = newObjectId
                                 // add to cache
-                                //                        EncoderPathCache.upsert(extendedPath, value: (newObjectId,
+                                //                        EncoderPathCache.upsert(extendedPath,value: (newObjectId,
                                 //                        .Map))
                                 // carry on with remaining path elements
                             }
@@ -210,7 +213,7 @@ extension AutomergeEncoderImpl {
                 } catch {
                     return .failure(error)
                 }
-            } else { // path[position] is a string-based key
+            } else { // path[position] is a string-based key, so we need to get - or insert - an Object
                 let keyValue = path[position].stringValue
                 do {
                     if let value = try self.document.get(obj: previousObjectId, key: keyValue) {
@@ -240,7 +243,7 @@ extension AutomergeEncoderImpl {
                                     )
                             )
                         }
-                    } else { // value returned from doc.get() is nil
+                    } else { // value returned from doc.get() is nil, we'll need to create it
                         if strategy == .readonly {
                             // path is a valid request, there's just nothing there
                             return .failure(
@@ -249,10 +252,10 @@ extension AutomergeEncoderImpl {
                                         "Nothing in schema exists at \(path[0 ... position]) - look u returns nil"
                                     )
                             )
-                        } else {
-                            // Look up the kind of "next path" element - list or object.
+                        } else { // looked-up value was nil AND we're not read-only, create the object
+                            // Look up the kind of object to create by inspecting the "next path" element
                             if let _ = path[position + 1].intValue {
-                                // create a list
+                                // the next item is a list, so create a new list within this object using the key value the current position indicates.
                                 let newObjectId = try self.document.putObject(
                                     obj: previousObjectId,
                                     key: keyValue,
@@ -261,10 +264,10 @@ extension AutomergeEncoderImpl {
                                 matchingObjectIds[position] = newObjectId
                                 previousObjectId = newObjectId
                                 // add to cache
-                                //                        EncoderPathCache.upsert(extendedPath, value: (newObjectId,
+                                //                       EncoderPathCache.upsert(extendedPath, value: (newObjectId,
                                 //                        .List))
                             } else {
-                                // create an object
+                                // the next item is an object, so create a new object within this object using the key value the current position indicates.
                                 let newObjectId = try self.document.putObject(
                                     obj: previousObjectId,
                                     key: keyValue,
@@ -273,10 +276,11 @@ extension AutomergeEncoderImpl {
                                 matchingObjectIds[position] = newObjectId
                                 previousObjectId = newObjectId
                                 // add to cache
-                                //                        EncoderPathCache.upsert(extendedPath, value: (newObjectId,
+                                //                       EncoderPathCache.upsert(extendedPath, value: (newObjectId,
                                 //                        .Map))
-                                // carry on with remaining path elements
+                                // carry on with remaining pathelements
                             }
+
                         }
                     }
                 } catch {
