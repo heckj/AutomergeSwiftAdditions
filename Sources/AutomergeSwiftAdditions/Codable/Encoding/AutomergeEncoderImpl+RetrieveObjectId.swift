@@ -290,8 +290,8 @@ extension AutomergeEncoderImpl {
         // - on KeyedContainer or UnkeyedContainer, we look up and return the final objectId
         let finalpiece = path[path.count - 1]
         switch containerType {
-        case .Index: // the element that we're looking up or creating is a key/obj
-            if let indexValue = finalpiece.intValue {
+        case .Index, .Key: // the element that we're looking up (or creating) is for a key or index container
+            if let indexValue = finalpiece.intValue { // The value within the CodingKey indicates it's a List
                 // short circuit beyond-length of array
                 if indexValue > self.document.length(obj: previousObjectId) {
                     if strategy == .readonly {
@@ -385,16 +385,16 @@ extension AutomergeEncoderImpl {
                                         )
                                 )
                             case .Map:
-                                return .failure(
-                                    CodingKeyLookupError
-                                        .mismatchedSchema(
-                                            "Path at \(path) is an object container, which is not the List container that we expected."
-                                        )
-                                )
-                            case .List:
                                 //                            EncoderPathCache.upsert(extendedPath, value: (objId,
                                 //                            objType))
                                 return .success((objId, AnyCodingKey("")))
+                            case .List:
+                                return .failure(
+                                    CodingKeyLookupError
+                                        .mismatchedSchema(
+                                            "Path at \(path) is a List container, which is not the object container that we expected."
+                                        )
+                                )
                             }
                         case .Scalar:
                             // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
@@ -422,143 +422,6 @@ extension AutomergeEncoderImpl {
                                 ty: .List
                             )
                             //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
-                            return .success((newObjectId, AnyCodingKey("")))
-                        }
-                    }
-                } catch {
-                    return .failure(error)
-                }
-            }
-        case .Key: // the element that we're looking up or creating is a key/obj
-            if let indexValue = finalpiece.intValue {
-                // short circuit beyond-length of array
-                if indexValue > self.document.length(obj: previousObjectId) {
-                    if strategy == .readonly {
-                        return .failure(
-                            CodingKeyLookupError
-                                .indexOutOfBounds(
-                                    "Index value \(indexValue) is beyond the length: \(self.document.length(obj: previousObjectId)) and schema is read-only"
-                                )
-                        )
-                    } else if indexValue > (self.document.length(obj: previousObjectId) + 1) {
-                        return .failure(
-                            CodingKeyLookupError
-                                .indexOutOfBounds(
-                                    "Index value \(indexValue) is too far beyond the length: \(self.document.length(obj: previousObjectId)) to append a new item."
-                                )
-                        )
-                    }
-                }
-
-                // Look up Automerge `Value` matching this index within the list
-                do {
-                    if let value = try self.document.get(obj: previousObjectId, index: UInt64(indexValue)) {
-                        switch value {
-                        case let .Object(objId, objType):
-                            switch objType {
-                            case .Text:
-                                return .failure(
-                                    CodingKeyLookupError
-                                        .mismatchedSchema(
-                                            "Path at \(path) is a Text object, which is not the List container that we expected."
-                                        )
-                                )
-                            case .Map:
-                                //                            EncoderPathCache.upsert(extendedPath, value: (objId,
-                                //                            objType))
-                                return .success((objId, AnyCodingKey("")))
-                            case .List:
-                                return .failure(
-                                    CodingKeyLookupError
-                                        .mismatchedSchema(
-                                            "Path at \(path) is an object container, which is not the List container that we expected."
-                                        )
-                                )
-                            }
-                        case .Scalar:
-                            // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
-                            return .failure(
-                                CodingKeyLookupError
-                                    .mismatchedSchema(
-                                        "Path at \(path) is an scalar value, which is not the List container that we expected."
-                                    )
-                            )
-                        }
-                    } else { // value returned from the lookup in Automerge at this position is `nil`
-                        if strategy == .readonly {
-                            // path is a valid request, there's just nothing there
-                            return .failure(
-                                CodingKeyLookupError
-                                    .schemaMissing(
-                                        "Nothing in schema exists at \(path) - look u returns nil"
-                                    )
-                            )
-                        } else {
-                            // need to create a map
-                            let newObjectId = try self.document.insertObject(
-                                obj: previousObjectId,
-                                index: UInt64(indexValue),
-                                ty: .Map
-                            )
-                            //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
-                            return .success((newObjectId, AnyCodingKey("")))
-                        }
-                    }
-                } catch {
-                    return .failure(error)
-                }
-            } else { // final path element is a key
-                let keyValue = finalpiece.stringValue
-                do {
-                    // Look up Automerge `Value` that matches the final key in the path
-                    if let value = try self.document.get(obj: previousObjectId, key: keyValue) {
-                        switch value {
-                        case let .Object(objId, objType):
-                            switch objType {
-                            case .Text:
-                                return .failure(
-                                    CodingKeyLookupError
-                                        .mismatchedSchema(
-                                            "Path at \(path) is a Text object, which is not the Map container that we expected."
-                                        )
-                                )
-                            case .Map:
-                                //                        EncoderPathCache.upsert(extendedPath, value: (objId, objType))
-                                return .success((objId, AnyCodingKey("")))
-                            case .List:
-                                return .failure(
-                                    CodingKeyLookupError
-                                        .mismatchedSchema(
-                                            "Path at \(path) is an object container, which is not the Map container that we expected."
-                                        )
-                                )
-                            }
-                        case .Scalar:
-                            // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
-                            return .failure(
-                                CodingKeyLookupError
-                                    .mismatchedSchema(
-                                        "Path at \(path) is an scalar value, which is not the Map container that we expected."
-                                    )
-                            )
-                        }
-                    } else { // value returned from the lookup in Automerge for this key is `nil`
-                        if strategy == .readonly {
-                            // path is a valid request, there's just nothing there
-                            return .failure(
-                                CodingKeyLookupError
-                                    .schemaMissing(
-                                        "Nothing in schema exists at \(path) - look u returns nil"
-                                    )
-                            )
-                        } else {
-                            // need to create a map within a map
-                            let newObjectId = try self.document.putObject(
-                                obj: previousObjectId,
-                                key: keyValue,
-                                ty: .Map
-                            )
-                            //                    EncoderPathCache.upsert(extendedPath, value: (objId, .List))
                             return .success((newObjectId, AnyCodingKey("")))
                         }
                     }
