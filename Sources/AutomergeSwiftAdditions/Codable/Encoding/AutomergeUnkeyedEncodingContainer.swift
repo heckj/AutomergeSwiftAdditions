@@ -203,10 +203,6 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     }
 
     mutating func encode<T>(_ value: T) throws where T: Encodable {
-        guard let objectId = self.objectId else {
-            throw reportBestError()
-        }
-
         let newPath = impl.codingPath + [ArrayKey(index: count)]
         let newEncoder = AutomergeEncoderImpl(
             userInfo: impl.userInfo,

@@ -1,6 +1,7 @@
 import struct Automerge.Counter
 import class Automerge.Document
 import struct Automerge.ObjId
+import protocol Automerge.ScalarValueRepresentable
 import Foundation
 
 struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
@@ -11,6 +12,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
     ///
     /// If `document` is `nil`, the error attempting to retrieve should be in ``lookupError``.
     let objectId: ObjId?
+    let codingkey: AnyCodingKey?
     /// An error captured when attempting to look up or create an objectId in Automerge based on the coding path
     /// provided.
     let lookupError: Error?
@@ -22,11 +24,13 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
         self.codingPath = codingPath
         self.doc = doc
         switch impl.retrieveObjectId(path: codingPath, containerType: .Value) {
-        case let .success((objId, _)):
+        case let .success((objId, codingkey)):
             self.objectId = objId
+            self.codingkey = codingkey
             self.lookupError = nil
         case let .failure(capturedError):
             self.objectId = nil
+            self.codingkey = nil
             self.lookupError = capturedError
         }
     }
@@ -34,57 +38,57 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
     mutating func encodeNil() throws {}
 
     mutating func encode(_ value: Bool) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .bool(value)
     }
 
     mutating func encode(_ value: Int) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
     }
 
     mutating func encode(_ value: Int8) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
     }
 
     mutating func encode(_ value: Int16) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
     }
 
     mutating func encode(_ value: Int32) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
     }
 
     mutating func encode(_ value: Int64) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .int(value)
     }
 
     mutating func encode(_ value: UInt) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
     }
 
     mutating func encode(_ value: UInt8) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
     }
 
     mutating func encode(_ value: UInt16) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
     }
 
     mutating func encode(_ value: UInt32) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
     }
 
     mutating func encode(_ value: UInt64) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
     }
 
@@ -96,7 +100,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             ))
         }
 
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .double(Double(value))
     }
 
@@ -108,35 +112,45 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             ))
         }
 
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .double(value)
     }
 
     mutating func encode(_ value: String) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .string(value)
     }
 
     mutating func encode(_ value: Data) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .bytes(value)
     }
 
     mutating func encode(_ value: Counter) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .counter(Int64(value.value))
     }
 
     mutating func encode(_ value: Date) throws {
-        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
         self.impl.singleValue = .timestamp(Int64(value.timeIntervalSince1970))
     }
-
-    // ?? how handle types for Counter and Timestamp
 
     mutating func encode<T: Encodable>(_ value: T) throws {
         self.preconditionCanEncodeNewValue()
         try value.encode(to: self.impl)
+    }
+
+    private func scalarValueEncode(value: some ScalarValueRepresentable) throws {
+        self.preconditionCanEncodeNewValue()
+        guard let objectId = self.objectId, let codingkey = self.codingkey else {
+            throw reportBestError()
+        }
+        if let indexToWrite = codingkey.intValue {
+            try doc.insert(obj: objectId, index: UInt64(indexToWrite), value: value.toScalarValue())
+        } else {
+            try doc.put(obj: objectId, key: codingkey.stringValue, value: value.toScalarValue())
+        }
     }
 
     func preconditionCanEncodeNewValue() {
@@ -144,5 +158,19 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             self.impl.singleValue == nil,
             "Attempt to encode value through single value container when previously value already encoded."
         )
+    }
+
+    fileprivate func reportBestError() -> Error {
+        // Returns the best value it can from a lookup error scenario.
+        if let containerLookupError = self.lookupError {
+            return containerLookupError
+        } else {
+            // If the error wasn't captured for some reason, drop back to a more general error exposing
+            // the precondition failure.
+            return CodingKeyLookupError
+                .unexpectedLookupFailure(
+                    "Encoding called on KeyedContainer when ObjectId is nil, and there was no recorded lookup error for the path \(self.codingPath)"
+                )
+        }
     }
 }
