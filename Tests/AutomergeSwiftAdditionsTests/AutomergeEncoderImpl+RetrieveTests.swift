@@ -33,6 +33,12 @@ final class RetrieveObjectIdTests: XCTestCase {
         XCTAssertEqual(path, [])
     }
 
+    func testSetupDocPath() throws {
+        let pathToText = try! doc.path(obj: setupCache["deeplyNestedText"]!).stringPath()
+        XCTAssertEqual(setupCache.count, 3)
+        XCTAssertEqual(pathToText, ".list.[0].notes")
+    }
+
     func testRetrieveLeafValue() throws {
         let fullCodingPath: [AnyCodingKey] = [
             AnyCodingKey("list"),
@@ -69,8 +75,6 @@ final class RetrieveObjectIdTests: XCTestCase {
         case let .failure(err):
             XCTFail("Failure looking up new path location: \(err)")
         }
-        // Caching not yet implemented
-        // XCTAssertEqual(encoderImpl.cache.count, 2)
     }
 
     func testCreateDeeperNewSchema_Key() throws {

@@ -1,6 +1,7 @@
 import class Automerge.Document
 import struct Automerge.ObjId
 import protocol Automerge.ScalarValueRepresentable
+import Foundation
 
 struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     let impl: AutomergeEncoderImpl
@@ -50,13 +51,36 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         }
     }
 
+    fileprivate func reportBestError() -> Error {
+        // Returns the best value it can from a lookup error scenario.
+        if let containerLookupError = self.lookupError {
+            return containerLookupError
+        } else {
+            // If the error wasn't captured for some reason, drop back to a more general error exposing
+            // the precondition failure.
+            return CodingKeyLookupError
+                .unexpectedLookupFailure(
+                    "Encoding called on UnkeyedContainer when ObjectId is nil, and there was no recorded lookup error for the path \(self.codingPath)"
+                )
+        }
+    }
+
     mutating func encodeNil() throws {}
 
     mutating func encode(_ value: Bool) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
+
         array.append(.bool(value))
     }
 
     mutating func encode(_ value: String) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
         array.append(.string(value))
     }
 
@@ -67,6 +91,10 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
                 debugDescription: "Unable to encode Double.\(value) directly in JSON."
             ))
         }
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
 
         try encodeFloatingPoint(value)
     }
@@ -78,51 +106,107 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
                 debugDescription: "Unable to encode Float.\(value) directly in JSON."
             ))
         }
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
 
         try encodeFloatingPoint(value)
     }
 
     mutating func encode(_ value: Int) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
         try encodeFixedWidthInteger(value)
     }
 
     mutating func encode(_ value: Int8) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
         try encodeFixedWidthInteger(value)
     }
 
     mutating func encode(_ value: Int16) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
         try encodeFixedWidthInteger(value)
     }
 
     mutating func encode(_ value: Int32) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
         try encodeFixedWidthInteger(value)
     }
 
     mutating func encode(_ value: Int64) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
         try encodeFixedWidthInteger(value)
     }
 
     mutating func encode(_ value: UInt) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
         try encodeFixedWidthInteger(value)
     }
 
     mutating func encode(_ value: UInt8) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
         try encodeFixedWidthInteger(value)
     }
 
     mutating func encode(_ value: UInt16) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
         try encodeFixedWidthInteger(value)
     }
 
     mutating func encode(_ value: UInt32) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
         try encodeFixedWidthInteger(value)
     }
 
     mutating func encode(_ value: UInt64) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
         try encodeFixedWidthInteger(value)
     }
 
+    mutating func encode(_ value: Data) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try self.document.insert(obj: objectId, index: UInt64(count), value: value.toScalarValue())
+        array.append(.bytes(value))
+    }
+
     mutating func encode<T>(_ value: T) throws where T: Encodable {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+
         let newPath = impl.codingPath + [ArrayKey(index: count)]
         let newEncoder = AutomergeEncoderImpl(
             userInfo: impl.userInfo,
@@ -136,6 +220,8 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         }
 
         array.append(value)
+        // not sure how to correctly identify what kind of object we're shoving into place
+//        try self.document.insertObject(obj: objectId, index: count, ty: <#T##ObjType#>)
     }
 
     mutating func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type) ->

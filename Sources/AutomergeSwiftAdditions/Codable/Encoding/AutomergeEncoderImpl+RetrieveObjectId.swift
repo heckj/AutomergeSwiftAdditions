@@ -2,24 +2,6 @@ import class Automerge.Document
 import struct Automerge.ObjId
 
 extension AutomergeEncoderImpl {
-    // Keyed container - I need an ObjectId that matches the keyed container (object) to write into.
-    //   on `encode()`, I'll be encoding with a key thats provided on methods.
-    //    - if needed, I should be extending the schema to add the container
-
-    // Un-keyed container - I need an ObjectId that matches the un-keyed container (list) to write into.
-    //   on `encode()`, I'll be encoding with a key thats provided on methods
-    //    - if needed, I should be extending the array size to add the container
-
-    // Single-value container - I need an ObjectId with the containing object AND the key (or index)
-    //   on `encode()`, I'll need to know the key or index to determine what method to use to write into
-    //     and Automerge objectId with the relevant value.
-
-    // Encoder Configuration Option (effects encode() methods):
-
-    // (extra-check)
-    // value-type-checked: As we call encode(), verify that the underlying types (ScalarValue, Text, etc)
-    // in Automerge aren't incompatible with the type we are encoding - at least for the leaf nodes.
-
     /// Returns an Automerge objectId for the location within the document.
     ///
     /// The function looks up Automerge schema while optionally creating schema if needed, and reporting on errors with
@@ -180,10 +162,10 @@ extension AutomergeEncoderImpl {
                                     )
                             )
                         } else { // couldn't find the object via lookup, so we need to create it
-
                             // Look up the kind of object to create by inspecting the "next path" element
                             if let _ = path[position + 1].intValue {
-                                // the next item is a list, so create a new list within this list at the index value the current position indicates.
+                                // the next item is a list, so create a new list within this list at the index value the
+                                // current position indicates.
                                 let newObjectId = try self.document.insertObject(
                                     obj: previousObjectId,
                                     index: UInt64(indexValue),
@@ -255,7 +237,8 @@ extension AutomergeEncoderImpl {
                         } else { // looked-up value was nil AND we're not read-only, create the object
                             // Look up the kind of object to create by inspecting the "next path" element
                             if let _ = path[position + 1].intValue {
-                                // the next item is a list, so create a new list within this object using the key value the current position indicates.
+                                // the next item is a list, so create a new list within this object using the key value
+                                // the current position indicates.
                                 let newObjectId = try self.document.putObject(
                                     obj: previousObjectId,
                                     key: keyValue,
@@ -267,7 +250,8 @@ extension AutomergeEncoderImpl {
                                 //                       EncoderPathCache.upsert(extendedPath, value: (newObjectId,
                                 //                        .List))
                             } else {
-                                // the next item is an object, so create a new object within this object using the key value the current position indicates.
+                                // the next item is an object, so create a new object within this object using the key
+                                // value the current position indicates.
                                 let newObjectId = try self.document.putObject(
                                     obj: previousObjectId,
                                     key: keyValue,
@@ -280,7 +264,6 @@ extension AutomergeEncoderImpl {
                                 //                        .Map))
                                 // carry on with remaining pathelements
                             }
-
                         }
                     }
                 } catch {

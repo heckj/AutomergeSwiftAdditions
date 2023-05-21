@@ -1,3 +1,4 @@
+import struct Automerge.Counter
 import class Automerge.Document
 import struct Automerge.ObjId
 import Foundation
@@ -119,6 +120,16 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
     mutating func encode(_ value: Data) throws {
         self.preconditionCanEncodeNewValue()
         self.impl.singleValue = .bytes(value)
+    }
+
+    mutating func encode(_ value: Counter) throws {
+        self.preconditionCanEncodeNewValue()
+        self.impl.singleValue = .counter(Int64(value.value))
+    }
+
+    mutating func encode(_ value: Date) throws {
+        self.preconditionCanEncodeNewValue()
+        self.impl.singleValue = .timestamp(Int64(value.timeIntervalSince1970))
     }
 
     // ?? how handle types for Counter and Timestamp
