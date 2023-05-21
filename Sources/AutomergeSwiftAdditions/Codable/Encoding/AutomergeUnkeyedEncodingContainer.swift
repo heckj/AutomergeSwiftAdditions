@@ -216,8 +216,6 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         }
 
         array.append(value)
-        // not sure how to correctly identify what kind of object we're shoving into place
-//        try self.document.insertObject(obj: objectId, index: count, ty: <#T##ObjType#>)
     }
 
     mutating func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type) ->
