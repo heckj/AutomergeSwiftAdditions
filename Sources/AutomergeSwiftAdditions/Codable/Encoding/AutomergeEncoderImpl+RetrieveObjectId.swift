@@ -1,6 +1,12 @@
 import class Automerge.Document
 import struct Automerge.ObjId
 
+private func tracePrint(_ stringval: String) {
+    #if DEBUG
+    print(stringval)
+    #endif
+}
+
 extension AutomergeEncoderImpl {
     /// Returns an Automerge objectId for the location within the document.
     ///
@@ -143,6 +149,7 @@ extension AutomergeEncoderImpl {
                             }
                             matchingObjectIds[position] = objId
                             previousObjectId = objId
+                            tracePrint("looked up \(path[0 ... position]) as objectId \(objId) of type \(objType)")
                         case .Scalar:
                             // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
                             return .failure(
@@ -173,6 +180,7 @@ extension AutomergeEncoderImpl {
                                 )
                                 matchingObjectIds[position] = newObjectId
                                 previousObjectId = newObjectId
+                                tracePrint("created \(path[0 ... position]) as objectId \(newObjectId) of type List")
                                 // add to cache
                                 //                        EncoderPathCache.upsert(extendedPath,value: (newObjectId,
                                 //                        .List))
@@ -185,6 +193,7 @@ extension AutomergeEncoderImpl {
                                 )
                                 matchingObjectIds[position] = newObjectId
                                 previousObjectId = newObjectId
+                                tracePrint("created \(path[0 ... position]) as objectId \(newObjectId) of type Map")
                                 // add to cache
                                 //                        EncoderPathCache.upsert(extendedPath,value: (newObjectId,
                                 //                        .Map))
@@ -215,6 +224,7 @@ extension AutomergeEncoderImpl {
                             }
                             matchingObjectIds[position] = objId
                             previousObjectId = objId
+                            tracePrint("created \(path[0 ... position]) as objectId \(objId) of type \(objType)")
                         case .Scalar:
                             // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
                             // If there's remaining values to be looked up, the overall path is invalid.
@@ -246,6 +256,7 @@ extension AutomergeEncoderImpl {
                                 )
                                 matchingObjectIds[position] = newObjectId
                                 previousObjectId = newObjectId
+                                tracePrint("created \(path[0 ... position]) as objectId \(newObjectId) of type List")
                                 // add to cache
                                 //                       EncoderPathCache.upsert(extendedPath, value: (newObjectId,
                                 //                        .List))
@@ -259,6 +270,7 @@ extension AutomergeEncoderImpl {
                                 )
                                 matchingObjectIds[position] = newObjectId
                                 previousObjectId = newObjectId
+                                tracePrint("created \(path[0 ... position]) as objectId \(newObjectId) of type Map")
                                 // add to cache
                                 //                       EncoderPathCache.upsert(extendedPath, value: (newObjectId,
                                 //                        .Map))
@@ -279,6 +291,7 @@ extension AutomergeEncoderImpl {
         switch containerType {
         case .Index, .Key: // the element that we're looking up (or creating) is for a key or index container
             if let indexValue = finalpiece.intValue { // The value within the CodingKey indicates it's a List
+                tracePrint("Final piece of the path \(finalpiece) is a List item, index \(indexValue).")
                 // short circuit beyond-length of array
                 if indexValue > self.document.length(obj: previousObjectId) {
                     if strategy == .readonly {
@@ -300,6 +313,7 @@ extension AutomergeEncoderImpl {
 
                 // Look up Automerge `Value` matching this index within the list
                 do {
+                    tracePrint("Look up what's at index \(indexValue) of objectId: \(previousObjectId):")
                     if let value = try self.document.get(obj: previousObjectId, index: UInt64(indexValue)) {
                         switch value {
                         case let .Object(objId, objType):
@@ -321,6 +335,7 @@ extension AutomergeEncoderImpl {
                             case .List:
                                 //                            EncoderPathCache.upsert(extendedPath, value: (objId,
                                 //                            objType))
+                                tracePrint("Found List container with ObjectId \(objId).")
                                 return .success((objId, AnyCodingKey("")))
                             }
                         case .Scalar:
@@ -349,6 +364,7 @@ extension AutomergeEncoderImpl {
                                 ty: .List
                             )
                             //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
+                            tracePrint("Created new List container with ObjectId \(newObjectId).")
                             return .success((newObjectId, AnyCodingKey("")))
                         }
                     }
@@ -360,6 +376,7 @@ extension AutomergeEncoderImpl {
 
                 // Look up Automerge `Value` matching this key on an object
                 do {
+                    tracePrint("Look up what's at key \(keyValue) of objectId: \(previousObjectId):")
                     if let value = try self.document.get(obj: previousObjectId, key: keyValue) {
                         switch value {
                         case let .Object(objId, objType):
@@ -374,6 +391,7 @@ extension AutomergeEncoderImpl {
                             case .Map:
                                 //                            EncoderPathCache.upsert(extendedPath, value: (objId,
                                 //                            objType))
+                                tracePrint("Found Map container with ObjectId \(objId).")
                                 return .success((objId, AnyCodingKey("")))
                             case .List:
                                 return .failure(
@@ -409,6 +427,7 @@ extension AutomergeEncoderImpl {
                                 ty: .Map
                             )
                             //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
+                            tracePrint("Created new Map container with ObjectId \(newObjectId).")
                             return .success((newObjectId, AnyCodingKey("")))
                         }
                     }
