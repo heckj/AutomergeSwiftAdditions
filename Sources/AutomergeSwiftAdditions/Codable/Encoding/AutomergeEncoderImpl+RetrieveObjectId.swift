@@ -82,10 +82,12 @@ extension AutomergeEncoderImpl {
             }
         }
 
+        tracePrint("Full path to look up '\(path)' for container type \(containerType)")
         // Iterate the cursor position forward doing lookups against the Automerge document
         // until we get to the second-to-last element. This range ensures that we're iterating
         // over "expected containers"
         for position in startingPosition ..< (path.count - 1) {
+            tracePrint("Checking position \(position): '\(path[position])'")
             // Strategy to use while creating schema:
             // defined in AutomergeEncoder.SchemaStrategy
 
@@ -109,6 +111,7 @@ extension AutomergeEncoderImpl {
             // If it's got an index value, then it's a reference in a list.
             // Otherwise it's a key on an object.
             if let indexValue = path[position].intValue {
+                tracePrint("Checking against index position \(indexValue).")
                 // If it's an index, verify that it doesn't represent an element beyond the end of an existing list.
                 if indexValue > self.document.length(obj: previousObjectId) {
                     if strategy == .readonly {
@@ -149,7 +152,7 @@ extension AutomergeEncoderImpl {
                             }
                             matchingObjectIds[position] = objId
                             previousObjectId = objId
-                            tracePrint("looked up \(path[0 ... position]) as objectId \(objId) of type \(objType)")
+                            tracePrint("Found \(path[0 ... position]) as objectId \(objId) of type \(objType)")
                         case .Scalar:
                             // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
                             return .failure(
@@ -160,6 +163,9 @@ extension AutomergeEncoderImpl {
                             )
                         }
                     } else { // value returned from the lookup in Automerge at this position is `nil`
+                        tracePrint(
+                            "Nothing pre-existing in schema at \(path[0 ... position]), will need to create a container."
+                        )
                         if strategy == .readonly {
                             // path is a valid request, there's just nothing there
                             return .failure(
@@ -170,6 +176,8 @@ extension AutomergeEncoderImpl {
                             )
                         } else { // couldn't find the object via lookup, so we need to create it
                             // Look up the kind of object to create by inspecting the "next path" element
+                            tracePrint("Need to create a container at \(path[0 ... position]).")
+                            tracePrint("Next path element is '\(path[position + 1])'.")
                             if let _ = path[position + 1].intValue {
                                 // the next item is a list, so create a new list within this list at the index value the
                                 // current position indicates.
@@ -206,6 +214,7 @@ extension AutomergeEncoderImpl {
                 }
             } else { // path[position] is a string-based key, so we need to get - or insert - an Object
                 let keyValue = path[position].stringValue
+                tracePrint("Checking against key \(keyValue).")
                 do {
                     if let value = try self.document.get(obj: previousObjectId, key: keyValue) {
                         switch value {
@@ -224,7 +233,7 @@ extension AutomergeEncoderImpl {
                             }
                             matchingObjectIds[position] = objId
                             previousObjectId = objId
-                            tracePrint("created \(path[0 ... position]) as objectId \(objId) of type \(objType)")
+                            tracePrint("Found \(path[0 ... position]) as objectId \(objId) of type \(objType)")
                         case .Scalar:
                             // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
                             // If there's remaining values to be looked up, the overall path is invalid.
@@ -236,6 +245,9 @@ extension AutomergeEncoderImpl {
                             )
                         }
                     } else { // value returned from doc.get() is nil, we'll need to create it
+                        tracePrint(
+                            "Nothing pre-existing in schema at \(path[0 ... position]), will need to create a container."
+                        )
                         if strategy == .readonly {
                             // path is a valid request, there's just nothing there
                             return .failure(
@@ -245,6 +257,8 @@ extension AutomergeEncoderImpl {
                                     )
                             )
                         } else { // looked-up value was nil AND we're not read-only, create the object
+                            tracePrint("Need to create a container at \(path[0 ... position]).")
+                            tracePrint("Next path element is \(path[position + 1]).")
                             // Look up the kind of object to create by inspecting the "next path" element
                             if let _ = path[position + 1].intValue {
                                 // the next item is a list, so create a new list within this object using the key value
@@ -291,7 +305,7 @@ extension AutomergeEncoderImpl {
         switch containerType {
         case .Index, .Key: // the element that we're looking up (or creating) is for a key or index container
             if let indexValue = finalpiece.intValue { // The value within the CodingKey indicates it's a List
-                tracePrint("Final piece of the path \(finalpiece) is a List item, index \(indexValue).")
+                tracePrint("Final piece of the path is '\(finalpiece)', index \(indexValue) of a List.")
                 // short circuit beyond-length of array
                 if indexValue > self.document.length(obj: previousObjectId) {
                     if strategy == .readonly {
@@ -376,7 +390,7 @@ extension AutomergeEncoderImpl {
 
                 // Look up Automerge `Value` matching this key on an object
                 do {
-                    tracePrint("Look up what's at key \(keyValue) of objectId: \(previousObjectId):")
+                    tracePrint("Look up what's at key '\(keyValue)' of objectId: \(previousObjectId).")
                     if let value = try self.document.get(obj: previousObjectId, key: keyValue) {
                         switch value {
                         case let .Object(objId, objType):

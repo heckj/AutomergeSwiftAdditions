@@ -124,7 +124,7 @@ final class AutomergeEncoderTests: XCTestCase {
         struct RootModel: Codable {
             let example: [SimpleStruct]
         }
-
+        let doc = Document()
         let automergeEncoder = AutomergeEncoder(doc: doc)
 
         let sample = RootModel(example: [SimpleStruct(name: "henry", duration: 3.14159, flag: true, count: 5)])
