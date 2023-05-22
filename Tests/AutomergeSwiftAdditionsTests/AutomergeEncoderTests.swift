@@ -26,7 +26,7 @@ final class AutomergeEncoderTests: XCTestCase {
         let deeplyNestedText = try! doc.putObject(obj: nestedMap, key: "notes", ty: .Text)
         setupCache["deeplyNestedText"] = deeplyNestedText
     }
-    
+
     func testSimpleEncode() throws {
         struct SimpleStruct: Codable {
             let name: String
@@ -34,36 +34,36 @@ final class AutomergeEncoderTests: XCTestCase {
             let flag: Bool
             let count: Int
         }
-        let automergeEncoder = AutomergeEncoder(doc: self.doc)
-        
+        let automergeEncoder = AutomergeEncoder(doc: doc)
+
         let sample = SimpleStruct(name: "henry", duration: 3.14159, flag: true, count: 5)
         try automergeEncoder.encode(sample)
-                
+
         if case let .Scalar(.String(a_name)) = try doc.get(obj: ObjId.ROOT, key: "name") {
             XCTAssertEqual(a_name, "henry")
         } else {
-            XCTFail("Didn't find: \(String(describing: try doc.get(obj: ObjId.ROOT, key: "name")))")
+            try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "name")))")
         }
-        
+
         if case let .Scalar(.F64(duration_value)) = try doc.get(obj: ObjId.ROOT, key: "duration") {
             XCTAssertEqual(duration_value, 3.14159, accuracy: 0.01)
         } else {
-            XCTFail("Didn't find: \(String(describing: try doc.get(obj: ObjId.ROOT, key: "duration")))")
+            try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "duration")))")
         }
 
         if case let .Scalar(.Boolean(boolean_value)) = try doc.get(obj: ObjId.ROOT, key: "flag") {
             XCTAssertEqual(boolean_value, true)
         } else {
-            XCTFail("Didn't find: \(String(describing: try doc.get(obj: ObjId.ROOT, key: "flag")))")
+            try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "flag")))")
         }
 
         if case let .Scalar(.Int(int_value)) = try doc.get(obj: ObjId.ROOT, key: "count") {
             XCTAssertEqual(int_value, 5)
         } else {
-            XCTFail("Didn't find: \(String(describing: try doc.get(obj: ObjId.ROOT, key: "count")))")
+            try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "count")))")
         }
     }
-    
+
     func testNestedEncode() throws {
         struct SimpleStruct: Codable {
             let name: String
@@ -71,48 +71,45 @@ final class AutomergeEncoderTests: XCTestCase {
             let flag: Bool
             let count: Int
         }
-        
+
         struct RootModel: Codable {
             let example: SimpleStruct
-            
         }
 
-        let automergeEncoder = AutomergeEncoder(doc: self.doc)
-        
+        let automergeEncoder = AutomergeEncoder(doc: doc)
+
         let sample = RootModel(example: SimpleStruct(name: "henry", duration: 3.14159, flag: true, count: 5))
-        
+
         try automergeEncoder.encode(sample)
-                
+
         if case let .Object(container_id, container_type) = try doc.get(obj: ObjId.ROOT, key: "example") {
             XCTAssertEqual(container_type, ObjType.Map)
-            
-            
+
             if case let .Scalar(.String(a_name)) = try doc.get(obj: container_id, key: "name") {
                 XCTAssertEqual(a_name, "henry")
             } else {
-                XCTFail("Didn't find: \(String(describing: try doc.get(obj: container_id, key: "name")))")
+                try XCTFail("Didn't find: \(String(describing: doc.get(obj: container_id, key: "name")))")
             }
-            
+
             if case let .Scalar(.F64(duration_value)) = try doc.get(obj: container_id, key: "duration") {
                 XCTAssertEqual(duration_value, 3.14159, accuracy: 0.01)
             } else {
-                XCTFail("Didn't find: \(String(describing: try doc.get(obj: container_id, key: "duration")))")
+                try XCTFail("Didn't find: \(String(describing: doc.get(obj: container_id, key: "duration")))")
             }
 
             if case let .Scalar(.Boolean(boolean_value)) = try doc.get(obj: container_id, key: "flag") {
                 XCTAssertEqual(boolean_value, true)
             } else {
-                XCTFail("Didn't find: \(String(describing: try doc.get(obj: container_id, key: "flag")))")
+                try XCTFail("Didn't find: \(String(describing: doc.get(obj: container_id, key: "flag")))")
             }
 
             if case let .Scalar(.Int(int_value)) = try doc.get(obj: container_id, key: "count") {
                 XCTAssertEqual(int_value, 5)
             } else {
-                XCTFail("Didn't find: \(String(describing: try doc.get(obj: container_id, key: "count")))")
+                try XCTFail("Didn't find: \(String(describing: doc.get(obj: container_id, key: "count")))")
             }
         } else {
-            XCTFail("Didn't find: \(String(describing: try doc.get(obj: ObjId.ROOT, key: "example")))")
+            try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "example")))")
         }
-        
     }
 }

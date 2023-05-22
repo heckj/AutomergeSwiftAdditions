@@ -406,7 +406,7 @@ extension AutomergeEncoderImpl {
                             let newObjectId = try self.document.putObject(
                                 obj: previousObjectId,
                                 key: keyValue,
-                                ty: .List
+                                ty: .Map
                             )
                             //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
                             return .success((newObjectId, AnyCodingKey("")))

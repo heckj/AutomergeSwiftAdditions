@@ -39,7 +39,7 @@ extension Document {
         }
         return try lookupSubPath(bits, basePath: "", from: ObjId.ROOT)
     }
-    
+
     private func extractIndexString(pathElement: String) throws -> UInt64 {
         if pathElement.first == "[", pathElement.last == "]" {
             let start = pathElement.index(after: pathElement.startIndex)
