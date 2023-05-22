@@ -82,7 +82,10 @@ extension AutomergeEncoderImpl {
             }
         }
 
-        tracePrint("Full path to look up '\(path)' for container type \(containerType)")
+//        let anypath = path.map { AnyCodingKey($0) }
+        tracePrint(
+            "`retrieveObjectId` with path [\(path.map { AnyCodingKey($0) })] for container type \(containerType), with stragegy: \(strategy)"
+        )
         // Iterate the cursor position forward doing lookups against the Automerge document
         // until we get to the second-to-last element. This range ensures that we're iterating
         // over "expected containers"
@@ -297,6 +300,13 @@ extension AutomergeEncoderImpl {
                 }
             }
         }
+
+        #if DEBUG
+        tracePrint("All prior containers created or found:")
+        for position in startingPosition ..< (path.count - 1) {
+            tracePrint("   \(position) -> \(String(describing: matchingObjectIds[position]))")
+        }
+        #endif
 
         // Then what we do depends on the type of lookup.
         // - on SingleValueContainer, we return the second-to-last objectId and the key and/or Index
