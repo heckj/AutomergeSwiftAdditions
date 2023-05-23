@@ -77,8 +77,7 @@ final class AutomergeEncoderTests: XCTestCase {
             try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "count")))")
         }
 
-        let capture_date = try doc.get(obj: ObjId.ROOT, key: "date")
-        debugPrint(capture_date)
+        try debugPrint(doc.get(obj: ObjId.ROOT, key: "date") as Any)
 //        if case let .Scalar(.Timestamp(timestamp_value)) = try doc.get(obj: ObjId.ROOT, key: "date") {
 //            print("Found the timestamp value of \(timestamp_value)")
         ////            XCTAssertEqual(int_value, 5)
@@ -86,8 +85,7 @@ final class AutomergeEncoderTests: XCTestCase {
 //            try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "date")))")
 //        }
 
-        let capture_data = try doc.get(obj: ObjId.ROOT, key: "data")
-        debugPrint(capture_data)
+        try debugPrint(doc.get(obj: ObjId.ROOT, key: "data") as Any)
 
         // debugPrint(try doc.get(obj: ObjId.ROOT, key: "uuid"))
         if case let .Scalar(.String(uuid_string)) = try doc.get(obj: ObjId.ROOT, key: "uuid") {
