@@ -372,6 +372,8 @@ extension AutomergeEncoderImpl {
                             )
                         }
                     } else { // value returned from the lookup in Automerge at this position is `nil`
+                        tracePrint("Need to create a container at \(path).")
+                        tracePrint("Path type to create is \(containerType).")
                         if strategy == .readonly {
                             // path is a valid request, there's just nothing there
                             return .failure(
@@ -381,15 +383,27 @@ extension AutomergeEncoderImpl {
                                     )
                             )
                         } else {
-                            // need to create a list within the list
-                            let newObjectId = try self.document.insertObject(
-                                obj: previousObjectId,
-                                index: UInt64(indexValue),
-                                ty: .List
-                            )
-                            //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
-                            tracePrint("Created new List container with ObjectId \(newObjectId).")
-                            return .success((newObjectId, AnyCodingKey("")))
+                            if containerType == .Index {
+                                // need to create a list within the list
+                                let newObjectId = try self.document.insertObject(
+                                    obj: previousObjectId,
+                                    index: UInt64(indexValue),
+                                    ty: .List
+                                )
+                                //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
+                                tracePrint("Created new List container with ObjectId \(newObjectId).")
+                                return .success((newObjectId, AnyCodingKey("")))
+                            } else {
+                                // need to create a map within the list
+                                let newObjectId = try self.document.insertObject(
+                                    obj: previousObjectId,
+                                    index: UInt64(indexValue),
+                                    ty: .Map
+                                )
+                                //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
+                                tracePrint("Created new Map container with ObjectId \(newObjectId).")
+                                return .success((newObjectId, AnyCodingKey("")))
+                            }
                         }
                     }
                 } catch {
@@ -435,6 +449,8 @@ extension AutomergeEncoderImpl {
                             )
                         }
                     } else { // value returned from the lookup in Automerge at this position is `nil`
+                        tracePrint("Need to create a container at \(path).")
+                        tracePrint("Path type to create is \(containerType).")
                         if strategy == .readonly {
                             // path is a valid request, there's just nothing there
                             return .failure(
@@ -444,15 +460,27 @@ extension AutomergeEncoderImpl {
                                     )
                             )
                         } else {
-                            // need to create a list within the map
-                            let newObjectId = try self.document.putObject(
-                                obj: previousObjectId,
-                                key: keyValue,
-                                ty: .Map
-                            )
-                            //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
-                            tracePrint("Created new Map container with ObjectId \(newObjectId).")
-                            return .success((newObjectId, AnyCodingKey("")))
+                            if containerType == .Index {
+                                // need to create a list within the list
+                                let newObjectId = try self.document.putObject(
+                                    obj: previousObjectId,
+                                    key: keyValue,
+                                    ty: .List
+                                )
+                                //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
+                                tracePrint("Created new List container with ObjectId \(newObjectId).")
+                                return .success((newObjectId, AnyCodingKey("")))
+                            } else {
+                                // need to create a map within the list
+                                let newObjectId = try self.document.putObject(
+                                    obj: previousObjectId,
+                                    key: keyValue,
+                                    ty: .Map
+                                )
+                                //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
+                                tracePrint("Created new Map container with ObjectId \(newObjectId).")
+                                return .success((newObjectId, AnyCodingKey("")))
+                            }
                         }
                     }
                 } catch {
