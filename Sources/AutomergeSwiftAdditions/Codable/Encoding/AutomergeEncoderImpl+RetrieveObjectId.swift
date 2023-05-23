@@ -488,12 +488,18 @@ extension AutomergeEncoderImpl {
                 }
             }
         case .Value:
-            guard let containerObjectId = matchingObjectIds[path.count - 2] else {
-                fatalError(
-                    "objectId lookups failed to identify object Id for the second to last element in path: \(path)"
-                )
+            if path.count < 2 {
+                // corner case where the root encoder (equivalent to position -1 in the matchingObjectIds) isn't in the
+                // lookup list
+                return .success((ObjId.ROOT, AnyCodingKey(finalpiece)))
+            } else {
+                guard let containerObjectId = matchingObjectIds[path.count - 2] else {
+                    fatalError(
+                        "objectId lookups failed to identify an object Id for the last element in path: \(path)"
+                    )
+                }
+                return .success((containerObjectId, AnyCodingKey(finalpiece)))
             }
-            return .success((containerObjectId, AnyCodingKey(finalpiece)))
         }
     }
 }

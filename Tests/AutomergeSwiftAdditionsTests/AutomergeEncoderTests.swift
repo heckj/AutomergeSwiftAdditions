@@ -33,10 +33,21 @@ final class AutomergeEncoderTests: XCTestCase {
             let duration: Double
             let flag: Bool
             let count: Int
+            let date: Date
+            let data: Data
         }
         let automergeEncoder = AutomergeEncoder(doc: doc)
 
-        let sample = SimpleStruct(name: "henry", duration: 3.14159, flag: true, count: 5)
+        let earlyDate = try Date("1941-04-26T08:17:00Z", strategy: .iso8601)
+
+        let sample = SimpleStruct(
+            name: "henry",
+            duration: 3.14159,
+            flag: true,
+            count: 5,
+            date: earlyDate,
+            data: Data("hello".utf8)
+        )
         try automergeEncoder.encode(sample)
 
         if case let .Scalar(.String(a_name)) = try doc.get(obj: ObjId.ROOT, key: "name") {
@@ -62,6 +73,18 @@ final class AutomergeEncoderTests: XCTestCase {
         } else {
             try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "count")))")
         }
+
+        let capture_date = try doc.get(obj: ObjId.ROOT, key: "date")
+        debugPrint(capture_date)
+//        if case let .Scalar(.Timestamp(timestamp_value)) = try doc.get(obj: ObjId.ROOT, key: "date") {
+//            print("Found the timestamp value of \(timestamp_value)")
+        ////            XCTAssertEqual(int_value, 5)
+//        } else {
+//            try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "date")))")
+//        }
+
+        let capture_data = try doc.get(obj: ObjId.ROOT, key: "data")
+        debugPrint(capture_data)
     }
 
     func testNestedKeyEncode() throws {
