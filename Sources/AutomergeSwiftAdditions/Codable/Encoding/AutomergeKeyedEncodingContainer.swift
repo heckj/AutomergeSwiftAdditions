@@ -242,7 +242,7 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
-    mutating func encode<T>(_ value: T, forKey key: Self.Key) throws where T: ScalarValueRepresentable {
+    mutating func encode<T: ScalarValueRepresentable>(_ value: T, forKey key: Self.Key) throws {
         guard let objectId = self.objectId else {
             throw reportBestError()
         }
@@ -250,8 +250,8 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         // object.set(.int(Int64(value.description)!), for: key.stringValue)
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
-
-    mutating func encode<T>(_ value: T, forKey key: Self.Key) throws where T: Encodable {
+    
+    mutating func encode<T: Encodable>(_ value: T, forKey key: Self.Key) throws {
         let newPath = impl.codingPath + [key]
         // this is where we need to figure out what the encodable type is in order to create
         // the correct Automerge objectType underneath the covers.

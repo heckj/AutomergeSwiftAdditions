@@ -78,6 +78,11 @@ final class AutomergeEncoderTests: XCTestCase {
         }
 
         try debugPrint(doc.get(obj: ObjId.ROOT, key: "date") as Any)
+        // Optional(SCALAR[Double(-1,900,000,000)])
+
+        // Tracking this down, the default Date Codable synthesis transforms the value
+        // into a Double
+
 //        if case let .Scalar(.Timestamp(timestamp_value)) = try doc.get(obj: ObjId.ROOT, key: "date") {
 //            print("Found the timestamp value of \(timestamp_value)")
         ////            XCTAssertEqual(int_value, 5)
@@ -86,6 +91,9 @@ final class AutomergeEncoderTests: XCTestCase {
 //        }
 
         try debugPrint(doc.get(obj: ObjId.ROOT, key: "data") as Any)
+        // Optional(OBJ[ObjId(101036e4fd33bee24c5d929f60fe2559a306000a), List])
+        // Tracking this down, the default Data Codable synthesis transforms the value
+        // into an array of bytes.
 
         // debugPrint(try doc.get(obj: ObjId.ROOT, key: "uuid"))
         if case let .Scalar(.String(uuid_string)) = try doc.get(obj: ObjId.ROOT, key: "uuid") {

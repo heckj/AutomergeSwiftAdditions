@@ -234,6 +234,39 @@ With that in place, I may be able to dump ObjecId from the various method calls 
 At the moment, I'm following the footsteps of JSONEncoderImpl and creating a shadow type structure, but I think I can get away with NOT building that. 
 I don't need to walk that structure later to get the final encoding - instead I'm writing as that structure would otherwise be built into an existing Automerge document.
 
-17 May 2023
+23 May 2023
 
+The basic encoder is functional. For primitive, direct types specified in the original Encodable protocol, there's no issue.
+That said, Data and Date, which Foundation exposes as Codable with synthesized conformance, have their own strategies that aren't immediately obvious.
+Date, in particular, encodes through as a Double, and Data as an Array of the primitive UInt8.
+Since Automerge has internal Scalar Types that are meant to represent this - we need to capture those types when they come in as generic `value.encode(to: ..encoder)` method calls and somehow redirect the preferred codable strategies to one that's Automerge specific.
+Turns out there's a decent example of this process within the new Swift Foundation codebase, where [the call to encode exposes the encodable type into the function](https://github.com/apple/swift-foundation/blob/main/Sources/FoundationEssentials/JSON/JSONEncoder.swift#L1111-L1115) to allow interception.
+I based the initial implementation, now functional, off the JSONEncoder from the repository https://github.com/swift-extras/swift-extras-json, which builds a type-erased structure that matches the JSON structure.
+Since I'm writing directly into Automerge, and don't need to "walk" that structure to generate the result, those additional creation steps are pretty extraneous, and I believe can be trimmed entirely to both save time and memory allocations.
+I added an initial simple benchmark for `encode` using https://github.com/ordo-one/package-benchmark, but a single layer of encoding with only 4-5 properties seems a bit small for a benchmark process.
+I'm aiming to create a benchmark that will "ride heavier" in terms of compute and memory allocations with structs or lists stacked 3 to 5 layers deep, alternating structs with lists, and the structs having 3 to 7 properties. 
+I hope that will provide get a better overall sense of the costs for mapping into Automerge and doing the relevant processing.
+The simple encode (single struct at root, 4-5 properties) is mostly coming back at taking 17 microseconds, with deviations above P90 peaking at a max of 43 microseconds.
 
+```
+╒════════════════════════════╤═════════╤═════════╤═════════╤═════════╤═════════╤═════════╤═════════╤═════════╕
+│ Metric                     │      p0 │     p25 │     p50 │     p75 │     p90 │     p99 │    p100 │ Samples │
+╞════════════════════════════╪═════════╪═════════╪═════════╪═════════╪═════════╪═════════╪═════════╪═════════╡
+│ Malloc (total)             │      78 │      78 │      78 │      78 │      78 │      78 │      78 │   10000 │
+├────────────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+│ Memory (resident peak) (M) │      12 │      12 │      12 │      12 │      12 │      12 │      12 │   10000 │
+├────────────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+│ Throughput (# / s) (K)     │      57 │      57 │      57 │      56 │      54 │      45 │       7 │   10000 │
+├────────────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+│ Time (total CPU) (μs)      │      17 │      18 │      18 │      18 │      18 │      22 │      81 │   10000 │
+├────────────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+│ Time (wall clock) (μs)     │      17 │      17 │      17 │      17 │      18 │      22 │     131 │   10000 │
+╘════════════════════════════╧═════════╧═════════╧═════════╧═════════╧═════════╧═════════╧═════════╧═════════╛
+
+```
+
+I want to get a reasonable example, and baselines set, before I start pruning the extraneous structure of the current implementation in order to see what the real difference is.
+I suspect it will mostly be in memory allocations for the encoding process, but there might be real time factors too.
+
+There's also a clear possibility for a caching win within the function that looks up (and creates if needed) relevant ObjectIds as the encode processing.
+That, I suspect, will definitely need a heavier encode to see the difference of caching - and to verify that it _makes sense_ to enable the additional complexity of a cache during encoding. 

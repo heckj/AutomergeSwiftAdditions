@@ -122,18 +122,26 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
     }
 
     mutating func encode(_ value: Data) throws {
+        // likely not caught
         try self.scalarValueEncode(value: value)
         self.impl.singleValue = .bytes(value)
     }
 
     mutating func encode(_ value: Counter) throws {
+        // likely not caught
         try self.scalarValueEncode(value: value)
         self.impl.singleValue = .counter(Int64(value.value))
     }
 
     mutating func encode(_ value: Date) throws {
+        // likely not caught
         try self.scalarValueEncode(value: value)
         self.impl.singleValue = .timestamp(Int64(value.timeIntervalSince1970))
+    }
+
+    mutating func encode<T: ScalarValueRepresentable>(_ value: T) throws {
+        self.preconditionCanEncodeNewValue()
+        try self.scalarValueEncode(value: value)
     }
 
     mutating func encode<T: Encodable>(_ value: T) throws {
