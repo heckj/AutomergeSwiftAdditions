@@ -1,2 +1,3 @@
-public struct AutomergeMicroBenchmarks {
-}
+import AutomergeSwiftAdditions
+
+public struct AutomergeMicroBenchmarks {}

@@ -14,15 +14,17 @@ let package = Package(
     ],
 
     dependencies: [
-        .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
-        .package(path: "../"),
+        .package(url: "https://github.com/ordo-one/package-benchmark.git", .upToNextMajor(from: "1.4.0")),
+        .package(url: "https://github.com/heckj/AutomergeSwiftAdditions.git", branch: "main"),
     ],
 
     targets: [
         .target(
             name: "AutomergeMicroBenchmarks",
-            dependencies: []
-        )
+            dependencies: [
+                .product(name: "AutomergeSwiftAdditions", package: "AutomergeSwiftAdditions"),
+            ]
+        ),
     ]
 )
 
@@ -31,8 +33,9 @@ package.targets += [
     .executableTarget(
         name: "CodableBenchmarks",
         dependencies: [
+            .product(name: "AutomergeSwiftAdditions", package: "AutomergeSwiftAdditions"),
             .product(name: "Benchmark", package: "package-benchmark"),
-            .product(name: "BenchmarkPlugin", package: "package-benchmark")
+            .product(name: "BenchmarkPlugin", package: "package-benchmark"),
         ],
         path: "Benchmarks/CodableBenchmarks"
     ),
