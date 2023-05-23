@@ -35,6 +35,7 @@ final class AutomergeEncoderTests: XCTestCase {
             let count: Int
             let date: Date
             let data: Data
+            let uuid: UUID
         }
         let automergeEncoder = AutomergeEncoder(doc: doc)
 
@@ -46,8 +47,10 @@ final class AutomergeEncoderTests: XCTestCase {
             flag: true,
             count: 5,
             date: earlyDate,
-            data: Data("hello".utf8)
+            data: Data("hello".utf8),
+            uuid: UUID(uuidString: "99CEBB16-1062-4F21-8837-CF18EC09DCD7")!
         )
+
         try automergeEncoder.encode(sample)
 
         if case let .Scalar(.String(a_name)) = try doc.get(obj: ObjId.ROOT, key: "name") {
@@ -85,6 +88,13 @@ final class AutomergeEncoderTests: XCTestCase {
 
         let capture_data = try doc.get(obj: ObjId.ROOT, key: "data")
         debugPrint(capture_data)
+
+        // debugPrint(try doc.get(obj: ObjId.ROOT, key: "uuid"))
+        if case let .Scalar(.String(uuid_string)) = try doc.get(obj: ObjId.ROOT, key: "uuid") {
+            XCTAssertEqual(uuid_string, "99CEBB16-1062-4F21-8837-CF18EC09DCD7")
+        } else {
+            try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "uuid")))")
+        }
     }
 
     func testNestedKeyEncode() throws {
