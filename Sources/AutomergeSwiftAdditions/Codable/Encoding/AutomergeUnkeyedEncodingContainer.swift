@@ -1,5 +1,6 @@
 import class Automerge.Document
 import struct Automerge.ObjId
+import struct Automerge.Counter
 import protocol Automerge.ScalarValueRepresentable
 import Foundation
 
@@ -209,7 +210,30 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
             codingPath: newPath,
             doc: self.document
         )
-        try value.encode(to: newEncoder)
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+
+        switch T.self {
+        case is Date.Type:
+            // Capture and override the default encodable pathing for Date since
+            // Automerge supports it as a primitive value type.
+            let downcastDate = value as! Date
+            try self.document.insert(obj: objectId, index: UInt64(count), value: downcastDate.toScalarValue())
+        case is Data.Type:
+            // Capture and override the default encodable pathing for Data since
+            // Automerge supports it as a primitive value type.
+            let downcastData = value as! Data
+            try self.document.insert(obj: objectId, index: UInt64(count), value: downcastData.toScalarValue())
+        case is Counter.Type:
+            // Capture and override the default encodable pathing for Counter since
+            // Automerge supports it as a primitive value type.
+            let downcastCounter = value as! Counter
+            try self.document.insert(obj: objectId, index: UInt64(count), value: downcastCounter.toScalarValue())
+        default:
+            try value.encode(to: newEncoder)
+        }
+        
 
         guard let value = newEncoder.value else {
             preconditionFailure()

@@ -1,3 +1,5 @@
+import Foundation
+import struct Automerge.Counter
 import class Automerge.Document
 import struct Automerge.ObjId
 import protocol Automerge.ScalarValueRepresentable
@@ -241,15 +243,6 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         object.set(.int(Int64(value.description)!), for: key.stringValue)
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
-
-    mutating func encode<T: ScalarValueRepresentable>(_ value: T, forKey key: Self.Key) throws {
-        guard let objectId = self.objectId else {
-            throw reportBestError()
-        }
-
-        // object.set(.int(Int64(value.description)!), for: key.stringValue)
-        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-    }
     
     mutating func encode<T: Encodable>(_ value: T, forKey key: Self.Key) throws {
         let newPath = impl.codingPath + [key]
@@ -269,19 +262,39 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         // the Codable method `encode` is called - because that's where a container is created. So while we
         // can set this "newPath", we don't have the deets to create (if needed) a new objectId until we
         // initialize a specific container type.
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
 
         let newEncoder = AutomergeEncoderImpl(
             userInfo: impl.userInfo,
             codingPath: newPath,
             doc: self.document
         )
-        try value.encode(to: newEncoder)
+        switch T.self {
+        case is Date.Type:
+            // Capture and override the default encodable pathing for Date since
+            // Automerge supports it as a primitive value type.
+            let downcastDate = value as! Date
+            try document.put(obj: objectId, key: key.stringValue, value: downcastDate.toScalarValue())
+        case is Data.Type:
+            // Capture and override the default encodable pathing for Data since
+            // Automerge supports it as a primitive value type.
+            let downcastData = value as! Data
+            try document.put(obj: objectId, key: key.stringValue, value: downcastData.toScalarValue())
+        case is Counter.Type:
+            // Capture and override the default encodable pathing for Counter since
+            // Automerge supports it as a primitive value type.
+            let downcastCounter = value as! Counter
+            try document.put(obj: objectId, key: key.stringValue, value: downcastCounter.toScalarValue())
+        default:
+            try value.encode(to: newEncoder)
+            guard let encodedValue = newEncoder.value else {
+                preconditionFailure()
+            }
 
-        guard let encodedValue = newEncoder.value else {
-            preconditionFailure()
-        }
-
-        object.set(encodedValue, for: key.stringValue)
+            object.set(encodedValue, for: key.stringValue)
+        }        
     }
 
     mutating func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type, forKey key: Self.Key) ->

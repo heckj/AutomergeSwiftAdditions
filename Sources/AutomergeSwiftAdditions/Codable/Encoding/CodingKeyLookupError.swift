@@ -19,6 +19,9 @@ public enum CodingKeyLookupError: LocalizedError {
 
     // schema is missing beyond a certain point - only in readOnly mode
     case schemaMissing(String)
+    
+    /// No coding path was provided for encoding a single value into the Automerge document.
+    case noPathForSingleValue(String)
 
     /// A localized message describing what error occurred.
     public var errorDescription: String? {
@@ -42,6 +45,8 @@ public enum CodingKeyLookupError: LocalizedError {
         case let .schemaMissing(str):
             return str
         case let .mismatchedSchema(str):
+            return str
+        case let .noPathForSingleValue(str):
             return str
         }
     }

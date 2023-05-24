@@ -139,14 +139,52 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
         self.impl.singleValue = .timestamp(Int64(value.timeIntervalSince1970))
     }
 
-    mutating func encode<T: ScalarValueRepresentable>(_ value: T) throws {
-        self.preconditionCanEncodeNewValue()
-        try self.scalarValueEncode(value: value)
-    }
-
     mutating func encode<T: Encodable>(_ value: T) throws {
         self.preconditionCanEncodeNewValue()
-        try value.encode(to: self.impl)
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        switch T.self {
+        case is Date.Type:
+            // Capture and override the default encodable pathing for Date since
+            // Automerge supports it as a primitive value type.
+            let downcastDate = value as! Date
+            guard let codingkey = codingkey else {
+                throw CodingKeyLookupError.noPathForSingleValue("No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self)).")
+            }
+            if let indexToWrite = codingkey.intValue {
+                try doc.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastDate.toScalarValue())
+            } else {
+                try doc.put(obj: objectId, key: codingkey.stringValue, value: downcastDate.toScalarValue())
+            }
+        case is Data.Type:
+            // Capture and override the default encodable pathing for Data since
+            // Automerge supports it as a primitive value type.
+            let downcastData = value as! Data
+            guard let codingkey = codingkey else {
+                throw CodingKeyLookupError.noPathForSingleValue("No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self)).")
+            }
+            if let indexToWrite = codingkey.intValue {
+                try doc.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastData.toScalarValue())
+            } else {
+                try doc.put(obj: objectId, key: codingkey.stringValue, value: downcastData.toScalarValue())
+            }
+        case is Counter.Type:
+            // Capture and override the default encodable pathing for Counter since
+            // Automerge supports it as a primitive value type.
+            let downcastCounter = value as! Counter
+            guard let codingkey = codingkey else {
+                throw CodingKeyLookupError.noPathForSingleValue("No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self)).")
+            }
+            if let indexToWrite = codingkey.intValue {
+                try doc.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastCounter.toScalarValue())
+            } else {
+                try doc.put(obj: objectId, key: codingkey.stringValue, value: downcastCounter.toScalarValue())
+            }
+        default:
+            try value.encode(to: self.impl)
+        }
+        
     }
 
     private func scalarValueEncode(value: some ScalarValueRepresentable) throws {

@@ -77,23 +77,18 @@ final class AutomergeEncoderTests: XCTestCase {
             try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "count")))")
         }
 
-        try debugPrint(doc.get(obj: ObjId.ROOT, key: "date") as Any)
-        // Optional(SCALAR[Double(-1,900,000,000)])
+        if case let .Scalar(.Timestamp(timestamp_value)) = try doc.get(obj: ObjId.ROOT, key: "date") {
+            XCTAssertEqual(timestamp_value, -905182980)
+        } else {
+            try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "date")))")
+        }
 
-        // Tracking this down, the default Date Codable synthesis transforms the value
-        // into a Double
-
-//        if case let .Scalar(.Timestamp(timestamp_value)) = try doc.get(obj: ObjId.ROOT, key: "date") {
-//            print("Found the timestamp value of \(timestamp_value)")
-        ////            XCTAssertEqual(int_value, 5)
-//        } else {
-//            try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "date")))")
-//        }
-
-        try debugPrint(doc.get(obj: ObjId.ROOT, key: "data") as Any)
-        // Optional(OBJ[ObjId(101036e4fd33bee24c5d929f60fe2559a306000a), List])
-        // Tracking this down, the default Data Codable synthesis transforms the value
-        // into an array of bytes.
+        //try debugPrint(doc.get(obj: ObjId.ROOT, key: "data") as Any)
+        if case let .Scalar(.Bytes(data_value)) = try doc.get(obj: ObjId.ROOT, key: "data") {
+            XCTAssertEqual(data_value, Data("hello".utf8))
+        } else {
+            try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "data")))")
+        }
 
         // debugPrint(try doc.get(obj: ObjId.ROOT, key: "uuid"))
         if case let .Scalar(.String(uuid_string)) = try doc.get(obj: ObjId.ROOT, key: "uuid") {
