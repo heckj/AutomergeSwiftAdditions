@@ -19,7 +19,7 @@ public enum CodingKeyLookupError: LocalizedError {
 
     // schema is missing beyond a certain point - only in readOnly mode
     case schemaMissing(String)
-    
+
     /// No coding path was provided for encoding a single value into the Automerge document.
     case noPathForSingleValue(String)
 

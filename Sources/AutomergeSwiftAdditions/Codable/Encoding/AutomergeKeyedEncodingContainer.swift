@@ -1,8 +1,8 @@
-import Foundation
 import struct Automerge.Counter
 import class Automerge.Document
 import struct Automerge.ObjId
 import protocol Automerge.ScalarValueRepresentable
+import Foundation
 
 struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
     typealias Key = K
@@ -243,7 +243,7 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         object.set(.int(Int64(value.description)!), for: key.stringValue)
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
-    
+
     mutating func encode<T: Encodable>(_ value: T, forKey key: Self.Key) throws {
         let newPath = impl.codingPath + [key]
         // this is where we need to figure out what the encodable type is in order to create
@@ -294,7 +294,7 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
             }
 
             object.set(encodedValue, for: key.stringValue)
-        }        
+        }
     }
 
     mutating func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type, forKey key: Self.Key) ->

@@ -150,7 +150,10 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             // Automerge supports it as a primitive value type.
             let downcastDate = value as! Date
             guard let codingkey = codingkey else {
-                throw CodingKeyLookupError.noPathForSingleValue("No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self)).")
+                throw CodingKeyLookupError
+                    .noPathForSingleValue(
+                        "No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self))."
+                    )
             }
             if let indexToWrite = codingkey.intValue {
                 try doc.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastDate.toScalarValue())
@@ -162,7 +165,10 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             // Automerge supports it as a primitive value type.
             let downcastData = value as! Data
             guard let codingkey = codingkey else {
-                throw CodingKeyLookupError.noPathForSingleValue("No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self)).")
+                throw CodingKeyLookupError
+                    .noPathForSingleValue(
+                        "No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self))."
+                    )
             }
             if let indexToWrite = codingkey.intValue {
                 try doc.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastData.toScalarValue())
@@ -174,7 +180,10 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             // Automerge supports it as a primitive value type.
             let downcastCounter = value as! Counter
             guard let codingkey = codingkey else {
-                throw CodingKeyLookupError.noPathForSingleValue("No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self)).")
+                throw CodingKeyLookupError
+                    .noPathForSingleValue(
+                        "No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self))."
+                    )
             }
             if let indexToWrite = codingkey.intValue {
                 try doc.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastCounter.toScalarValue())
@@ -184,7 +193,6 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
         default:
             try value.encode(to: self.impl)
         }
-        
     }
 
     private func scalarValueEncode(value: some ScalarValueRepresentable) throws {

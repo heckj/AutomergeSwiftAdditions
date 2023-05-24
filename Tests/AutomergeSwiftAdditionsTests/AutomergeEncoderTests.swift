@@ -83,7 +83,7 @@ final class AutomergeEncoderTests: XCTestCase {
             try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "date")))")
         }
 
-        //try debugPrint(doc.get(obj: ObjId.ROOT, key: "data") as Any)
+        // try debugPrint(doc.get(obj: ObjId.ROOT, key: "data") as Any)
         if case let .Scalar(.Bytes(data_value)) = try doc.get(obj: ObjId.ROOT, key: "data") {
             XCTAssertEqual(data_value, Data("hello".utf8))
         } else {

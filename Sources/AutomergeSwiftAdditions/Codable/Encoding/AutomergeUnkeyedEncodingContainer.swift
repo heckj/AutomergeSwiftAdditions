@@ -1,6 +1,6 @@
+import struct Automerge.Counter
 import class Automerge.Document
 import struct Automerge.ObjId
-import struct Automerge.Counter
 import protocol Automerge.ScalarValueRepresentable
 import Foundation
 
@@ -233,7 +233,6 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         default:
             try value.encode(to: newEncoder)
         }
-        
 
         guard let value = newEncoder.value else {
             preconditionFailure()
