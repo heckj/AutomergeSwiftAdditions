@@ -105,6 +105,7 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         }
 
         array.append(value)
+        count += 1
     }
 
     mutating func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type) ->
