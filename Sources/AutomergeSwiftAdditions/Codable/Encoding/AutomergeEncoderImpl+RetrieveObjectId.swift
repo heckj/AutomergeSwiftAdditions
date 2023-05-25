@@ -377,17 +377,31 @@ extension AutomergeEncoderImpl {
                                         )
                                 )
                             case .Map:
-                                return .failure(
-                                    CodingKeyLookupError
-                                        .mismatchedSchema(
-                                            "Path at \(path) is an object container, which is not the List container that we expected."
-                                        )
-                                )
+                                if containerType == .Key {
+                                    tracePrint("Found Object container with ObjectId \(objId).")
+                                    return .success((objId, AnyCodingKey("")))
+                                } else {
+                                    return .failure(
+                                        CodingKeyLookupError
+                                            .mismatchedSchema(
+                                                "Path at \(path) is an object container, not the List container that we expected."
+                                            )
+                                    )
+                                }
                             case .List:
                                 //                            EncoderPathCache.upsert(extendedPath, value: (objId,
                                 //                            objType))
-                                tracePrint("Found List container with ObjectId \(objId).")
-                                return .success((objId, AnyCodingKey("")))
+                                if containerType == .Index {
+                                    tracePrint("Found List container with ObjectId \(objId).")
+                                    return .success((objId, AnyCodingKey("")))
+                                } else {
+                                    return .failure(
+                                        CodingKeyLookupError
+                                            .mismatchedSchema(
+                                                "Path at \(path) is a list container, not the Object container that we expected."
+                                            )
+                                    )
+                                }
                             }
                         case .Scalar:
                             // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
@@ -459,28 +473,44 @@ extension AutomergeEncoderImpl {
                                 return .failure(
                                     CodingKeyLookupError
                                         .mismatchedSchema(
-                                            "Path at \(path) is a Text object, which is not the List container that we expected."
+                                            "Container at \(path) is a Text object, which is not the List container that we expected."
                                         )
                                 )
                             case .Map:
-                                //                            EncoderPathCache.upsert(extendedPath, value: (objId,
-                                //                            objType))
-                                tracePrint(indent: path.count - 1, "Found Map container with ObjectId \(objId).")
-                                return .success((objId, AnyCodingKey("")))
+                                if containerType == .Key {
+                                    //                            EncoderPathCache.upsert(extendedPath, value: (objId,
+                                    //                            objType))
+                                    tracePrint(indent: path.count - 1, "Found Map container with ObjectId \(objId).")
+                                    return .success((objId, AnyCodingKey("")))
+                                } else {
+                                    return .failure(
+                                        CodingKeyLookupError
+                                            .mismatchedSchema(
+                                                "Container at \(path) is a Map container, not the List container that we expected."
+                                            )
+                                    )
+                                }
                             case .List:
-                                return .failure(
-                                    CodingKeyLookupError
-                                        .mismatchedSchema(
-                                            "Path at \(path) is a List container, which is not the object container that we expected."
-                                        )
-                                )
+                                if containerType == .Index {
+                                    //                            EncoderPathCache.upsert(extendedPath, value: (objId,
+                                    //                            objType))
+                                    tracePrint(indent: path.count - 1, "Found List container with ObjectId \(objId).")
+                                    return .success((objId, AnyCodingKey("")))
+                                } else {
+                                    return .failure(
+                                        CodingKeyLookupError
+                                            .mismatchedSchema(
+                                                "Container at \(path) is a List container, not the object container that we expected."
+                                            )
+                                    )
+                                }
                             }
                         case .Scalar:
                             // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
                             return .failure(
                                 CodingKeyLookupError
                                     .mismatchedSchema(
-                                        "Path at \(path) is an scalar value, which is not the List container that we expected."
+                                        "Item at \(path) is an scalar value, which is not the List container that we expected."
                                     )
                             )
                         }
