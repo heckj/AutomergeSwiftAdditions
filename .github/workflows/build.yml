@@ -16,10 +16,10 @@ jobs:
         fetch-depth: 0
 
     - name: Homebrew Mac
-        if: ${{ runner.os == 'Macos' }}
-        run: |
-          echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
-          brew install jemalloc
+      run: |
+        echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
+        brew install jemalloc
+
     - name: run benchmark on PR branch
       run: |
         cd MicroBenchmarks
@@ -45,32 +45,35 @@ jobs:
         echo "exitStatus=1" >> $GITHUB_ENV
         swift package benchmark baseline check main pull_request --format markdown >> $GITHUB_STEP_SUMMARY
         echo "exitStatus=0" >> $GITHUB_ENV
-      continue-on-error: true
+        continue-on-error: true
 
-      - if: ${{ env.exitStatus == '0' }}
-        name: Pull request comment text success
-        id: prtestsuccess
-        run: |
-          echo 'PRTEST<<EOF' >> $GITHUB_ENV
-          echo "[Pull request benchmark comparison [${{ matrix.os }}] with 'main' run at $(date -Iseconds)](https://github.com/ordo-one/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-      - if: ${{ env.exitStatus == '1' }}
-        name: Pull request comment text failure
-        id: prtestfailure
-        run: |
-          echo 'PRTEST<<EOF' >> $GITHUB_ENV
-          echo "[Pull request benchmark comparison [${{ matrix.os }}] with 'main' run at $(date -Iseconds)](https://github.com/ordo-one/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
-          echo "_Pull request had performance regressions_" >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-      - name: Comment PR
-        uses: thollander/actions-comment-pull-request@v1
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          message: ${{ env.PRTEST }}
-          comment_includes: "Pull request benchmark comparison with"
-      - name: Exit with correct status
-        run: |
-          exit ${{ env.exitStatus }}
+    - if: ${{ env.exitStatus == '0' }}
+      name: Pull request comment text success
+      id: prtestsuccess
+      run: |
+        echo 'PRTEST<<EOF' >> $GITHUB_ENV
+        echo "[Pull request benchmark comparison [${{ matrix.os }}] with 'main' run at $(date -Iseconds)](https://github.com/ordo-one/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
+
+    - if: ${{ env.exitStatus == '1' }}
+      name: Pull request comment text failure
+      id: prtestfailure
+      run: |
+        echo 'PRTEST<<EOF' >> $GITHUB_ENV
+        echo "[Pull request benchmark comparison [${{ matrix.os }}] with 'main' run at $(date -Iseconds)](https://github.com/ordo-one/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
+        echo "_Pull request had performance regressions_" >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
+
+    - name: Comment PR
+      uses: thollander/actions-comment-pull-request@v1
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        message: ${{ env.PRTEST }}
+        comment_includes: "Pull request benchmark comparison with"
+
+    - name: Exit with correct status
+      run: |
+        exit ${{ env.exitStatus }}
 
   build:
 
