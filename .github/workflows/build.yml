@@ -38,13 +38,13 @@ jobs:
 
     - name: Compare PR and main
       id: benchmark
+      continue-on-error: true
       run: |
         cd MicroBenchmarks
         echo $(date) >> $GITHUB_STEP_SUMMARY
         echo "exitStatus=1" >> $GITHUB_ENV
         swift package benchmark baseline check main pull_request --format markdown >> $GITHUB_STEP_SUMMARY
         echo "exitStatus=0" >> $GITHUB_ENV
-        continue-on-error: true
 
     - if: ${{ env.exitStatus == '0' }}
       name: Pull request comment text success
