@@ -36,6 +36,7 @@ package.targets += [
             .product(name: "AutomergeSwiftAdditions", package: "AutomergeSwiftAdditions"),
             .product(name: "Benchmark", package: "package-benchmark"),
             .product(name: "BenchmarkPlugin", package: "package-benchmark"),
+            .target(name: "AutomergeMicroBenchmarks"),
         ],
         path: "Benchmarks/CodableBenchmarks"
     ),
