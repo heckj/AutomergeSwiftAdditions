@@ -201,4 +201,12 @@ final class AutomergeEncoderTests: XCTestCase {
             try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "example")))")
         }
     }
+
+    func testLayeredEncode() throws {
+        let sample = Samples.layered
+        let doc = Document()
+        let automergeEncoder = AutomergeEncoder(doc: doc)
+
+        try automergeEncoder.encode(sample)
+    }
 }
