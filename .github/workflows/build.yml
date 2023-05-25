@@ -36,7 +36,6 @@ jobs:
         cd MicroBenchmarks
         swift package --allow-writing-to-directory .benchmarkBaselines/ benchmark baseline update main --no-progress --quiet
 
-
     - name: Compare PR and main
       id: benchmark
       run: |
@@ -51,6 +50,7 @@ jobs:
       name: Pull request comment text success
       id: prtestsuccess
       run: |
+        cd MicroBenchmarks
         echo 'PRTEST<<EOF' >> $GITHUB_ENV
         echo "[Pull request benchmark comparison [${{ matrix.os }}] with 'main' run at $(date -Iseconds)](https://github.com/ordo-one/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
@@ -59,6 +59,7 @@ jobs:
       name: Pull request comment text failure
       id: prtestfailure
       run: |
+        cd MicroBenchmarks
         echo 'PRTEST<<EOF' >> $GITHUB_ENV
         echo "[Pull request benchmark comparison [${{ matrix.os }}] with 'main' run at $(date -Iseconds)](https://github.com/ordo-one/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
         echo "_Pull request had performance regressions_" >> $GITHUB_ENV
