@@ -147,6 +147,27 @@ final class AutomergeEncoderTests: XCTestCase {
         }
     }
 
+    func testNestedListSingleValueEncode() throws {
+        struct RootModel: Codable {
+            let numbers: [Int]
+        }
+
+        let doc = Document()
+        let automergeEncoder = AutomergeEncoder(doc: doc)
+        let sample = RootModel(numbers: [1, 2, 3])
+
+        try automergeEncoder.encode(sample)
+
+        if case let .Object(container_id, container_type) = try doc.get(obj: ObjId.ROOT, key: "numbers") {
+            XCTAssertEqual(container_type, ObjType.List)
+            XCTAssertEqual(try doc.get(obj: container_id, index: 0), .Scalar(.Int(1)))
+            XCTAssertEqual(try doc.get(obj: container_id, index: 1), .Scalar(.Int(2)))
+            XCTAssertEqual(try doc.get(obj: container_id, index: 2), .Scalar(.Int(3)))
+        } else {
+            try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "example")))")
+        }
+    }
+
     func testNestedListEncode() throws {
         struct SimpleStruct: Codable {
             let name: String
