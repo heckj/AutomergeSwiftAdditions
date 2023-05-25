@@ -14,11 +14,11 @@ This expects the Automerge-swifter project at the relevant branch to be checked 
 
 Punchlist:
 
-- [ ] establish a Text type to hold strings that are meant to be collaborative (Text nodes in Automerge)
+- [x] establish a Text type to hold strings that are meant to be collaborative (Text nodes in Automerge)
   - [ ] bind/capture Text type in encoding to establish appropriate node
-  - [ ] update encoder to compare and update Text node values with diff structure
+  - [x] update encoder to compare and update Text node values with diff structure
 
-- [ ] measure (and track) code coverage
+- [x] measure (and track) code coverage
   - [ ] expand code coverage for encoding - corner cases
 - [ ] expand strategy to allow for strictly type checking down to single-value encoders
 
