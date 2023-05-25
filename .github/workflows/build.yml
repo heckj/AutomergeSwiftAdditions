@@ -38,19 +38,11 @@ jobs:
     #- name: check against API breaking changes
     #  run: swift package diagnose-api-breaking-changes 0.5.0
 
-    #- name: Prepare Code Coverage
-    # run: xcrun llvm-cov export -format="lcov" .build/debug/SwiftVizScalePackageTests.xctest/Contents/MacOS/SwiftVizScalePackageTests -instr-profile .build/debug/codecov/default.profdata > info.lcov
-
-    - name: Locate code coverage files for upload and stash location into ENV
-      run: |
-        CODECOV_PATH=$(find . -name "AutomergeSwiftAdditions.json")
-        echo "CODECOVFILE=$CODECOV_PATH" >> $GITHUB_ENV
-
-    # - name: check env
-    #   run: env
+    - name: Prepare Code Coverage
+      run: xcrun llvm-cov export -format="lcov" .build/debug/AutomergeSwiftAdditionsPackageTests.xctest/Contents/MacOS/AutomergeSwiftAdditionsPackageTests  -instr-profile .build/debug/codecov/default.profdata > info.lcov
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        files: ${{ env.CODECOVFILE }}
+        files: info.lcov
