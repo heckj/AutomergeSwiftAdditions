@@ -2,7 +2,9 @@
 
 [![codecov](https://codecov.io/gh/heckj/AutomergeSwiftAdditions/branch/main/graph/badge.svg?token=D592XNTYBM)](https://codecov.io/gh/heckj/AutomergeSwiftAdditions)
 
-[![sunburst graph of code coverage](https://codecov.io/gh/heckj/AutomergeSwiftAdditions/branch/main/graphs/sunburst.svg?token=D592XNTYBM)
+![sunburst graph of code coverage](https://codecov.io/gh/heckj/AutomergeSwiftAdditions/branch/main/graphs/sunburst.svg?token=D592XNTYBM)
+
+---
 
 Explorations in extending [Automerge-swifter](http://github.com/automerge/automerge-swifter/) to be easier to use within a SwiftUI app context.
 
