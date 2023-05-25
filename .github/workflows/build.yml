@@ -1,89 +1,12 @@
-name: Benchmark PRs
+name: Build and Test
 
 on:
+  push:
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
 jobs:
-
-  benchmark:
-    runs-on: macos-13
-    permissions: 
-        issues: write
-        pull-requests: write 
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: Swift Version
-      run: swift -version
-
-    - name: Homebrew Mac
-      run: |
-        echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
-        brew install jemalloc
-
-    - name: run benchmark on PR branch
-      run: |
-        cd MicroBenchmarks
-        swift package --allow-writing-to-directory .benchmarkBaselines/ benchmark baseline update pull_request --no-progress --quiet
-
-    - name: switch back to main branch
-      run: |
-        cd MicroBenchmarks
-        git stash
-        git checkout main
-
-    - name: establish current main baseline
-      run: |
-        cd MicroBenchmarks
-        swift package --allow-writing-to-directory .benchmarkBaselines/ benchmark baseline update main --no-progress --quiet
-
-    - name: Compare PR and main
-      id: benchmark
-      continue-on-error: true
-      run: |
-        cd MicroBenchmarks
-        echo '## Summary' >> $GITHUB_STEP_SUMMARY
-        echo $(date) >> $GITHUB_STEP_SUMMARY
-        echo "exitStatus=1" >> $GITHUB_ENV
-        swift package benchmark baseline check main pull_request --format markdown >> $GITHUB_STEP_SUMMARY
-        echo '---' >> $GITHUB_STEP_SUMMARY
-        swift package benchmark baseline compare main pull_request --no-progress --quiet --format markdown >> $GITHUB_STEP_SUMMARY
-        echo "exitStatus=0" >> $GITHUB_ENV
-
-    - if: ${{ env.exitStatus == '0' }}
-      name: Pull request comment text success
-      id: prtestsuccess
-      run: |
-        cd MicroBenchmarks
-        echo 'PRTEST<<EOF' >> $GITHUB_ENV
-        echo "[Pull request benchmark comparison vs 'main' branch run at $(date -Iseconds)](https://github.com/heckj/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
-        echo 'EOF' >> $GITHUB_ENV
-
-    - if: ${{ env.exitStatus == '1' }}
-      name: Pull request comment text failure
-      id: prtestfailure
-      run: |
-        cd MicroBenchmarks
-        echo 'PRTEST<<EOF' >> $GITHUB_ENV
-        echo "[Pull request benchmark comparison vs 'main' branch run at $(date -Iseconds)](https://github.com/heckj/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
-        echo "_Pull request had performance regressions_" >> $GITHUB_ENV
-        echo 'EOF' >> $GITHUB_ENV
-
-    - name: Comment PR
-      uses: thollander/actions-comment-pull-request@v2
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        message: ${{ env.PRTEST }}
-        comment_tag: execution
-
-    - name: Exit with correct status
-      run: |
-        exit ${{ env.exitStatus }}
 
   build:
 
@@ -117,7 +40,6 @@ jobs:
 
     #- name: Prepare Code Coverage
     # run: xcrun llvm-cov export -format="lcov" .build/debug/SwiftVizScalePackageTests.xctest/Contents/MacOS/SwiftVizScalePackageTests -instr-profile .build/debug/codecov/default.profdata > info.lcov
-
 
     - name: Locate code coverage files for upload and stash location into ENV
       run: |
