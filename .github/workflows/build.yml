@@ -15,6 +15,9 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Swift Version
+      run: swift -version
+
     - name: Homebrew Mac
       run: |
         echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
@@ -72,9 +75,7 @@ jobs:
       uses: thollander/actions-comment-pull-request@v2
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        filePath: MicroBenchmarks/PRTEST
         message: ${{ env.PRTEST }}
-        comment_includes: "Pull request benchmark comparison with"
 
     - name: Exit with correct status
       run: |
