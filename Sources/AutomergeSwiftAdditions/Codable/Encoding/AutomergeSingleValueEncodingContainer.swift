@@ -7,7 +7,7 @@ import Foundation
 struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
     let impl: AutomergeEncoderImpl
     let codingPath: [CodingKey]
-    let doc: Document
+    let document: Document
     /// The objectId that this keyed encoding container maps to within an Automerge document.
     ///
     /// If `document` is `nil`, the error attempting to retrieve should be in ``lookupError``.
@@ -22,7 +22,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
     init(impl: AutomergeEncoderImpl, codingPath: [CodingKey], doc: Document) {
         self.impl = impl
         self.codingPath = codingPath
-        self.doc = doc
+        self.document = doc
         switch impl.retrieveObjectId(path: codingPath, containerType: .Value) {
         case let .success((objId, codingkey)):
             self.objectId = objId
@@ -157,9 +157,9 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
                     )
             }
             if let indexToWrite = codingkey.intValue {
-                try doc.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastDate.toScalarValue())
+                try document.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastDate.toScalarValue())
             } else {
-                try doc.put(obj: objectId, key: codingkey.stringValue, value: downcastDate.toScalarValue())
+                try document.put(obj: objectId, key: codingkey.stringValue, value: downcastDate.toScalarValue())
             }
         case is Data.Type:
             // Capture and override the default encodable pathing for Data since
@@ -172,9 +172,9 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
                     )
             }
             if let indexToWrite = codingkey.intValue {
-                try doc.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastData.toScalarValue())
+                try document.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastData.toScalarValue())
             } else {
-                try doc.put(obj: objectId, key: codingkey.stringValue, value: downcastData.toScalarValue())
+                try document.put(obj: objectId, key: codingkey.stringValue, value: downcastData.toScalarValue())
             }
         case is Counter.Type:
             // Capture and override the default encodable pathing for Counter since
@@ -187,9 +187,41 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
                     )
             }
             if let indexToWrite = codingkey.intValue {
-                try doc.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastCounter.toScalarValue())
+                try document.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastCounter.toScalarValue())
             } else {
-                try doc.put(obj: objectId, key: codingkey.stringValue, value: downcastCounter.toScalarValue())
+                try document.put(obj: objectId, key: codingkey.stringValue, value: downcastCounter.toScalarValue())
+            }
+        case is Text.Type:
+            guard let codingkey = codingkey else {
+                throw CodingKeyLookupError
+                    .noPathForSingleValue(
+                        "No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self))."
+                    )
+            }
+            // Capture and override the default encodable pathing for Counter since
+            // Automerge supports it as a primitive value type.
+            let downcastText = value as! Text
+            // FIXME: check to see if the object exists here before just splatting a new one into place
+
+            let textNode: ObjId
+            if let indexToWrite = codingkey.intValue {
+                textNode = try document.putObject(obj: objectId, index: UInt64(indexToWrite), ty: .Text)
+            } else {
+                textNode = try document.putObject(obj: objectId, key: codingkey.stringValue, ty: .Text)
+            }
+
+            // Iterate through
+            let currentText = try! document.text(obj: textNode).utf8
+            let diff: CollectionDifference<String.UTF8View.Element> = downcastText.value.utf8
+                .difference(from: currentText)
+            for change in diff {
+                switch change {
+                case let .insert(offset, element, _):
+                    let char = String(bytes: [element], encoding: .utf8)
+                    try document.spliceText(obj: textNode, start: UInt64(offset), delete: 0, value: char)
+                case let .remove(offset, _, _):
+                    try document.spliceText(obj: textNode, start: UInt64(offset), delete: 1)
+                }
             }
         default:
             try value.encode(to: self.impl)
@@ -202,9 +234,9 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             throw reportBestError()
         }
         if let indexToWrite = codingkey.intValue {
-            try doc.insert(obj: objectId, index: UInt64(indexToWrite), value: value.toScalarValue())
+            try document.insert(obj: objectId, index: UInt64(indexToWrite), value: value.toScalarValue())
         } else {
-            try doc.put(obj: objectId, key: codingkey.stringValue, value: value.toScalarValue())
+            try document.put(obj: objectId, key: codingkey.stringValue, value: value.toScalarValue())
         }
     }
 

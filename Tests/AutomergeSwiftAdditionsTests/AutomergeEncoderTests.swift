@@ -36,6 +36,7 @@ final class AutomergeEncoderTests: XCTestCase {
             let date: Date
             let data: Data
             let uuid: UUID
+            let notes: Text
         }
         let automergeEncoder = AutomergeEncoder(doc: doc)
 
@@ -48,7 +49,8 @@ final class AutomergeEncoderTests: XCTestCase {
             count: 5,
             date: earlyDate,
             data: Data("hello".utf8),
-            uuid: UUID(uuidString: "99CEBB16-1062-4F21-8837-CF18EC09DCD7")!
+            uuid: UUID(uuidString: "99CEBB16-1062-4F21-8837-CF18EC09DCD7")!,
+            notes: Text("Something wicked this way comes.")
         )
 
         try automergeEncoder.encode(sample)
@@ -90,12 +92,20 @@ final class AutomergeEncoderTests: XCTestCase {
             try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "data")))")
         }
 
-        // debugPrint(try doc.get(obj: ObjId.ROOT, key: "uuid"))
+        // debugPrint(try doc.get(obj: ObjId.ROOT, key: "uuid") as Any)
         if case let .Scalar(.String(uuid_string)) = try doc.get(obj: ObjId.ROOT, key: "uuid") {
             XCTAssertEqual(uuid_string, "99CEBB16-1062-4F21-8837-CF18EC09DCD7")
         } else {
             try XCTFail("Didn't find: \(String(describing: doc.get(obj: ObjId.ROOT, key: "uuid")))")
         }
+
+        if case let .Object(textNode, nodeType) = try doc.get(obj: ObjId.ROOT, key: "notes") {
+            XCTAssertEqual(nodeType, .Text)
+            XCTAssertEqual(try doc.text(obj: textNode), "Something wicked this way comes.")
+        } else {
+            try XCTFail("Didn't find an object at \(String(describing: doc.get(obj: ObjId.ROOT, key: "notes")))")
+        }
+        try debugPrint(doc.get(obj: ObjId.ROOT, key: "notes") as Any)
     }
 
     func testNestedKeyEncode() throws {
