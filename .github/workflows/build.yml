@@ -8,6 +8,9 @@ jobs:
 
   benchmark:
     runs-on: macos-13
+    permissions: 
+        issues: write
+        pull-requests: write 
 
     steps:
     - name: Checkout repository
