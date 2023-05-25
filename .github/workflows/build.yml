@@ -129,10 +129,8 @@ jobs:
         #- name: Prepare Code Coverage
         # run: xcrun llvm-cov export -format="lcov" .build/debug/SwiftVizScalePackageTests.xctest/Contents/MacOS/SwiftVizScalePackageTests -instr-profile .build/debug/codecov/default.profdata > info.lcov
 
-        # - name: Upload to CodeCov.io
-        # run: bash <(curl https://codecov.io/bash)
-        #env:
-        #  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: .build/arm64-apple-macosx/debug/codecov/AutomergeSwiftAdditions.json
