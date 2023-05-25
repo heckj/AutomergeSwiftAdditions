@@ -47,46 +47,44 @@ jobs:
       continue-on-error: true
       run: |
         cd MicroBenchmarks
+        echo '# CHECKING INJECTION\n' >> $GITHUB_STEP_SUMMARY
         echo $(date) >> $GITHUB_STEP_SUMMARY
         echo "exitStatus=1" >> $GITHUB_ENV
         swift package benchmark baseline check main pull_request --format markdown >> $GITHUB_STEP_SUMMARY
         echo "exitStatus=0" >> $GITHUB_ENV
 
-    - name: snooping on summary
-      run: cat $GITHUB_STEP_SUMMARY
-  
-    # - if: ${{ env.exitStatus == '0' }}
-    #   name: Pull request comment text success
-    #   id: prtestsuccess
-    #   run: |
-    #     cd MicroBenchmarks
-    #     echo 'PRTEST<<EOF' >> $GITHUB_ENV
-    #     echo "[Pull request benchmark comparison vs 'main' branch run at $(date -Iseconds)](https://github.com/heckj/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
-    #     echo 'EOF' >> $GITHUB_ENV
+    - if: ${{ env.exitStatus == '0' }}
+      name: Pull request comment text success
+      id: prtestsuccess
+      run: |
+        cd MicroBenchmarks
+        echo 'PRTEST<<EOF' >> $GITHUB_ENV
+        echo "[Pull request benchmark comparison vs 'main' branch run at $(date -Iseconds)](https://github.com/heckj/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
 
-    # - if: ${{ env.exitStatus == '1' }}
-    #   name: Pull request comment text failure
-    #   id: prtestfailure
-    #   run: |
-    #     cd MicroBenchmarks
-    #     echo 'PRTEST<<EOF' >> $GITHUB_ENV
-    #     echo "[Pull request benchmark comparison vs 'main' branch run at $(date -Iseconds)](https://github.com/heckj/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
-    #     echo "_Pull request had performance regressions_" >> $GITHUB_ENV
-    #     echo 'EOF' >> $GITHUB_ENV
+    - if: ${{ env.exitStatus == '1' }}
+      name: Pull request comment text failure
+      id: prtestfailure
+      run: |
+        cd MicroBenchmarks
+        echo 'PRTEST<<EOF' >> $GITHUB_ENV
+        echo "[Pull request benchmark comparison vs 'main' branch run at $(date -Iseconds)](https://github.com/heckj/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
+        echo "_Pull request had performance regressions_" >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
 
-    - name: check env
-      run: env
+    # - name: check env
+    #   run: env
 
-    # - name: Comment PR
-    #   uses: thollander/actions-comment-pull-request@v2
-    #   with:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     message: ${{ env.PRTEST }}
-    #     comment_tag: execution
+    - name: Comment PR
+      uses: thollander/actions-comment-pull-request@v2
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        message: ${{ env.PRTEST }}
+        comment_tag: execution
 
-    # - name: Exit with correct status
-    #   run: |
-    #     exit ${{ env.exitStatus }}
+    - name: Exit with correct status
+      run: |
+        exit ${{ env.exitStatus }}
 
   build:
 
