@@ -74,8 +74,9 @@ jobs:
     - name: Comment PR
       uses: thollander/actions-comment-pull-request@v2
       with:
+        filePath: ${{ env.GITHUB_STEP_SUMMARY }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        message: ${{ env.PRTEST }}
+        comment_tag: execution
 
     - name: Exit with correct status
       run: |
