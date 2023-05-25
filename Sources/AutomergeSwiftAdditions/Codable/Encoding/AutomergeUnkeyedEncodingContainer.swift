@@ -34,6 +34,7 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
             self.objectId = nil
             self.lookupError = capturedError
         }
+        tracePrint("Establishing Unkeyed Encoding Container for path \(codingPath.map { AnyCodingKey($0) }))")
     }
 
     // used for nested containers

@@ -1,9 +1,10 @@
 import class Automerge.Document
 import struct Automerge.ObjId
 
-private func tracePrint(_ stringval: String) {
+func tracePrint(indent: Int = 0, _ stringval: String) {
     #if DEBUG
-    print(stringval)
+    let prefix = String(repeating: " ", count: indent)
+    print(prefix, stringval)
     #endif
 }
 
@@ -53,6 +54,10 @@ extension AutomergeEncoderImpl {
         var matchingObjectIds: [Int: ObjId] = [:]
         matchingObjectIds.reserveCapacity(path.count)
 
+        tracePrint(
+            "`retrieveObjectId` with path [\(path.map { AnyCodingKey($0) })] for container type \(containerType), with strategy: \(strategy)"
+        )
+
         // - Efficiency boost using a cache
         // Iterate from the N-1 end of path, backwards - checking [] -> (ObjectId, ObjType) cache,
         // checking until we get a positive hit from the cache. Worst case there'll be nothing in
@@ -82,15 +87,11 @@ extension AutomergeEncoderImpl {
             }
         }
 
-//        let anypath = path.map { AnyCodingKey($0) }
-        tracePrint(
-            "`retrieveObjectId` with path [\(path.map { AnyCodingKey($0) })] for container type \(containerType), with stragegy: \(strategy)"
-        )
         // Iterate the cursor position forward doing lookups against the Automerge document
         // until we get to the second-to-last element. This range ensures that we're iterating
         // over "expected containers"
         for position in startingPosition ..< (path.count - 1) {
-            tracePrint("Checking position \(position): '\(path[position])'")
+            tracePrint(indent: position, "Checking position \(position): '\(path[position])'")
             // Strategy to use while creating schema:
             // defined in AutomergeEncoder.SchemaStrategy
 
@@ -114,7 +115,7 @@ extension AutomergeEncoderImpl {
             // If it's got an index value, then it's a reference in a list.
             // Otherwise it's a key on an object.
             if let indexValue = path[position].intValue {
-                tracePrint("Checking against index position \(indexValue).")
+                tracePrint(indent: position, "Checking against index position \(indexValue).")
                 // If it's an index, verify that it doesn't represent an element beyond the end of an existing list.
                 if indexValue > self.document.length(obj: previousObjectId) {
                     if strategy == .readonly {
@@ -155,7 +156,10 @@ extension AutomergeEncoderImpl {
                             }
                             matchingObjectIds[position] = objId
                             previousObjectId = objId
-                            tracePrint("Found \(path[0 ... position]) as objectId \(objId) of type \(objType)")
+                            tracePrint(
+                                indent: position,
+                                "Found \(path[0 ... position]) as objectId \(objId) of type \(objType)"
+                            )
                         case .Scalar:
                             // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
                             return .failure(
@@ -167,6 +171,7 @@ extension AutomergeEncoderImpl {
                         }
                     } else { // value returned from the lookup in Automerge at this position is `nil`
                         tracePrint(
+                            indent: position,
                             "Nothing pre-existing in schema at \(path[0 ... position]), will need to create a container."
                         )
                         if strategy == .readonly {
@@ -179,8 +184,8 @@ extension AutomergeEncoderImpl {
                             )
                         } else { // couldn't find the object via lookup, so we need to create it
                             // Look up the kind of object to create by inspecting the "next path" element
-                            tracePrint("Need to create a container at \(path[0 ... position]).")
-                            tracePrint("Next path element is '\(path[position + 1])'.")
+                            tracePrint(indent: position, "Need to create a container at \(path[0 ... position]).")
+                            tracePrint(indent: position, "Next path element is '\(path[position + 1])'.")
                             if let _ = path[position + 1].intValue {
                                 // the next item is a list, so create a new list within this list at the index value the
                                 // current position indicates.
@@ -191,7 +196,10 @@ extension AutomergeEncoderImpl {
                                 )
                                 matchingObjectIds[position] = newObjectId
                                 previousObjectId = newObjectId
-                                tracePrint("created \(path[0 ... position]) as objectId \(newObjectId) of type List")
+                                tracePrint(
+                                    indent: position,
+                                    "created \(path[0 ... position]) as objectId \(newObjectId) of type List"
+                                )
                                 // add to cache
                                 //                        EncoderPathCache.upsert(extendedPath,value: (newObjectId,
                                 //                        .List))
@@ -204,7 +212,10 @@ extension AutomergeEncoderImpl {
                                 )
                                 matchingObjectIds[position] = newObjectId
                                 previousObjectId = newObjectId
-                                tracePrint("created \(path[0 ... position]) as objectId \(newObjectId) of type Map")
+                                tracePrint(
+                                    indent: position,
+                                    "created \(path[0 ... position]) as objectId \(newObjectId) of type Map"
+                                )
                                 // add to cache
                                 //                        EncoderPathCache.upsert(extendedPath,value: (newObjectId,
                                 //                        .Map))
@@ -217,7 +228,7 @@ extension AutomergeEncoderImpl {
                 }
             } else { // path[position] is a string-based key, so we need to get - or insert - an Object
                 let keyValue = path[position].stringValue
-                tracePrint("Checking against key \(keyValue).")
+                tracePrint(indent: position, "Checking against key \(keyValue).")
                 do {
                     if let value = try self.document.get(obj: previousObjectId, key: keyValue) {
                         switch value {
@@ -236,7 +247,10 @@ extension AutomergeEncoderImpl {
                             }
                             matchingObjectIds[position] = objId
                             previousObjectId = objId
-                            tracePrint("Found \(path[0 ... position]) as objectId \(objId) of type \(objType)")
+                            tracePrint(
+                                indent: position,
+                                "Found \(path[0 ... position]) as objectId \(objId) of type \(objType)"
+                            )
                         case .Scalar:
                             // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
                             // If there's remaining values to be looked up, the overall path is invalid.
@@ -249,6 +263,7 @@ extension AutomergeEncoderImpl {
                         }
                     } else { // value returned from doc.get() is nil, we'll need to create it
                         tracePrint(
+                            indent: position,
                             "Nothing pre-existing in schema at \(path[0 ... position]), will need to create a container."
                         )
                         if strategy == .readonly {
@@ -260,8 +275,8 @@ extension AutomergeEncoderImpl {
                                     )
                             )
                         } else { // looked-up value was nil AND we're not read-only, create the object
-                            tracePrint("Need to create a container at \(path[0 ... position]).")
-                            tracePrint("Next path element is \(path[position + 1]).")
+                            tracePrint(indent: position, "Need to create a container at \(path[0 ... position]).")
+                            tracePrint(indent: position, "Next path element is \(path[position + 1]).")
                             // Look up the kind of object to create by inspecting the "next path" element
                             if let _ = path[position + 1].intValue {
                                 // the next item is a list, so create a new list within this object using the key value
@@ -273,7 +288,10 @@ extension AutomergeEncoderImpl {
                                 )
                                 matchingObjectIds[position] = newObjectId
                                 previousObjectId = newObjectId
-                                tracePrint("created \(path[0 ... position]) as objectId \(newObjectId) of type List")
+                                tracePrint(
+                                    indent: position,
+                                    "created \(path[0 ... position]) as objectId \(newObjectId) of type List"
+                                )
                                 // add to cache
                                 //                       EncoderPathCache.upsert(extendedPath, value: (newObjectId,
                                 //                        .List))
@@ -287,7 +305,10 @@ extension AutomergeEncoderImpl {
                                 )
                                 matchingObjectIds[position] = newObjectId
                                 previousObjectId = newObjectId
-                                tracePrint("created \(path[0 ... position]) as objectId \(newObjectId) of type Map")
+                                tracePrint(
+                                    indent: position,
+                                    "created \(path[0 ... position]) as objectId \(newObjectId) of type Map"
+                                )
                                 // add to cache
                                 //                       EncoderPathCache.upsert(extendedPath, value: (newObjectId,
                                 //                        .Map))
@@ -315,7 +336,10 @@ extension AutomergeEncoderImpl {
         switch containerType {
         case .Index, .Key: // the element that we're looking up (or creating) is for a key or index container
             if let indexValue = finalpiece.intValue { // The value within the CodingKey indicates it's a List
-                tracePrint("Final piece of the path is '\(finalpiece)', index \(indexValue) of a List.")
+                tracePrint(
+                    indent: path.count - 1,
+                    "Final piece of the path is '\(finalpiece)', index \(indexValue) of a List."
+                )
                 // short circuit beyond-length of array
                 if indexValue > self.document.length(obj: previousObjectId) {
                     if strategy == .readonly {
@@ -337,7 +361,10 @@ extension AutomergeEncoderImpl {
 
                 // Look up Automerge `Value` matching this index within the list
                 do {
-                    tracePrint("Look up what's at index \(indexValue) of objectId: \(previousObjectId):")
+                    tracePrint(
+                        indent: path.count - 1,
+                        "Look up what's at index \(indexValue) of objectId: \(previousObjectId):"
+                    )
                     if let value = try self.document.get(obj: previousObjectId, index: UInt64(indexValue)) {
                         switch value {
                         case let .Object(objId, objType):
@@ -372,8 +399,8 @@ extension AutomergeEncoderImpl {
                             )
                         }
                     } else { // value returned from the lookup in Automerge at this position is `nil`
-                        tracePrint("Need to create a container at \(path).")
-                        tracePrint("Path type to create is \(containerType).")
+                        tracePrint(indent: path.count - 1, "Need to create a container at \(path).")
+                        tracePrint(indent: path.count - 1, "Path type to create is \(containerType).")
                         if strategy == .readonly {
                             // path is a valid request, there's just nothing there
                             return .failure(
@@ -391,7 +418,10 @@ extension AutomergeEncoderImpl {
                                     ty: .List
                                 )
                                 //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
-                                tracePrint("Created new List container with ObjectId \(newObjectId).")
+                                tracePrint(
+                                    indent: path.count - 1,
+                                    "Created new List container with ObjectId \(newObjectId)."
+                                )
                                 return .success((newObjectId, AnyCodingKey("")))
                             } else {
                                 // need to create a map within the list
@@ -401,7 +431,10 @@ extension AutomergeEncoderImpl {
                                     ty: .Map
                                 )
                                 //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
-                                tracePrint("Created new Map container with ObjectId \(newObjectId).")
+                                tracePrint(
+                                    indent: path.count - 1,
+                                    "Created new Map container with ObjectId \(newObjectId)."
+                                )
                                 return .success((newObjectId, AnyCodingKey("")))
                             }
                         }
@@ -414,7 +447,10 @@ extension AutomergeEncoderImpl {
 
                 // Look up Automerge `Value` matching this key on an object
                 do {
-                    tracePrint("Look up what's at key '\(keyValue)' of objectId: \(previousObjectId).")
+                    tracePrint(
+                        indent: path.count - 1,
+                        "Look up what's at key '\(keyValue)' of objectId: \(previousObjectId)."
+                    )
                     if let value = try self.document.get(obj: previousObjectId, key: keyValue) {
                         switch value {
                         case let .Object(objId, objType):
@@ -429,7 +465,7 @@ extension AutomergeEncoderImpl {
                             case .Map:
                                 //                            EncoderPathCache.upsert(extendedPath, value: (objId,
                                 //                            objType))
-                                tracePrint("Found Map container with ObjectId \(objId).")
+                                tracePrint(indent: path.count - 1, "Found Map container with ObjectId \(objId).")
                                 return .success((objId, AnyCodingKey("")))
                             case .List:
                                 return .failure(
@@ -449,8 +485,8 @@ extension AutomergeEncoderImpl {
                             )
                         }
                     } else { // value returned from the lookup in Automerge at this position is `nil`
-                        tracePrint("Need to create a container at \(path).")
-                        tracePrint("Path type to create is \(containerType).")
+                        tracePrint(indent: path.count - 1, "Need to create a container at \(path).")
+                        tracePrint(indent: path.count - 1, "Path type to create is \(containerType).")
                         if strategy == .readonly {
                             // path is a valid request, there's just nothing there
                             return .failure(
@@ -468,7 +504,10 @@ extension AutomergeEncoderImpl {
                                     ty: .List
                                 )
                                 //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
-                                tracePrint("Created new List container with ObjectId \(newObjectId).")
+                                tracePrint(
+                                    indent: path.count - 1,
+                                    "Created new List container with ObjectId \(newObjectId)."
+                                )
                                 return .success((newObjectId, AnyCodingKey("")))
                             } else {
                                 // need to create a map within the list
@@ -478,7 +517,10 @@ extension AutomergeEncoderImpl {
                                     ty: .Map
                                 )
                                 //                        EncoderPathCache.upsert(extendedPath, value: (objId, .List))
-                                tracePrint("Created new Map container with ObjectId \(newObjectId).")
+                                tracePrint(
+                                    indent: path.count - 1,
+                                    "Created new Map container with ObjectId \(newObjectId)."
+                                )
                                 return .success((newObjectId, AnyCodingKey("")))
                             }
                         }

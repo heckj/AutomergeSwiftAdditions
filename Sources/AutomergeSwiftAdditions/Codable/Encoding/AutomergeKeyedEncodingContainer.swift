@@ -58,6 +58,7 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
             self.objectId = nil
             self.lookupError = capturedError
         }
+        tracePrint("Establishing Keyed Encoding Container for path \(codingPath.map { AnyCodingKey($0) }))")
     }
 
     // used for nested containers

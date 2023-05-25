@@ -161,7 +161,10 @@ final class AutomergeEncoderTests: XCTestCase {
         let doc = Document()
         let automergeEncoder = AutomergeEncoder(doc: doc)
 
-        let sample = RootModel(example: [SimpleStruct(name: "henry", duration: 3.14159, flag: true, count: 5)])
+        let sample = RootModel(example: [
+            SimpleStruct(name: "henry", duration: 3.14159, flag: true, count: 5),
+            SimpleStruct(name: "jules", duration: 2.7182818, flag: false, count: 2),
+        ])
 
         try automergeEncoder.encode(sample)
 

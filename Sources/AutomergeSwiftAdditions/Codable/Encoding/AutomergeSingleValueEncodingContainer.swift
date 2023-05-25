@@ -33,6 +33,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             self.codingkey = nil
             self.lookupError = capturedError
         }
+        tracePrint("Establishing Single Value Encoding Container for path \(codingPath.map { AnyCodingKey($0) }))")
     }
 
     mutating func encodeNil() throws {}
