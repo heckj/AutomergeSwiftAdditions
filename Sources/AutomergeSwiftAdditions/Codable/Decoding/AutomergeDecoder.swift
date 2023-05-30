@@ -1,6 +1,6 @@
-import Foundation
 import class Automerge.Document
 import struct Automerge.ObjId
+import Foundation
 
 public struct AutomergeDecoder {
     public var userInfo: [CodingUserInfoKey: Any] = [:]
@@ -29,15 +29,20 @@ public struct AutomergeDecoder {
 //    }
 }
 
- @usableFromInline struct AutomergeDecoderImpl {
-     @usableFromInline let doc: Document
+@usableFromInline struct AutomergeDecoderImpl {
+    @usableFromInline let doc: Document
     @usableFromInline let codingPath: [CodingKey]
     @usableFromInline let userInfo: [CodingUserInfoKey: Any]
 
     @usableFromInline let automergeValue: AutomergeValue
 
-     @inlinable init(doc: Document, userInfo: [CodingUserInfoKey: Any], from automergeValue: AutomergeValue, codingPath: [CodingKey]) {
-         self.doc = doc
+    @inlinable init(
+        doc: Document,
+        userInfo: [CodingUserInfoKey: Any],
+        from automergeValue: AutomergeValue,
+        codingPath: [CodingKey]
+    ) {
+        self.doc = doc
         self.userInfo = userInfo
         self.codingPath = codingPath
         self.automergeValue = automergeValue
@@ -46,25 +51,30 @@ public struct AutomergeDecoder {
     @inlinable public func decode<T: Decodable>(_: T.Type) throws -> T {
         try T(from: self)
     }
- }
+}
 
- extension AutomergeDecoderImpl: Decoder {
+extension AutomergeDecoderImpl: Decoder {
     @usableFromInline func container<Key>(keyedBy _: Key.Type) throws ->
         KeyedDecodingContainer<Key> where Key: CodingKey
     {
-        guard case .object(let dictionary) = self.automergeValue else {
+        guard case let .object(dictionary) = self.automergeValue else {
             throw DecodingError.typeMismatch([String: AutomergeValue].self, DecodingError.Context(
                 codingPath: self.codingPath,
                 debugDescription: "Expected to decode \([String: AutomergeValue].self) but found \(self.automergeValue.debugDataTypeDescription) instead."
             ))
         }
         // dictionary: [String: AutomergeValue]
-        let container = AutomergeKeyedDecodingContainer(impl: self, object: dictionary, codingPath: codingPath, doc: doc)
+        let container = AutomergeKeyedDecodingContainer(
+            impl: self,
+            object: dictionary,
+            codingPath: codingPath,
+            doc: doc
+        )
         return KeyedDecodingContainer(container)
     }
 
     @usableFromInline func unkeyedContainer() throws -> UnkeyedDecodingContainer {
-        guard case .array(let array) = self.automergeValue else {
+        guard case let .array(array) = self.automergeValue else {
             throw DecodingError.typeMismatch([AutomergeValue].self, DecodingError.Context(
                 codingPath: self.codingPath,
                 debugDescription: "Expected to decode \([AutomergeValue].self) but found \(self.automergeValue.debugDataTypeDescription) instead."
@@ -80,10 +90,9 @@ public struct AutomergeDecoder {
 
     @usableFromInline func singleValueContainer() throws -> SingleValueDecodingContainer {
         AutomergeSingleValueDecodingContainer(
-            doc: self.doc
             impl: self,
             codingPath: self.codingPath,
-            json: self.automergeValue
+            automergeValue: self.automergeValue
         )
     }
- }
+}

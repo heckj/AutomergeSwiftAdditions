@@ -50,7 +50,7 @@ public enum AutomergeValue: Equatable, Hashable {
 
 extension AutomergeValue {
     // used for creating type mismatch errors possible when decoding
-    
+
     var debugDataTypeDescription: String {
         switch self {
         case .array:
@@ -63,21 +63,21 @@ extension AutomergeValue {
             return "a dictionary"
         case .null:
             return "null"
-        case .text(_):
+        case .text:
             return "a scalar text value"
-        case .bytes(_):
+        case .bytes:
             return "bytes"
-        case .uint(_):
+        case .uint:
             return "an unsigned integer"
-        case .int(_):
+        case .int:
             return "a signed integer"
-        case .double(_):
+        case .double:
             return "a floating point value"
-        case .counter(_):
+        case .counter:
             return "a counter"
-        case .timestamp(_):
+        case .timestamp:
             return "a timestamp"
-        case .unknown(typeCode: let typeCode, data: let data):
+        case let .unknown(typeCode: typeCode, data: data):
             return "an unknown value with typeCode \(typeCode) and data \(data)"
         }
     }
