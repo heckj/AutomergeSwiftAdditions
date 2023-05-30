@@ -48,6 +48,41 @@ public enum AutomergeValue: Equatable, Hashable {
     case null
 }
 
+extension AutomergeValue {
+    // used for creating type mismatch errors possible when decoding
+    
+    var debugDataTypeDescription: String {
+        switch self {
+        case .array:
+            return "an array"
+        case .bool:
+            return "bool"
+        case .string:
+            return "a string"
+        case .object:
+            return "a dictionary"
+        case .null:
+            return "null"
+        case .text(_):
+            return "a scalar text value"
+        case .bytes(_):
+            return "bytes"
+        case .uint(_):
+            return "an unsigned integer"
+        case .int(_):
+            return "a signed integer"
+        case .double(_):
+            return "a floating point value"
+        case .counter(_):
+            return "a counter"
+        case .timestamp(_):
+            return "a timestamp"
+        case .unknown(typeCode: let typeCode, data: let data):
+            return "an unknown value with typeCode \(typeCode) and data \(data)"
+        }
+    }
+}
+
 public func == (lhs: AutomergeValue, rhs: AutomergeValue) -> Bool {
     switch (lhs, rhs) {
     case (.null, .null):
