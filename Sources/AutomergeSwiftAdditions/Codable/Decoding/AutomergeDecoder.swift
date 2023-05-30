@@ -21,12 +21,17 @@ public struct AutomergeDecoder {
 //            throw error.decodingError
 //        }
 //    }
-//
-//    // decode JSON from a JSONValue
-//    @inlinable public func decode<T: Decodable>(_: T.Type, from json: JSONValue) throws -> T {
-//        let decoder = JSONDecoderImpl(userInfo: userInfo, from: json, codingPath: [])
-//        return try decoder.decode(T.self)
-//    }
+
+    // decode type from an Automerge Value
+    @inlinable public func decode<T: Decodable>(_: T.Type, from automergeValue: AutomergeValue) throws -> T {
+        let decoder = AutomergeDecoderImpl(
+            doc: doc,
+            userInfo: userInfo,
+            from: automergeValue,
+            codingPath: []
+        )
+        return try decoder.decode(T.self)
+    }
 }
 
 @usableFromInline struct AutomergeDecoderImpl {
@@ -64,11 +69,10 @@ extension AutomergeDecoderImpl: Decoder {
             ))
         }
         // dictionary: [String: AutomergeValue]
-        let container = AutomergeKeyedDecodingContainer(
+        let container = AutomergeKeyedDecodingContainer<Key>(
             impl: self,
-            object: dictionary,
             codingPath: codingPath,
-            doc: doc
+            dictionary: dictionary
         )
         return KeyedDecodingContainer(container)
     }

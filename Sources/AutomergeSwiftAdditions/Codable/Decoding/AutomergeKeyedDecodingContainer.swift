@@ -1,11 +1,11 @@
-struct JSONKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol {
+struct AutomergeKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol {
     typealias Key = K
 
-    let impl: JSONDecoderImpl
+    let impl: AutomergeDecoderImpl
     let codingPath: [CodingKey]
-    let dictionary: [String: JSONValue]
+    let dictionary: [String: AutomergeValue]
 
-    init(impl: JSONDecoderImpl, codingPath: [CodingKey], dictionary: [String: JSONValue]) {
+    init(impl: AutomergeDecoderImpl, codingPath: [CodingKey], dictionary: [String: AutomergeValue]) {
         self.impl = impl
         self.codingPath = codingPath
         self.dictionary = dictionary
@@ -119,20 +119,21 @@ struct JSONKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol 
     }
 }
 
-extension JSONKeyedDecodingContainer {
-    private func decoderForKey(_ key: K) throws -> JSONDecoderImpl {
+extension AutomergeKeyedDecodingContainer {
+    private func decoderForKey(_ key: K) throws -> AutomergeDecoderImpl {
         let value = try getValue(forKey: key)
         var newPath = codingPath
         newPath.append(key)
 
-        return JSONDecoderImpl(
+        return AutomergeDecoderImpl(
+            doc: impl.doc,
             userInfo: impl.userInfo,
             from: value,
             codingPath: newPath
         )
     }
 
-    @inline(__always) private func getValue(forKey key: K) throws -> JSONValue {
+    @inline(__always) private func getValue(forKey key: K) throws -> AutomergeValue {
         guard let value = dictionary[key.stringValue] else {
             throw DecodingError.keyNotFound(key, .init(
                 codingPath: codingPath,
@@ -143,7 +144,7 @@ extension JSONKeyedDecodingContainer {
         return value
     }
 
-    @inline(__always) private func createTypeMismatchError(type: Any.Type, forKey key: K, value: JSONValue) ->
+    @inline(__always) private func createTypeMismatchError(type: Any.Type, forKey key: K, value: AutomergeValue) ->
         DecodingError
     {
         let codingPath = codingPath + [key]
@@ -156,19 +157,14 @@ extension JSONKeyedDecodingContainer {
     @inline(__always) private func decodeFixedWidthInteger<T: FixedWidthInteger>(key: Self.Key) throws -> T {
         let value = try getValue(forKey: key)
 
-        guard case let .number(number) = value else {
+        switch value {
+        case let .int(intValue):
+            return T(intValue)
+        case let .uint(intValue):
+            return T(intValue)
+        default:
             throw createTypeMismatchError(type: T.self, forKey: key, value: value)
         }
-
-        guard let integer = T(number) else {
-            throw DecodingError.dataCorruptedError(
-                forKey: key,
-                in: self,
-                debugDescription: "Parsed JSON number <\(number)> does not fit in \(T.self)."
-            )
-        }
-
-        return integer
     }
 
     @inline(__always) private func decodeLosslessStringConvertible<T: LosslessStringConvertible>(
@@ -176,15 +172,15 @@ extension JSONKeyedDecodingContainer {
     ) throws -> T {
         let value = try getValue(forKey: key)
 
-        guard case let .number(number) = value else {
+        guard case let .double(number) = value else {
             throw createTypeMismatchError(type: T.self, forKey: key, value: value)
         }
 
-        guard let floatingPoint = T(number) else {
+        guard let floatingPoint = T(number.description) else {
             throw DecodingError.dataCorruptedError(
                 forKey: key,
                 in: self,
-                debugDescription: "Parsed JSON number <\(number)> does not fit in \(T.self)."
+                debugDescription: "Parsed Automerge number <\(number)> does not fit in \(T.self)."
             )
         }
 
