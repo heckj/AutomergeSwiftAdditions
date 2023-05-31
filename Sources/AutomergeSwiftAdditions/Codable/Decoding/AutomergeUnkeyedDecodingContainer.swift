@@ -1,25 +1,25 @@
 import class Automerge.Document
 import struct Automerge.ObjId
+import enum Automerge.Value
 
 struct AutomergeUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     let impl: AutomergeDecoderImpl
     let codingPath: [CodingKey]
-    let array: [AutomergeValue]
     let objectId: ObjId
 
-    var count: Int? { array.count }
+    var count: Int?
     var isAtEnd: Bool { currentIndex >= (count ?? 0) }
     var currentIndex = 0
 
-    init(impl: AutomergeDecoderImpl, codingPath: [CodingKey], array: [AutomergeValue], objectId: ObjId) {
+    init(impl: AutomergeDecoderImpl, codingPath: [CodingKey], array _: [AutomergeValue], objectId: ObjId) {
         self.impl = impl
         self.codingPath = codingPath
-        self.array = array
         self.objectId = objectId
+        self.count = Int(impl.doc.length(obj: objectId))
     }
 
     mutating func decodeNil() throws -> Bool {
-        if try getNextValue(ofType: Never.self) == .null {
+        if try getNextValue(ofType: Never.self) == .Scalar(.Null) {
             currentIndex += 1
             return true
         }
@@ -31,7 +31,7 @@ struct AutomergeUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     mutating func decode(_ type: Bool.Type) throws -> Bool {
         let value = try getNextValue(ofType: Bool.self)
-        guard case let .bool(bool) = value else {
+        guard case let .Scalar(.Boolean(bool)) = value else {
             throw createTypeMismatchError(type: type, value: value)
         }
 
@@ -41,7 +41,7 @@ struct AutomergeUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     mutating func decode(_ type: String.Type) throws -> String {
         let value = try getNextValue(ofType: String.self)
-        guard case let .string(string) = value else {
+        guard case let .Scalar(.String(string)) = value else {
             throw createTypeMismatchError(type: type, value: value)
         }
 
@@ -101,7 +101,7 @@ struct AutomergeUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         let decoder = try decoderForNextElement(ofType: T.self)
         let result = try T(from: decoder)
 
-        // FIXME: capture and resolve types Counter, Text, and Date
+        // FIXME: capture and resolve types Counter, Text, Data, and Date
 
         // Because of the requirement that the index not be incremented unless
         // decoding the desired result type succeeds, it can not be a tail call.
@@ -137,9 +137,8 @@ struct AutomergeUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 extension AutomergeUnkeyedDecodingContainer {
     private mutating func decoderForNextElement<T>(
         ofType _: T.Type,
-        isNested: Bool = false
+        isNested _: Bool = false
     ) throws -> AutomergeDecoderImpl {
-        let value = try getNextValue(ofType: T.self, isNested: isNested)
         let newPath = codingPath + [ArrayKey(index: currentIndex)]
 
         return AutomergeDecoderImpl(
@@ -160,7 +159,7 @@ extension AutomergeUnkeyedDecodingContainer {
     ///   can quite neatly remove whichever branch of the `if` is not taken during optimization, making doing it this
     ///   way _much_ more performant (for what little it matters given that it's only checked in case of an error).
     @inline(__always)
-    private func getNextValue<T>(ofType _: T.Type, isNested: Bool = false) throws -> AutomergeValue {
+    private func getNextValue<T>(ofType _: T.Type, isNested: Bool = false) throws -> Value {
         guard !isAtEnd else {
             if isNested {
                 throw DecodingError.valueNotFound(
@@ -182,14 +181,25 @@ extension AutomergeUnkeyedDecodingContainer {
                 )
             }
         }
-        return array[currentIndex]
+        if let value = try impl.doc.get(obj: objectId, index: UInt64(currentIndex)) {
+            return value
+        } else {
+            throw DecodingError.valueNotFound(
+                T.self,
+                .init(
+                    codingPath: codingPath,
+                    debugDescription: "Cannot get nested keyed container -- unkeyed container is at end.",
+                    underlyingError: nil
+                )
+            )
+        }
     }
 
-    @inline(__always) private func createTypeMismatchError(type: Any.Type, value: AutomergeValue) -> DecodingError {
+    @inline(__always) private func createTypeMismatchError(type: Any.Type, value: Value) -> DecodingError {
         let codingPath = codingPath + [ArrayKey(index: currentIndex)]
         return DecodingError.typeMismatch(type, .init(
             codingPath: codingPath,
-            debugDescription: "Expected to decode \(type) but found \(value.debugDataTypeDescription) instead."
+            debugDescription: "Expected to decode \(type) but found \(value) instead."
         ))
     }
 
@@ -197,11 +207,11 @@ extension AutomergeUnkeyedDecodingContainer {
         let value = try getNextValue(ofType: T.self)
 
         switch value {
-        case let .int(intValue):
+        case let .Scalar(.Int(intValue)):
             let integer = T(intValue)
             currentIndex += 1
             return integer
-        case let .uint(intValue):
+        case let .Scalar(.Uint(intValue)):
             let integer = T(intValue)
             currentIndex += 1
             return integer
@@ -212,7 +222,7 @@ extension AutomergeUnkeyedDecodingContainer {
 
     @inline(__always) private mutating func decodeBinaryFloatingPoint<T: LosslessStringConvertible>() throws -> T {
         let value = try getNextValue(ofType: T.self)
-        guard case let .double(double) = value else {
+        guard case let .Scalar(.F64(double)) = value else {
             throw createTypeMismatchError(type: T.self, value: value)
         }
 
