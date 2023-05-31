@@ -1,36 +1,39 @@
+import class Automerge.Document
+import struct Automerge.ObjId
+import enum Automerge.Value
+
 struct AutomergeKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol {
     typealias Key = K
 
     let impl: AutomergeDecoderImpl
     let codingPath: [CodingKey]
-    let dictionary: [String: AutomergeValue]
+    let objectId: ObjId
+    let keys: [String]
 
-    init(impl: AutomergeDecoderImpl, codingPath: [CodingKey], dictionary: [String: AutomergeValue]) {
+    init(impl: AutomergeDecoderImpl, codingPath: [CodingKey], objectId: ObjId) {
         self.impl = impl
         self.codingPath = codingPath
-        self.dictionary = dictionary
+        self.objectId = objectId
+        keys = impl.doc.keys(obj: objectId)
     }
 
     var allKeys: [K] {
-        dictionary.keys.compactMap { K(stringValue: $0) }
+        keys.compactMap { K(stringValue: $0) }
     }
 
     func contains(_ key: K) -> Bool {
-        if let _ = dictionary[key.stringValue] {
-            return true
-        }
-        return false
+        keys.contains(key.stringValue)
     }
 
     func decodeNil(forKey key: K) throws -> Bool {
         let value = try getValue(forKey: key)
-        return value == .null
+        return value == .Scalar(.Null)
     }
 
     func decode(_ type: Bool.Type, forKey key: K) throws -> Bool {
         let value = try getValue(forKey: key)
 
-        guard case let .bool(bool) = value else {
+        guard case let .Scalar(.Boolean(bool)) = value else {
             throw createTypeMismatchError(type: type, forKey: key, value: value)
         }
 
@@ -40,7 +43,7 @@ struct AutomergeKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProt
     func decode(_ type: String.Type, forKey key: K) throws -> String {
         let value = try getValue(forKey: key)
 
-        guard case let .string(string) = value else {
+        guard case let .Scalar(.String(string)) = value else {
             throw createTypeMismatchError(type: type, forKey: key, value: value)
         }
 
@@ -128,39 +131,41 @@ extension AutomergeKeyedDecodingContainer {
         return AutomergeDecoderImpl(
             doc: impl.doc,
             userInfo: impl.userInfo,
-            from: value,
             codingPath: newPath
         )
     }
 
-    @inline(__always) private func getValue(forKey key: K) throws -> AutomergeValue {
-        guard let value = dictionary[key.stringValue] else {
+    @inline(__always) private func getValue(forKey key: K) throws -> Value {
+        guard let value = try impl.doc.get(obj: objectId, key: key.stringValue) else {
             throw DecodingError.keyNotFound(key, .init(
                 codingPath: codingPath,
                 debugDescription: "No value associated with key \(key) (\"\(key.stringValue)\")."
             ))
         }
-
         return value
+        // return AutomergeValue.fromValue(value)
     }
 
-    @inline(__always) private func createTypeMismatchError(type: Any.Type, forKey key: K, value: AutomergeValue) ->
+    @inline(__always) private func createTypeMismatchError(type: Any.Type, forKey key: K, value: Value) ->
         DecodingError
     {
         let codingPath = codingPath + [key]
         return DecodingError.typeMismatch(type, .init(
             codingPath: codingPath,
-            debugDescription: "Expected to decode \(type) but found \(value.debugDataTypeDescription) instead."
+            debugDescription: "Expected to decode \(type) but found \(value) instead."
         ))
     }
 
     @inline(__always) private func decodeFixedWidthInteger<T: FixedWidthInteger>(key: Self.Key) throws -> T {
         let value = try getValue(forKey: key)
 
-        switch value {
-        case let .int(intValue):
+        guard case let .Scalar(scalar) = value else {
+            throw createTypeMismatchError(type: T.self, forKey: key, value: value)
+        }
+        switch scalar {
+        case let .Int(intValue):
             return T(intValue)
-        case let .uint(intValue):
+        case let .Uint(intValue):
             return T(intValue)
         default:
             throw createTypeMismatchError(type: T.self, forKey: key, value: value)
@@ -172,7 +177,7 @@ extension AutomergeKeyedDecodingContainer {
     ) throws -> T {
         let value = try getValue(forKey: key)
 
-        guard case let .double(number) = value else {
+        guard case let .Scalar(.F64(number)) = value else {
             throw createTypeMismatchError(type: T.self, forKey: key, value: value)
         }
 

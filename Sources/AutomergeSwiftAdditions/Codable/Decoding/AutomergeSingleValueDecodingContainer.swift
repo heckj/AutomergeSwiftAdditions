@@ -1,12 +1,18 @@
+import class Automerge.Document
+import struct Automerge.ObjId
+
 struct AutomergeSingleValueDecodingContainer: SingleValueDecodingContainer {
     let impl: AutomergeDecoderImpl
     let value: AutomergeValue
     let codingPath: [CodingKey]
 
-    init(impl: AutomergeDecoderImpl, codingPath: [CodingKey], automergeValue: AutomergeValue) {
+    let objectId: ObjId
+
+    init(impl: AutomergeDecoderImpl, codingPath: [CodingKey], automergeValue: AutomergeValue, objectId: ObjId) {
         self.impl = impl
         self.codingPath = codingPath
         value = automergeValue
+        self.objectId = objectId
     }
 
     func decodeNil() -> Bool {

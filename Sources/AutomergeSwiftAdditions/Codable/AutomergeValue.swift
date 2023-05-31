@@ -1,3 +1,6 @@
+import struct Automerge.ObjId
+import enum Automerge.ObjType
+import enum Automerge.Value
 import Foundation
 
 // conceptually borrowing the same idea that was used for JSON encoding and decoding
@@ -46,6 +49,43 @@ public enum AutomergeValue: Equatable, Hashable {
     /// This type is reserved for forward compatibility, and is not expected to be created directly.
     case unknown(typeCode: UInt8, data: Data)
     case null
+
+    public static func fromValue(_ value: Value) -> Self {
+        switch value {
+        case let .Object(_, typeOfObject):
+            switch typeOfObject {
+            case .Text:
+                return .text("")
+            case .Map:
+                return .object([:])
+            case .List:
+                return .array([])
+            }
+        case let .Scalar(scalarValue):
+            switch scalarValue {
+            case let .Bytes(data):
+                return .bytes(data)
+            case let .String(str):
+                return .string(str)
+            case let .Uint(intValue):
+                return .uint(intValue)
+            case let .Int(intValue):
+                return .int(intValue)
+            case let .F64(doubleValue):
+                return .double(doubleValue)
+            case let .Counter(counterValue):
+                return .counter(counterValue)
+            case let .Timestamp(intValue):
+                return .timestamp(intValue)
+            case let .Boolean(boolValue):
+                return .bool(boolValue)
+            case let .Unknown(typeCode: typeCode, data: data):
+                return .unknown(typeCode: typeCode, data: data)
+            case .Null:
+                return .null
+            }
+        }
+    }
 }
 
 extension AutomergeValue {
