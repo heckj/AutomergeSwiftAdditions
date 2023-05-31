@@ -1,6 +1,7 @@
 import class Automerge.Document
 import struct Automerge.ObjId
 
+@usableFromInline
 func tracePrint(indent: Int = 0, _ stringval: String) {
     #if DEBUG
     let prefix = String(repeating: " ", count: indent)
@@ -42,7 +43,7 @@ extension AnyCodingKey {
     }
 
     /// An enumeration that represents the type of encoding container.
-    enum EncodingContainerType {
+    @usableFromInline enum EncodingContainerType {
         /// A keyed container.
         case Key
         /// An un-keyed container.
@@ -64,7 +65,7 @@ extension AnyCodingKey {
     /// schema. The strategy defaults to ``AutomergeEncoder/SchemaStrategy/default``.
     /// - Returns: A result type that contains a tuple of an Automerge object Id of the relevant container and the final
     /// CodingKey value, or an error if the retrieval failed or there was conflicting schema within in the document.
-    static func retrieveObjectId(
+    @inlinable static func retrieveObjectId(
         document: Document,
         path: [CodingKey],
         containerType: EncodingContainerType,
