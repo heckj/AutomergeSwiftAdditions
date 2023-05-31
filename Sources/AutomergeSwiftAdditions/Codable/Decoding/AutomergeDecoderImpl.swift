@@ -1,5 +1,6 @@
 import class Automerge.Document
 import struct Automerge.ObjId
+import enum Automerge.Value
 import Foundation
 
 /* Code flow example from a user-defined Decoder implementation
@@ -18,24 +19,14 @@ import Foundation
     @usableFromInline let codingPath: [CodingKey]
     @usableFromInline let userInfo: [CodingUserInfoKey: Any]
 
-    @usableFromInline let automergeValue: AutomergeValue
-
     @inlinable init(
         doc: Document,
         userInfo: [CodingUserInfoKey: Any],
-        from automergeValue: AutomergeValue,
         codingPath: [CodingKey]
     ) {
         self.doc = doc
         self.userInfo = userInfo
         self.codingPath = codingPath
-        self.automergeValue = automergeValue
-
-        // FIXME: Do lookup of ObjectId from Automerge doc based on codingPath
-        // and stash it locally, then use to generate relevant containers - adding
-        // it into their initializers to _require_ an ObjectId - that way we move
-        // all the lookups into direct-to-Automerge doc code, and don't build a
-        // paralell AutomergeType structure.
     }
 
     @inlinable public func decode<T: Decodable>(_: T.Type) throws -> T {
@@ -47,41 +38,79 @@ extension AutomergeDecoderImpl: Decoder {
     @usableFromInline func container<Key>(keyedBy _: Key.Type) throws ->
         KeyedDecodingContainer<Key> where Key: CodingKey
     {
-        guard case let .object(dictionary) = self.automergeValue else {
-            throw DecodingError.typeMismatch([String: AutomergeValue].self, DecodingError.Context(
-                codingPath: self.codingPath,
-                debugDescription: "Expected to decode \([String: AutomergeValue].self) but found \(self.automergeValue.debugDataTypeDescription) instead."
-            ))
+        let result = AnyCodingKey.retrieveObjectId(document: self.doc, path: codingPath, containerType: .Key)
+        switch result {
+        case let .success((objectId, _)):
+            let objectType = doc.objectType(obj: objectId)
+            guard case .Map = objectType else {
+                throw DecodingError.typeMismatch([String: AutomergeValue].self, DecodingError.Context(
+                    codingPath: self.codingPath,
+                    debugDescription: "ObjectId \(objectId) returned an type of \(objectType)."
+                ))
+            }
+
+            let container = AutomergeKeyedDecodingContainer<Key>(
+                impl: self,
+                codingPath: codingPath,
+                objectId: objectId
+            )
+            return KeyedDecodingContainer(container)
+        case let .failure(err):
+            throw err
         }
-        // dictionary: [String: AutomergeValue]
-        let container = AutomergeKeyedDecodingContainer<Key>(
-            impl: self,
-            codingPath: codingPath,
-            dictionary: dictionary
-        )
-        return KeyedDecodingContainer(container)
     }
 
     @usableFromInline func unkeyedContainer() throws -> UnkeyedDecodingContainer {
-        guard case let .array(array) = self.automergeValue else {
-            throw DecodingError.typeMismatch([AutomergeValue].self, DecodingError.Context(
-                codingPath: self.codingPath,
-                debugDescription: "Expected to decode \([AutomergeValue].self) but found \(self.automergeValue.debugDataTypeDescription) instead."
-            ))
-        }
+        let result = AnyCodingKey.retrieveObjectId(document: self.doc, path: codingPath, containerType: .Index)
+        switch result {
+        case let .success((objectId, _)):
+            let objectType = doc.objectType(obj: objectId)
+            guard case .List = objectType else {
+                throw DecodingError.typeMismatch([String: AutomergeValue].self, DecodingError.Context(
+                    codingPath: self.codingPath,
+                    debugDescription: "ObjectId \(objectId) returned an type of \(objectType)."
+                ))
+            }
 
-        return AutomergeUnkeyedDecodingContainer(
-            impl: self,
-            codingPath: self.codingPath,
-            array: array
-        )
+            return AutomergeUnkeyedDecodingContainer(
+                impl: self,
+                codingPath: self.codingPath,
+                array: [],
+                objectId: objectId
+            )
+        case let .failure(err):
+            throw err
+        }
     }
 
     @usableFromInline func singleValueContainer() throws -> SingleValueDecodingContainer {
-        AutomergeSingleValueDecodingContainer(
-            impl: self,
-            codingPath: self.codingPath,
-            automergeValue: self.automergeValue
-        )
+        let result = AnyCodingKey.retrieveObjectId(document: self.doc, path: codingPath, containerType: .Value)
+        switch result {
+        case let .success((objectId, finalKey)):
+
+            let foo: Value?
+            if let indexValue = finalKey.intValue {
+                foo = try doc.get(obj: objectId, index: UInt64(indexValue))
+            } else {
+                foo = try doc.get(obj: objectId, key: finalKey.stringValue)
+            }
+            guard let value = foo else {
+                throw DecodingError.dataCorrupted(
+                    DecodingError.Context(
+                        codingPath: self.codingPath,
+                        debugDescription: "Attempted to read value at \(objectId) with coding key: \(finalKey), and no value was returned."
+                    )
+                )
+            }
+
+            return AutomergeSingleValueDecodingContainer(
+                impl: self,
+                codingPath: self.codingPath,
+                automergeValue: AutomergeValue.fromValue(value),
+                objectId: objectId
+            )
+        case let .failure(err):
+            throw err
+        }
     }
 }

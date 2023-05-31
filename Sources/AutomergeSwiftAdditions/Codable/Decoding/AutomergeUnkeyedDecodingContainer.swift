@@ -1,16 +1,21 @@
+import class Automerge.Document
+import struct Automerge.ObjId
+
 struct AutomergeUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     let impl: AutomergeDecoderImpl
     let codingPath: [CodingKey]
     let array: [AutomergeValue]
+    let objectId: ObjId
 
     var count: Int? { array.count }
     var isAtEnd: Bool { currentIndex >= (count ?? 0) }
     var currentIndex = 0
 
-    init(impl: AutomergeDecoderImpl, codingPath: [CodingKey], array: [AutomergeValue]) {
+    init(impl: AutomergeDecoderImpl, codingPath: [CodingKey], array: [AutomergeValue], objectId: ObjId) {
         self.impl = impl
         self.codingPath = codingPath
         self.array = array
+        self.objectId = objectId
     }
 
     mutating func decodeNil() throws -> Bool {
@@ -140,7 +145,6 @@ extension AutomergeUnkeyedDecodingContainer {
         return AutomergeDecoderImpl(
             doc: impl.doc,
             userInfo: impl.userInfo,
-            from: value,
             codingPath: newPath
         )
     }
