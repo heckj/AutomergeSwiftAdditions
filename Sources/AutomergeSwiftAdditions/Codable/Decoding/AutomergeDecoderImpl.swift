@@ -30,6 +30,12 @@ import Foundation
         self.userInfo = userInfo
         self.codingPath = codingPath
         self.automergeValue = automergeValue
+
+        // FIXME: Do lookup of ObjectId from Automerge doc based on codingPath
+        // and stash it locally, then use to generate relevant containers - adding
+        // it into their initializers to _require_ an ObjectId - that way we move
+        // all the lookups into direct-to-Automerge doc code, and don't build a
+        // paralell AutomergeType structure.
     }
 
     @inlinable public func decode<T: Decodable>(_: T.Type) throws -> T {
