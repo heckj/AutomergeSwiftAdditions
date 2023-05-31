@@ -30,12 +30,13 @@ Punchlist:
   - [ ] encoder to 80% with failure cases
   - [ ] lookup/schema creation to 80% with failure cases
 
-- [ ] expand strategy to allow for strictly type checking down to single-value encoders
+- [ ] expand strategy to allow for strictly type checking when encoding single-value scalar values
 
 - [ ] strip out encoder duplicate structure that's created but not needed
   - [ ] check performance impact for removing that extra stuff
 
-- [ ] establish decoder
+- [x] establish decoder
+  - [ ] capture and override decoding Text, Data, Date, and Counter
 - [ ] expand encoder to allow "encode at" to aim within the schema
 - [ ] expand decoder to allow "decode from" to select within the schema to decode
 
