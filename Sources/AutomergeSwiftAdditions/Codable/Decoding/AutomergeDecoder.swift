@@ -3,11 +3,14 @@ import struct Automerge.ObjId
 import Foundation
 
 public struct AutomergeDecoder {
+    public var codingPath: [CodingKey]
+        
     public var userInfo: [CodingUserInfoKey: Any] = [:]
     public let doc: Document
 
     public init(doc: Document) {
         self.doc = doc
+        self.codingPath = []
     }
 
     // decode type from an Automerge Value
