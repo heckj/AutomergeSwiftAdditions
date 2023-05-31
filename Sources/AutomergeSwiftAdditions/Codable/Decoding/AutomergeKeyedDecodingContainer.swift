@@ -124,7 +124,6 @@ struct AutomergeKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProt
 
 extension AutomergeKeyedDecodingContainer {
     private func decoderForKey(_ key: K) throws -> AutomergeDecoderImpl {
-        let value = try getValue(forKey: key)
         var newPath = codingPath
         newPath.append(key)
 
