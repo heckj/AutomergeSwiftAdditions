@@ -3,9 +3,9 @@ import class Automerge.Document
 public struct AutomergeEncoder {
     public var userInfo: [CodingUserInfoKey: Any] = [:]
     var doc: Document
-    var schemaStrategy: AnyCodingKey.SchemaStrategy
+    var schemaStrategy: SchemaStrategy
 
-    public init(doc: Document, strategy: AnyCodingKey.SchemaStrategy = .default) {
+    public init(doc: Document, strategy: SchemaStrategy = .default) {
         self.doc = doc
         self.schemaStrategy = strategy
     }
