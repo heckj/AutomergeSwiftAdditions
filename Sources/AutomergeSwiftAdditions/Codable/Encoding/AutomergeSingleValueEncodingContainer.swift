@@ -23,7 +23,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
         self.impl = impl
         self.codingPath = codingPath
         self.document = doc
-        switch impl.retrieveObjectId(path: codingPath, containerType: .Value) {
+        switch AnyCodingKey.retrieveObjectId(document: doc, path: codingPath, containerType: .Value) {
         case let .success((objId, codingkey)):
             self.objectId = objId
             self.codingkey = codingkey

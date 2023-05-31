@@ -8,7 +8,17 @@ func tracePrint(indent: Int = 0, _ stringval: String) {
     #endif
 }
 
-extension AutomergeEncoderImpl {
+extension AnyCodingKey {
+    /// An enumeration that represents the type of encoding container.
+    enum EncodingContainerType {
+        /// A keyed container.
+        case Key
+        /// An un-keyed container.
+        case Index
+        /// A single-value container.
+        case Value
+    }
+
     /// Returns an Automerge objectId for the location within the document.
     ///
     /// The function looks up Automerge schema while optionally creating schema if needed, and reporting on errors with
@@ -22,7 +32,8 @@ extension AutomergeEncoderImpl {
     /// schema. The strategy defaults to ``AutomergeEncoder/SchemaStrategy/default``.
     /// - Returns: A result type that contains a tuple of an Automerge object Id of the relevant container and the final
     /// CodingKey value, or an error if the retrieval failed or there was conflicting schema within in the document.
-    func retrieveObjectId(
+    static func retrieveObjectId(
+        document: Document,
         path: [CodingKey],
         containerType: EncodingContainerType,
         strategy: AutomergeEncoder.SchemaStrategy = .default
@@ -117,19 +128,19 @@ extension AutomergeEncoderImpl {
             if let indexValue = path[position].intValue {
                 tracePrint(indent: position, "Checking against index position \(indexValue).")
                 // If it's an index, verify that it doesn't represent an element beyond the end of an existing list.
-                if indexValue > self.document.length(obj: previousObjectId) {
+                if indexValue > document.length(obj: previousObjectId) {
                     if strategy == .readonly {
                         return .failure(
                             CodingKeyLookupError
                                 .indexOutOfBounds(
-                                    "Index value \(indexValue) is beyond the length: \(self.document.length(obj: previousObjectId)) and schema is read-only"
+                                    "Index value \(indexValue) is beyond the length: \(document.length(obj: previousObjectId)) and schema is read-only"
                                 )
                         )
-                    } else if indexValue > (self.document.length(obj: previousObjectId) + 1) {
+                    } else if indexValue > (document.length(obj: previousObjectId) + 1) {
                         return .failure(
                             CodingKeyLookupError
                                 .indexOutOfBounds(
-                                    "Index value \(indexValue) is too far beyond the length: \(self.document.length(obj: previousObjectId)) to append a new item."
+                                    "Index value \(indexValue) is too far beyond the length: \(document.length(obj: previousObjectId)) to append a new item."
                                 )
                         )
                     }
@@ -137,7 +148,7 @@ extension AutomergeEncoderImpl {
 
                 // Look up Automerge `Value` matching this index within the list
                 do {
-                    if let value = try self.document.get(obj: previousObjectId, index: UInt64(indexValue)) {
+                    if let value = try document.get(obj: previousObjectId, index: UInt64(indexValue)) {
                         switch value {
                         case let .Object(objId, objType):
                             //                EncoderPathCache.upsert(extendedPath, value: (objId, objType))
@@ -189,7 +200,7 @@ extension AutomergeEncoderImpl {
                             if let _ = path[position + 1].intValue {
                                 // the next item is a list, so create a new list within this list at the index value the
                                 // current position indicates.
-                                let newObjectId = try self.document.insertObject(
+                                let newObjectId = try document.insertObject(
                                     obj: previousObjectId,
                                     index: UInt64(indexValue),
                                     ty: .List
@@ -205,7 +216,7 @@ extension AutomergeEncoderImpl {
                                 //                        .List))
                             } else {
                                 // need to create an object
-                                let newObjectId = try self.document.insertObject(
+                                let newObjectId = try document.insertObject(
                                     obj: previousObjectId,
                                     index: UInt64(indexValue),
                                     ty: .Map
@@ -230,7 +241,7 @@ extension AutomergeEncoderImpl {
                 let keyValue = path[position].stringValue
                 tracePrint(indent: position, "Checking against key \(keyValue).")
                 do {
-                    if let value = try self.document.get(obj: previousObjectId, key: keyValue) {
+                    if let value = try document.get(obj: previousObjectId, key: keyValue) {
                         switch value {
                         case let .Object(objId, objType):
                             //                EncoderPathCache.upsert(extendedPath, value: (objId, objType))
@@ -281,7 +292,7 @@ extension AutomergeEncoderImpl {
                             if let _ = path[position + 1].intValue {
                                 // the next item is a list, so create a new list within this object using the key value
                                 // the current position indicates.
-                                let newObjectId = try self.document.putObject(
+                                let newObjectId = try document.putObject(
                                     obj: previousObjectId,
                                     key: keyValue,
                                     ty: .List
@@ -298,7 +309,7 @@ extension AutomergeEncoderImpl {
                             } else {
                                 // the next item is an object, so create a new object within this object using the key
                                 // value the current position indicates.
-                                let newObjectId = try self.document.putObject(
+                                let newObjectId = try document.putObject(
                                     obj: previousObjectId,
                                     key: keyValue,
                                     ty: .Map
@@ -341,19 +352,19 @@ extension AutomergeEncoderImpl {
                     "Final piece of the path is '\(finalpiece)', index \(indexValue) of a List."
                 )
                 // short circuit beyond-length of array
-                if indexValue > self.document.length(obj: previousObjectId) {
+                if indexValue > document.length(obj: previousObjectId) {
                     if strategy == .readonly {
                         return .failure(
                             CodingKeyLookupError
                                 .indexOutOfBounds(
-                                    "Index value \(indexValue) is beyond the length: \(self.document.length(obj: previousObjectId)) and schema is read-only"
+                                    "Index value \(indexValue) is beyond the length: \(document.length(obj: previousObjectId)) and schema is read-only"
                                 )
                         )
-                    } else if indexValue > (self.document.length(obj: previousObjectId) + 1) {
+                    } else if indexValue > (document.length(obj: previousObjectId) + 1) {
                         return .failure(
                             CodingKeyLookupError
                                 .indexOutOfBounds(
-                                    "Index value \(indexValue) is too far beyond the length: \(self.document.length(obj: previousObjectId)) to append a new item."
+                                    "Index value \(indexValue) is too far beyond the length: \(document.length(obj: previousObjectId)) to append a new item."
                                 )
                         )
                     }
@@ -365,7 +376,7 @@ extension AutomergeEncoderImpl {
                         indent: path.count - 1,
                         "Look up what's at index \(indexValue) of objectId: \(previousObjectId):"
                     )
-                    if let value = try self.document.get(obj: previousObjectId, index: UInt64(indexValue)) {
+                    if let value = try document.get(obj: previousObjectId, index: UInt64(indexValue)) {
                         switch value {
                         case let .Object(objId, objType):
                             switch objType {
@@ -426,7 +437,7 @@ extension AutomergeEncoderImpl {
                         } else {
                             if containerType == .Index {
                                 // need to create a list within the list
-                                let newObjectId = try self.document.insertObject(
+                                let newObjectId = try document.insertObject(
                                     obj: previousObjectId,
                                     index: UInt64(indexValue),
                                     ty: .List
@@ -439,7 +450,7 @@ extension AutomergeEncoderImpl {
                                 return .success((newObjectId, AnyCodingKey("")))
                             } else {
                                 // need to create a map within the list
-                                let newObjectId = try self.document.insertObject(
+                                let newObjectId = try document.insertObject(
                                     obj: previousObjectId,
                                     index: UInt64(indexValue),
                                     ty: .Map
@@ -465,7 +476,7 @@ extension AutomergeEncoderImpl {
                         indent: path.count - 1,
                         "Look up what's at key '\(keyValue)' of objectId: \(previousObjectId)."
                     )
-                    if let value = try self.document.get(obj: previousObjectId, key: keyValue) {
+                    if let value = try document.get(obj: previousObjectId, key: keyValue) {
                         switch value {
                         case let .Object(objId, objType):
                             switch objType {
@@ -528,7 +539,7 @@ extension AutomergeEncoderImpl {
                         } else {
                             if containerType == .Index {
                                 // need to create a list within the list
-                                let newObjectId = try self.document.putObject(
+                                let newObjectId = try document.putObject(
                                     obj: previousObjectId,
                                     key: keyValue,
                                     ty: .List
@@ -541,7 +552,7 @@ extension AutomergeEncoderImpl {
                                 return .success((newObjectId, AnyCodingKey("")))
                             } else {
                                 // need to create a map within the list
-                                let newObjectId = try self.document.putObject(
+                                let newObjectId = try document.putObject(
                                     obj: previousObjectId,
                                     key: keyValue,
                                     ty: .Map

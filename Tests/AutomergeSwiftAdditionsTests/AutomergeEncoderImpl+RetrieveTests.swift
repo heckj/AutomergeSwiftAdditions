@@ -45,9 +45,9 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey(0),
             AnyCodingKey("notes"),
         ]
-        let encoderImpl = AutomergeEncoderImpl(userInfo: [:], codingPath: fullCodingPath, doc: doc)
 
-        let result = encoderImpl.retrieveObjectId(path: fullCodingPath, containerType: .Value)
+        let result = AnyCodingKey.retrieveObjectId(document: doc, path: fullCodingPath, containerType: .Value)
+
         switch result {
         case let .success((objectId, codingKeyInstance)):
             XCTAssertEqual(objectId, setupCache["nestedMap"])
@@ -64,9 +64,9 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("list"),
             AnyCodingKey(1),
         ]
-        let encoderImpl = AutomergeEncoderImpl(userInfo: [:], codingPath: newCodingPath, doc: doc)
 
-        let result = encoderImpl.retrieveObjectId(path: newCodingPath, containerType: .Key)
+        let result = AnyCodingKey.retrieveObjectId(document: doc, path: newCodingPath, containerType: .Key)
+
         switch result {
         case let .success((objectId, codingKeyInstance)):
             XCTAssertEqual(codingKeyInstance, AnyCodingKey.ROOT)
@@ -84,9 +84,9 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("bluefish"),
             AnyCodingKey("yellowfish"),
         ]
-        let encoderImpl = AutomergeEncoderImpl(userInfo: [:], codingPath: newCodingPath, doc: doc)
 
-        let result = encoderImpl.retrieveObjectId(path: newCodingPath, containerType: .Key)
+        let result = AnyCodingKey.retrieveObjectId(document: doc, path: newCodingPath, containerType: .Key)
+
         switch result {
         case let .success((objectId, codingKeyInstance)):
             XCTAssertEqual(codingKeyInstance, AnyCodingKey.ROOT)
@@ -104,9 +104,9 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("bluefish"),
             AnyCodingKey(0),
         ]
-        let encoderImpl = AutomergeEncoderImpl(userInfo: [:], codingPath: newCodingPath, doc: doc)
 
-        let result = encoderImpl.retrieveObjectId(path: newCodingPath, containerType: .Index)
+        let result = AnyCodingKey.retrieveObjectId(document: doc, path: newCodingPath, containerType: .Index)
+
         switch result {
         case let .success((objectId, codingKeyInstance)):
             XCTAssertEqual(codingKeyInstance, AnyCodingKey.ROOT)
@@ -124,9 +124,9 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("bluefish"),
             AnyCodingKey("yellowfish"),
         ]
-        let encoderImpl = AutomergeEncoderImpl(userInfo: [:], codingPath: newCodingPath, doc: doc)
 
-        let result = encoderImpl.retrieveObjectId(path: newCodingPath, containerType: .Value)
+        let result = AnyCodingKey.retrieveObjectId(document: doc, path: newCodingPath, containerType: .Value)
+
         switch result {
         case let .success((objectId, codingKeyInstance)):
             XCTAssertEqual(codingKeyInstance.stringValue, "yellowfish")
@@ -144,9 +144,8 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("bluefish"),
             AnyCodingKey("yellowfish"),
         ]
-        let encoderImpl = AutomergeEncoderImpl(userInfo: [:], codingPath: newCodingPath, doc: doc)
 
-        let result = encoderImpl.retrieveObjectId(path: newCodingPath, containerType: .Value)
+        let result = AnyCodingKey.retrieveObjectId(document: doc, path: newCodingPath, containerType: .Value)
         switch result {
         case .success:
             XCTFail("Expected this to fail with index 5 in a new array")

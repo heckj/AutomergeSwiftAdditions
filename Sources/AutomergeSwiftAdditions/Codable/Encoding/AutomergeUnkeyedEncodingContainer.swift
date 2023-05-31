@@ -26,7 +26,7 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         array = impl.array!
         self.codingPath = codingPath
         self.document = doc
-        switch impl.retrieveObjectId(path: codingPath, containerType: .Index) {
+        switch AnyCodingKey.retrieveObjectId(document: doc, path: codingPath, containerType: .Index) {
         case let .success((objId, _)):
             self.objectId = objId
             self.lookupError = nil
@@ -43,7 +43,7 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         self.array = array
         self.codingPath = codingPath
         self.document = doc
-        switch impl.retrieveObjectId(path: codingPath, containerType: .Index) {
+        switch AnyCodingKey.retrieveObjectId(document: doc, path: codingPath, containerType: .Index) {
         case let .success((objId, _)):
             self.objectId = objId
             self.lookupError = nil

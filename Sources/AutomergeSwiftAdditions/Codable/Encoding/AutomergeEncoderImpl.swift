@@ -44,16 +44,6 @@ class AutomergeEncoderImpl {
             cache[key] = value
         }
     }
-
-    /// An enumeration that represents the type of encoding container.
-    enum EncodingContainerType {
-        /// A keyed container.
-        case Key
-        /// An un-keyed container.
-        case Index
-        /// A single-value container.
-        case Value
-    }
 }
 
 // A bit of example code that someone might implement to provide Encodable conformance
