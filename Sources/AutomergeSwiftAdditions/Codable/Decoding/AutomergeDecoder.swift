@@ -4,7 +4,7 @@ import Foundation
 
 public struct AutomergeDecoder {
     public var codingPath: [CodingKey]
-        
+
     public var userInfo: [CodingUserInfoKey: Any] = [:]
     public let doc: Document
 
