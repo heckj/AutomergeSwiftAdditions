@@ -1,5 +1,7 @@
+import Automerge
 import class Automerge.Document
 import struct Automerge.ObjId
+import protocol Automerge.ScalarValueRepresentable
 import enum Automerge.Value
 
 struct AutomergeUnkeyedDecodingContainer: UnkeyedDecodingContainer {
@@ -97,11 +99,33 @@ struct AutomergeUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         try decodeFixedWidthInteger()
     }
 
+    mutating func decode<S>(_: S.Type) throws -> S where S: ScalarValueRepresentable {
+        let value = try getNextValue(ofType: S.self)
+
+        switch value {
+        case let .Scalar(scalarValue):
+            let conversionResult = S.fromScalarValue(scalarValue)
+            switch conversionResult {
+            case let .success(success):
+                currentIndex += 1
+                return success
+            case let .failure(failure):
+                throw DecodingError.typeMismatch(S.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(S.self) but found \(value) instead.",
+                    underlyingError: failure
+                ))
+            }
+        default:
+            throw createTypeMismatchError(type: S.self, value: value)
+        }
+    }
+
     mutating func decode<T>(_: T.Type) throws -> T where T: Decodable {
         let decoder = try decoderForNextElement(ofType: T.self)
         let result = try T(from: decoder)
 
-        // FIXME: capture and resolve types Counter, Text, Data, and Date
+        // FIXME: search for and capture flows for Date, Counter, Data, and Text
 
         // Because of the requirement that the index not be incremented unless
         // decoding the desired result type succeeds, it can not be a tail call.

@@ -1,5 +1,6 @@
 import class Automerge.Document
 import struct Automerge.ObjId
+import protocol Automerge.ScalarValueRepresentable
 
 struct AutomergeSingleValueDecodingContainer: SingleValueDecodingContainer {
     let impl: AutomergeDecoderImpl
@@ -119,8 +120,26 @@ struct AutomergeSingleValueDecodingContainer: SingleValueDecodingContainer {
         return uintValue
     }
 
+    mutating func decode<S>(_: S.Type) throws -> S where S: ScalarValueRepresentable {
+        if let scalarValue = value.scalarValue() {
+            let conversionResult = S.fromScalarValue(scalarValue)
+            switch conversionResult {
+            case let .success(success):
+                return success
+            case let .failure(failure):
+                throw DecodingError.typeMismatch(S.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(S.self) but found \(value) instead.",
+                    underlyingError: failure
+                ))
+            }
+        } else {
+            throw createTypeMismatchError(type: S.self, value: value)
+        }
+    }
+
     func decode<T>(_: T.Type) throws -> T where T: Decodable {
-        // FIXME: search for and capture flows for Date, Counter, and Text
+        // FIXME: search for and capture flows for Date, Counter, Data, and Text
         try T(from: impl)
     }
 }
