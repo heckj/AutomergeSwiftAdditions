@@ -1,5 +1,6 @@
 import struct Automerge.ObjId
 import enum Automerge.ObjType
+import enum Automerge.ScalarValue
 import enum Automerge.Value
 import Foundation
 
@@ -49,6 +50,31 @@ public enum AutomergeValue: Equatable, Hashable {
     /// This type is reserved for forward compatibility, and is not expected to be created directly.
     case unknown(typeCode: UInt8, data: Data)
     case null
+
+    /// Returns an Automerge ScalarValue from the Codable AutomergeValue when available.
+    /// - Returns: returns nil if the value doesn't map into Automerge's ScalarValue enum.
+    public func scalarValue() -> ScalarValue? {
+        switch self {
+        case let .bytes(data):
+            return .Bytes(data)
+        case let .string(string):
+            return .String(string)
+        case let .uint(uInt64):
+            return .Uint(uInt64)
+        case let .int(int64):
+            return .Int(int64)
+        case let .double(double):
+            return .F64(double)
+        case let .counter(int64):
+            return .Counter(int64)
+        case let .timestamp(int64):
+            return .Timestamp(int64)
+        case let .bool(bool):
+            return .Boolean(bool)
+        default:
+            return nil
+        }
+    }
 
     public static func fromValue(_ value: Value) -> Self {
         switch value {

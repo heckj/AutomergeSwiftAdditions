@@ -1,5 +1,6 @@
 import class Automerge.Document
 import struct Automerge.ObjId
+import protocol Automerge.ScalarValueRepresentable
 import enum Automerge.Value
 
 struct AutomergeKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol {
@@ -98,7 +99,28 @@ struct AutomergeKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProt
         try decodeFixedWidthInteger(key: key)
     }
 
+    func decode<S>(_: S.Type, forKey key: K) throws -> S where S: ScalarValueRepresentable {
+        let value = try getValue(forKey: key)
+        switch value {
+        case let .Scalar(scalarValue):
+            let conversionResult = S.fromScalarValue(scalarValue)
+            switch conversionResult {
+            case let .success(success):
+                return success
+            case let .failure(failure):
+                throw DecodingError.typeMismatch(S.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(S.self) from key \(key) but found \(value) instead.",
+                    underlyingError: failure
+                ))
+            }
+        default:
+            throw createTypeMismatchError(type: S.self, forKey: key, value: value)
+        }
+    }
+
     func decode<T>(_: T.Type, forKey key: K) throws -> T where T: Decodable {
+        // FIXME: search for and capture flows for Date, Counter, Data, and Text
         let decoder = try decoderForKey(key)
         return try T(from: decoder)
     }
