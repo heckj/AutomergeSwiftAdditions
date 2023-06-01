@@ -21,6 +21,7 @@ final class AutomergeDecoderTests: XCTestCase {
         try! doc.put(obj: ObjId.ROOT, key: "duration", value: .F64(3.14159))
         try! doc.put(obj: ObjId.ROOT, key: "flag", value: .Boolean(true))
         try! doc.put(obj: ObjId.ROOT, key: "count", value: .Int(5))
+        try! doc.put(obj: ObjId.ROOT, key: "uuid", value: .String("99CEBB16-1062-4F21-8837-CF18EC09DCD7"))
 
         let text = try! doc.putObject(obj: ObjId.ROOT, key: "notes", ty: .Text)
         setupCache["notes"] = text
@@ -51,7 +52,7 @@ final class AutomergeDecoderTests: XCTestCase {
             let count: Int
             //            let date: Date
             //            let data: Data
-            //            let uuid: UUID
+            let uuid: UUID
             //            let notes: Text
         }
         let decoder = AutomergeDecoder(doc: doc)
@@ -64,6 +65,9 @@ final class AutomergeDecoderTests: XCTestCase {
         XCTAssertEqual(decodedStruct.duration, 3.14159, accuracy: 0.0001)
         XCTAssertTrue(decodedStruct.flag)
         XCTAssertEqual(decodedStruct.count, 5)
+
+        let expectedUUID = UUID(uuidString: "99CEBB16-1062-4F21-8837-CF18EC09DCD7")!
+        XCTAssertEqual(decodedStruct.uuid, expectedUUID)
     }
 
     func testDecodeTypeMismatch() throws {
