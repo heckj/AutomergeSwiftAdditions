@@ -22,6 +22,8 @@ final class AutomergeDecoderTests: XCTestCase {
         try! doc.put(obj: ObjId.ROOT, key: "flag", value: .Boolean(true))
         try! doc.put(obj: ObjId.ROOT, key: "count", value: .Int(5))
         try! doc.put(obj: ObjId.ROOT, key: "uuid", value: .String("99CEBB16-1062-4F21-8837-CF18EC09DCD7"))
+        try! doc.put(obj: ObjId.ROOT, key: "date", value: .Timestamp(-905182980))
+        try! doc.put(obj: ObjId.ROOT, key: "data", value: .Bytes(Data("hello".utf8)))
 
         let text = try! doc.putObject(obj: ObjId.ROOT, key: "notes", ty: .Text)
         setupCache["notes"] = text
@@ -50,8 +52,8 @@ final class AutomergeDecoderTests: XCTestCase {
             let duration: Double
             let flag: Bool
             let count: Int
-            //            let date: Date
-            //            let data: Data
+            let date: Date
+            let data: Data
             let uuid: UUID
             //            let notes: Text
         }
@@ -68,11 +70,37 @@ final class AutomergeDecoderTests: XCTestCase {
 
         let expectedUUID = UUID(uuidString: "99CEBB16-1062-4F21-8837-CF18EC09DCD7")!
         XCTAssertEqual(decodedStruct.uuid, expectedUUID)
+
+        let earlyDate = try Date("1941-04-26T08:17:00Z", strategy: .iso8601)
+        XCTAssertEqual(earlyDate, decodedStruct.date)
+        XCTAssertEqual(Data("hello".utf8), decodedStruct.data)
     }
 
-    func testDecodeTypeMismatch() throws {
+    func testDecodeTypeMismatch_propType() throws {
         struct SimpleStruct: Codable {
             let name: Double
+        }
+        let decoder = AutomergeDecoder(doc: doc)
+
+        XCTAssertThrowsError(try decoder.decode(SimpleStruct.self), "Expected type mismatch error") { _ in
+            // print(error)
+        }
+    }
+
+    func testDecodeTypeMismatch_list() throws {
+        struct SimpleStruct: Codable {
+            let name: [String]
+        }
+        let decoder = AutomergeDecoder(doc: doc)
+
+        XCTAssertThrowsError(try decoder.decode(SimpleStruct.self), "Expected type mismatch error") { _ in
+            // print(error)
+        }
+    }
+
+    func testDecodeTypeMismatch_key() throws {
+        struct SimpleStruct: Codable {
+            let votes: String
         }
         let decoder = AutomergeDecoder(doc: doc)
 

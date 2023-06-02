@@ -1,6 +1,8 @@
+import struct Automerge.Counter
 import class Automerge.Document
 import struct Automerge.ObjId
 import protocol Automerge.ScalarValueRepresentable
+import Foundation
 
 struct AutomergeSingleValueDecodingContainer: SingleValueDecodingContainer {
     let impl: AutomergeDecoderImpl
@@ -139,8 +141,59 @@ struct AutomergeSingleValueDecodingContainer: SingleValueDecodingContainer {
     }
 
     func decode<T>(_: T.Type) throws -> T where T: Decodable {
-        // FIXME: search for and capture flows for Date, Counter, Data, and Text
-        try T(from: impl)
+        // FIXME: search for and capture flows for Text
+
+        switch T.self {
+        case is Date.Type:
+            if case let AutomergeValue.timestamp(intValue) = value {
+                return Date(timeIntervalSince1970: Double(intValue)) as! T
+            } else {
+                throw DecodingError.typeMismatch(T.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(T.self) from \(value), but it wasn't a `.timestamp`."
+                ))
+            }
+        case is Data.Type:
+            if case let AutomergeValue.bytes(data) = value {
+                return data as! T
+            } else {
+                throw DecodingError.typeMismatch(T.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(T.self) from \(value), but it wasn't a `.data`."
+                ))
+            }
+        case is Counter.Type:
+            if case let AutomergeValue.counter(counterValue) = value {
+                return Counter(counterValue) as! T
+            } else {
+                throw DecodingError.typeMismatch(T.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(T.self) from \(value), but it wasn't a `.counter`."
+                ))
+            }
+//        case is Text.Type:
+//            // Capture and override the default encodable pathing for Counter since
+//            // Automerge supports it as a primitive value type.
+//            let downcastText = value as! Text
+//            // FIXME: check to see if the object exists here before just splatting a new one into place
+//            let textNode = try document.putObject(obj: objectId, key: key.stringValue, ty: .Text)
+//
+//            // Iterate through
+//            let currentText = try! document.text(obj: textNode).utf8
+//            let diff: CollectionDifference<String.UTF8View.Element> = downcastText.value.utf8
+//                .difference(from: currentText)
+//            for change in diff {
+//                switch change {
+//                case let .insert(offset, element, _):
+//                    let char = String(bytes: [element], encoding: .utf8)
+//                    try document.spliceText(obj: textNode, start: UInt64(offset), delete: 0, value: char)
+//                case let .remove(offset, _, _):
+//                    try document.spliceText(obj: textNode, start: UInt64(offset), delete: 1)
+//                }
+
+        default:
+            return try T(from: impl)
+        }
     }
 }
 

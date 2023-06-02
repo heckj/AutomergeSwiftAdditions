@@ -1,7 +1,9 @@
+import struct Automerge.Counter
 import class Automerge.Document
 import struct Automerge.ObjId
 import protocol Automerge.ScalarValueRepresentable
 import enum Automerge.Value
+import Foundation
 
 struct AutomergeKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol {
     typealias Key = K
@@ -120,9 +122,41 @@ struct AutomergeKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProt
     }
 
     func decode<T>(_: T.Type, forKey key: K) throws -> T where T: Decodable {
-        // FIXME: search for and capture flows for Date, Counter, Data, and Text
-        let decoder = try decoderForKey(key)
-        return try T(from: decoder)
+        switch T.self {
+        case is Date.Type:
+            let retrievedValue = try getValue(forKey: key)
+            if case let Value.Scalar(.Timestamp(intValue)) = retrievedValue {
+                return Date(timeIntervalSince1970: Double(intValue)) as! T
+            } else {
+                throw DecodingError.typeMismatch(T.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(T.self) from \(retrievedValue), but it wasn't a `.timestamp`."
+                ))
+            }
+        case is Data.Type:
+            let retrievedValue = try getValue(forKey: key)
+            if case let Value.Scalar(.Bytes(data)) = retrievedValue {
+                return data as! T
+            } else {
+                throw DecodingError.typeMismatch(T.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(T.self) from \(retrievedValue), but it wasn't a `.data`."
+                ))
+            }
+        case is Counter.Type:
+            let retrievedValue = try getValue(forKey: key)
+            if case let Value.Scalar(.Counter(counterValue)) = retrievedValue {
+                return Counter(counterValue) as! T
+            } else {
+                throw DecodingError.typeMismatch(T.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(T.self) from \(retrievedValue), but it wasn't a `.counter`."
+                ))
+            }
+        default:
+            let decoder = try decoderForKey(key)
+            return try T(from: decoder)
+        }
     }
 
     func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type, forKey key: K) throws
@@ -164,7 +198,6 @@ extension AutomergeKeyedDecodingContainer {
             ))
         }
         return value
-        // return AutomergeValue.fromValue(value)
     }
 
     @inline(__always) private func createTypeMismatchError(type: Any.Type, forKey key: K, value: Value) ->
