@@ -23,7 +23,7 @@ Punchlist:
 - [x] establish a Text type to hold strings that are meant to be collaborative (Text nodes in Automerge)
   - [x] bind/capture Text type in encoding to establish appropriate node
   - [x] update encoder to compare and update Text node values with diff structure
-- [ ] test text encoding variations - insert, delete, mixes - for correct results
+- [x] test text encoding variations - insert, delete, mixes - for correct results
 
 - [x] measure (and track) code coverage
   - [ ] expand code coverage for encoding - corner cases
@@ -36,11 +36,11 @@ Punchlist:
   - [ ] check performance impact for removing that extra stuff
 
 - [x] establish decoder
-  - [ ] capture and override decoding Text, Data, Date, and Counter
+  - [x] capture and override decoding Text, Data, Date, and Counter
 - [ ] expand encoder to allow "encode at" to aim within the schema
 - [ ] expand decoder to allow "decode from" to select within the schema to decode
 
-- [ ] review ScalarValueRepresentable - do we need it to exist with the encoder?
+- [x] review ScalarValueRepresentable - do we need it to exist with the encoder?
 - [ ] test SwiftUI binding concept - see what making dozens of updates to a ScalarValue does to doc size
 - [ ] add read-only, auto-generated UUID into Document to identify it from compatriots
 - [ ] CBOR encode the document with the UUID and the Automerge "data" from a save for the document format
