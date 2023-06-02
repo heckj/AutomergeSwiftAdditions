@@ -20,7 +20,7 @@ let benchmarks = {
         for _ in benchmark.scaledIterations {
             let doc = Document()
             let automergeEncoder = AutomergeEncoder(doc: doc)
-
+            
             try blackHole(automergeEncoder.encode(sample))
         }
     }
@@ -32,6 +32,27 @@ let benchmarks = {
             let automergeEncoder = AutomergeEncoder(doc: doc)
 
             try blackHole(automergeEncoder.encode(layeredSample))
+        }
+    }
+    
+    Benchmark("SimpleEncodeDecodeRoundtrip") { benchmark in
+        for _ in benchmark.scaledIterations {
+            let doc = Document()
+            let automergeEncoder = AutomergeEncoder(doc: doc)
+            try automergeEncoder.encode(sample)
+            let decoder = AutomergeDecoder(doc: doc)
+            try blackHole(try decoder.decode(SimpleStruct.self))
+        }
+    }
+
+    Benchmark("LayeredEncodeDecodeRoundtrip") { benchmark in
+        let layeredSample = Samples.layered
+        for _ in benchmark.scaledIterations {
+            let doc = Document()
+            let automergeEncoder = AutomergeEncoder(doc: doc)
+            try automergeEncoder.encode(layeredSample)
+            let decoder = AutomergeDecoder(doc: doc)
+            try blackHole(try decoder.decode(ExampleModel.self))
         }
     }
 }
