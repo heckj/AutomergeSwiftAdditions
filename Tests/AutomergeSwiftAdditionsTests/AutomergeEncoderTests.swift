@@ -243,4 +243,42 @@ final class AutomergeEncoderTests: XCTestCase {
 
         try automergeEncoder.encode(sample)
     }
+
+    func testTextUpdateWithEncoding() throws {
+        let doc = Document()
+        struct TestModel: Codable {
+            var notes: Text
+        }
+        var model = TestModel(notes: Text("Hello"))
+        let automergeEncoder = AutomergeEncoder(doc: doc)
+
+        try automergeEncoder.encode(model)
+
+        if case let .Object(textNode, nodeType) = try doc.get(obj: ObjId.ROOT, key: "notes") {
+            XCTAssertEqual(nodeType, .Text)
+            XCTAssertEqual(try doc.text(obj: textNode), "Hello")
+        } else {
+            try XCTFail("Didn't find an object at \(String(describing: doc.get(obj: ObjId.ROOT, key: "notes")))")
+        }
+
+        model.notes = Text("Hello World!")
+        try automergeEncoder.encode(model)
+
+        if case let .Object(textNode, nodeType) = try doc.get(obj: ObjId.ROOT, key: "notes") {
+            XCTAssertEqual(nodeType, .Text)
+            XCTAssertEqual(try doc.text(obj: textNode), "Hello World!")
+        } else {
+            try XCTFail("Didn't find an object at \(String(describing: doc.get(obj: ObjId.ROOT, key: "notes")))")
+        }
+
+        model.notes = Text("Wassup World?")
+        try automergeEncoder.encode(model)
+
+        if case let .Object(textNode, nodeType) = try doc.get(obj: ObjId.ROOT, key: "notes") {
+            XCTAssertEqual(nodeType, .Text)
+            XCTAssertEqual(try doc.text(obj: textNode), "Wassup World?")
+        } else {
+            try XCTFail("Didn't find an object at \(String(describing: doc.get(obj: ObjId.ROOT, key: "notes")))")
+        }
+    }
 }
