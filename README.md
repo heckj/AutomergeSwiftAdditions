@@ -32,8 +32,8 @@ Punchlist:
 
 - [ ] expand strategy to allow for strictly type checking when encoding single-value scalar values
 
-- [ ] strip out encoder duplicate structure that's created but not needed
-  - [ ] check performance impact for removing that extra stuff
+- [x] strip out encoder duplicate structure that's created but not needed
+  - [x] check performance impact for removing that extra stuff
 
 - [x] establish decoder
   - [x] capture and override decoding Text, Data, Date, and Counter
