@@ -11,7 +11,7 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
     let impl: AutomergeEncoderImpl
     /// An instance that represents a Map being constructed in an Automerge Document that maps to the keyed container
     /// you provide to encode.
-    //let object: AutomergeObject
+    // let object: AutomergeObject
     /// An array of types that conform to CodingKey that make up the "schema path" to this instance from the root of the
     /// top-level encoded type.
     let codingPath: [CodingKey]
@@ -25,8 +25,6 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
     /// provided.
     let lookupError: Error?
 
-    private var firstValueWritten: Bool = false
-    
     /// Creates a new keyed-encoding container you use to encode into an Automerge document.
     ///
     /// After initialization, the container has one of two properties set: ``objectId`` or ``lookupError``.
@@ -48,7 +46,6 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
     ///   - doc: The Automerge document that the encoder writes into.
     init(impl: AutomergeEncoderImpl, codingPath: [CodingKey], doc: Document) {
         self.impl = impl
-        //object = impl.object!
         self.codingPath = codingPath
         self.document = doc
         switch AnyCodingKey.retrieveObjectId(document: doc, path: codingPath, containerType: .Key) {
@@ -63,9 +60,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
     }
 
     // used for nested containers
-    init(impl: AutomergeEncoderImpl, object: AutomergeObject, codingPath: [CodingKey], doc: Document) {
+    init(impl: AutomergeEncoderImpl, object _: AutomergeObject, codingPath: [CodingKey], doc: Document) {
         self.impl = impl
-        //self.object = object
+        // self.object = object
         self.codingPath = codingPath
         self.document = doc
         switch AnyCodingKey.retrieveObjectId(document: doc, path: codingPath, containerType: .Key) {
@@ -96,9 +93,6 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         guard let objectId = self.objectId else {
             throw reportBestError()
         }
-        // This builds up a mirror of the schema that can be consistently walked
-        //object.set(.null, for: key.stringValue)
-        // This writes the value into the Automerge document as the encoding process advances.
         try document.put(obj: objectId, key: key.stringValue, value: .Null)
     }
 
@@ -312,11 +306,6 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
             }
         default:
             try value.encode(to: newEncoder)
-            guard newEncoder.value != nil else {
-                preconditionFailure()
-            }
-
-            //object.set(encodedValue, for: key.stringValue)
         }
     }
 
@@ -324,10 +313,8 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey
     {
         let newPath = impl.codingPath + [key]
-        //let object = object.setObject(for: key.stringValue)
         let nestedContainer = AutomergeKeyedEncodingContainer<NestedKey>(
             impl: impl,
-            //object: object,
             codingPath: newPath,
             doc: self.document
         )
@@ -336,10 +323,8 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
 
     mutating func nestedUnkeyedContainer(forKey key: Self.Key) -> UnkeyedEncodingContainer {
         let newPath = impl.codingPath + [key]
-        //let array = object.setArray(for: key.stringValue)
         let nestedContainer = AutomergeUnkeyedEncodingContainer(
             impl: impl,
-            //array: array,
             codingPath: newPath,
             doc: self.document
         )

@@ -17,8 +17,6 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
     /// provided.
     let lookupError: Error?
 
-    private var firstValueWritten: Bool = false
-
     init(impl: AutomergeEncoderImpl, codingPath: [CodingKey], doc: Document) {
         self.impl = impl
         self.codingPath = codingPath
@@ -40,57 +38,57 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
 
     mutating func encode(_ value: Bool) throws {
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .bool(value)
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: Int) throws {
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: Int8) throws {
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: Int16) throws {
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: Int32) throws {
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: Int64) throws {
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .int(value)
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: UInt) throws {
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: UInt8) throws {
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: UInt16) throws {
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: UInt32) throws {
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: UInt64) throws {
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .int(Int64(truncatingIfNeeded: value))
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: Float) throws {
@@ -102,7 +100,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
         }
 
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .double(Double(value))
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: Double) throws {
@@ -114,30 +112,12 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
         }
 
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .double(value)
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode(_ value: String) throws {
         try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .string(value)
-    }
-
-    mutating func encode(_ value: Data) throws {
-        // likely not caught
-        try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .bytes(value)
-    }
-
-    mutating func encode(_ value: Counter) throws {
-        // likely not caught
-        try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .counter(Int64(value.value))
-    }
-
-    mutating func encode(_ value: Date) throws {
-        // likely not caught
-        try self.scalarValueEncode(value: value)
-        self.impl.singleValue = .timestamp(Int64(value.timeIntervalSince1970))
+        self.impl.singleValueWritten = true
     }
 
     mutating func encode<T: Encodable>(_ value: T) throws {
@@ -225,6 +205,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             }
         default:
             try value.encode(to: self.impl)
+            self.impl.singleValueWritten = true
         }
     }
 
@@ -242,7 +223,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
 
     func preconditionCanEncodeNewValue() {
         precondition(
-            self.impl.singleValue == nil,
+            self.impl.singleValueWritten == false,
             "Attempt to encode value through single value container when previously value already encoded."
         )
     }

@@ -10,21 +10,8 @@ class AutomergeEncoderImpl {
     let codingPath: [CodingKey]
     let document: Document
 
-    // Only one of these optional properties is expected to be valid at a time,
-    // effectively exposed on the instance as the `value` property.
-    var singleValue: AutomergeValue?
-    var array: AutomergeArray?
-    var object: AutomergeObject?
-
-    var value: AutomergeValue? {
-        if let object = self.object {
-            return .object(object.values)
-        }
-        if let array = self.array {
-            return .array(array.values)
-        }
-        return self.singleValue
-    }
+    // indicator that the singleValue has written a value
+    var singleValueWritten: Bool = false
 
     init(userInfo: [CodingUserInfoKey: Any], codingPath: [CodingKey], doc: Document) {
         self.userInfo = userInfo
@@ -61,11 +48,6 @@ class AutomergeEncoderImpl {
 //    }
 // }
 
-// 1. encode calls to create the container for the instance, passing in available coding keys type that it'll use
-// 2. iterate through the properties, and on each:
-//      call container.encode(AValue, forKey: AKey)
-// // container.nestedContainer creates a new keyed or unkeyed reference
-
 extension AutomergeEncoderImpl: Encoder {
     /// Returns a KeyedCodingContainer that a developer uses when conforming to the Encodable protocol.
     /// - Parameter _: The CodingKey type that this keyed coding container expects when encoding properties.
@@ -75,24 +57,10 @@ extension AutomergeEncoderImpl: Encoder {
     /// such as an array (nested unkeyed container) or dictionary (nested keyed container) while serializing/encoding
     /// their type.
     func container<Key>(keyedBy _: Key.Type) -> KeyedEncodingContainer<Key> where Key: CodingKey {
-        // if the Impl already has a keyed encoding container set locally, return that value.
-        if let _ = object {
-            let container = AutomergeKeyedEncodingContainer<Key>(
-                impl: self,
-                codingPath: codingPath,
-                doc: self.document
-            )
-            return KeyedEncodingContainer(container)
-        }
-
-        // verify that the impl doesn't already have a singleValue or unkeyed container set
-        guard self.singleValue == nil, self.array == nil else {
+        guard self.singleValueWritten == false else {
             preconditionFailure()
         }
 
-        // falling through, create a new AutomergeObject to represent this, and built the
-        // keyed container to return with that object.
-        self.object = AutomergeObject()
         let container = AutomergeKeyedEncodingContainer<Key>(
             impl: self,
             codingPath: codingPath,
@@ -108,19 +76,10 @@ extension AutomergeEncoderImpl: Encoder {
     /// such as an array (nested unkeyed container) or dictionary (nested keyed container) while serializing/encoding
     /// their type.
     func unkeyedContainer() -> UnkeyedEncodingContainer {
-        if let _ = array {
-            return AutomergeUnkeyedEncodingContainer(
-                impl: self,
-                codingPath: self.codingPath,
-                doc: self.document
-            )
-        }
-
-        guard self.singleValue == nil, self.object == nil else {
+        guard self.singleValueWritten == false else {
             preconditionFailure()
         }
 
-        self.array = AutomergeArray()
         return AutomergeUnkeyedEncodingContainer(
             impl: self,
             codingPath: self.codingPath,
@@ -135,7 +94,7 @@ extension AutomergeEncoderImpl: Encoder {
     /// such as an array (nested unkeyed container) or dictionary (nested keyed container) while serializing/encoding
     /// their type.
     func singleValueContainer() -> SingleValueEncodingContainer {
-        guard self.object == nil, self.array == nil else {
+        guard self.singleValueWritten == false else {
             preconditionFailure()
         }
 
