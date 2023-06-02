@@ -103,13 +103,13 @@ extension AutomergeDecoderImpl: Decoder {
         switch result {
         case let .success((objectId, finalKey)):
 
-            let foo: Value?
+            let finalAutomergeValue: Value?
             if let indexValue = finalKey.intValue {
-                foo = try doc.get(obj: objectId, index: UInt64(indexValue))
+                finalAutomergeValue = try doc.get(obj: objectId, index: UInt64(indexValue))
             } else {
-                foo = try doc.get(obj: objectId, key: finalKey.stringValue)
+                finalAutomergeValue = try doc.get(obj: objectId, key: finalKey.stringValue)
             }
-            guard let value = foo else {
+            guard let value = finalAutomergeValue else {
                 throw DecodingError.dataCorrupted(
                     DecodingError.Context(
                         codingPath: self.codingPath,

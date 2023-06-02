@@ -55,7 +55,7 @@ final class AutomergeDecoderTests: XCTestCase {
             let date: Date
             let data: Data
             let uuid: UUID
-            //            let notes: Text
+            let notes: Text
         }
         let decoder = AutomergeDecoder(doc: doc)
 
@@ -74,6 +74,8 @@ final class AutomergeDecoderTests: XCTestCase {
         let earlyDate = try Date("1941-04-26T08:17:00Z", strategy: .iso8601)
         XCTAssertEqual(earlyDate, decodedStruct.date)
         XCTAssertEqual(Data("hello".utf8), decodedStruct.data)
+
+        XCTAssertEqual("Hello", decodedStruct.notes.description)
     }
 
     func testDecodeTypeMismatch_propType() throws {

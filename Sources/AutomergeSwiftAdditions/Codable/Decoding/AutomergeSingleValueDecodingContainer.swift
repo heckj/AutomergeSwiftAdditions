@@ -1,6 +1,7 @@
 import struct Automerge.Counter
 import class Automerge.Document
 import struct Automerge.ObjId
+import enum Automerge.ObjType
 import protocol Automerge.ScalarValueRepresentable
 import Foundation
 
@@ -141,8 +142,6 @@ struct AutomergeSingleValueDecodingContainer: SingleValueDecodingContainer {
     }
 
     func decode<T>(_: T.Type) throws -> T where T: Decodable {
-        // FIXME: search for and capture flows for Text
-
         switch T.self {
         case is Date.Type:
             if case let AutomergeValue.timestamp(intValue) = value {
@@ -171,26 +170,37 @@ struct AutomergeSingleValueDecodingContainer: SingleValueDecodingContainer {
                     debugDescription: "Expected to decode \(T.self) from \(value), but it wasn't a `.counter`."
                 ))
             }
-//        case is Text.Type:
-//            // Capture and override the default encodable pathing for Counter since
-//            // Automerge supports it as a primitive value type.
-//            let downcastText = value as! Text
-//            // FIXME: check to see if the object exists here before just splatting a new one into place
-//            let textNode = try document.putObject(obj: objectId, key: key.stringValue, ty: .Text)
-//
-//            // Iterate through
-//            let currentText = try! document.text(obj: textNode).utf8
-//            let diff: CollectionDifference<String.UTF8View.Element> = downcastText.value.utf8
-//                .difference(from: currentText)
-//            for change in diff {
-//                switch change {
-//                case let .insert(offset, element, _):
-//                    let char = String(bytes: [element], encoding: .utf8)
-//                    try document.spliceText(obj: textNode, start: UInt64(offset), delete: 0, value: char)
-//                case let .remove(offset, _, _):
-//                    try document.spliceText(obj: textNode, start: UInt64(offset), delete: 1)
-//                }
-
+        case is Text.Type:
+            // AutomergeValue in this case only knows that it's a text object, but not the value
+            // so we backtrack and retrieve the Object Id for the text and assemble it directly.
+            let result = AnyCodingKey.retrieveObjectId(
+                document: impl.doc,
+                path: codingPath,
+                containerType: .Index,
+                strategy: .readonly
+            )
+            switch result {
+            case let .success((objectId, _)):
+                let type = impl.doc.objectType(obj: objectId)
+                guard type == .Text else {
+                    throw DecodingError.dataCorrupted(
+                        DecodingError.Context(
+                            codingPath: self.codingPath,
+                            debugDescription: "Attempted to read value at \(objectId) with coding key: \(codingPath), but the result wasn't a list (Text)."
+                        )
+                    )
+                }
+                let stringValue = try impl.doc.text(obj: objectId)
+                return Text(stringValue) as! T
+            case let .failure(errFromLookup):
+                throw DecodingError.dataCorrupted(
+                    DecodingError.Context(
+                        codingPath: self.codingPath,
+                        debugDescription: "Attempted to read value at \(objectId) with coding key: \(codingPath), but the result wasn't a list (Text).",
+                        underlyingError: errFromLookup
+                    )
+                )
+            }
         default:
             return try T(from: impl)
         }
