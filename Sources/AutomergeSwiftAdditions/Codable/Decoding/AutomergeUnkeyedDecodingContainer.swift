@@ -1,8 +1,9 @@
-import Automerge
+import struct Automerge.Counter
 import class Automerge.Document
 import struct Automerge.ObjId
 import protocol Automerge.ScalarValueRepresentable
 import enum Automerge.Value
+import Foundation
 
 struct AutomergeUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     let impl: AutomergeDecoderImpl
@@ -122,17 +123,51 @@ struct AutomergeUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     }
 
     mutating func decode<T>(_: T.Type) throws -> T where T: Decodable {
-        let decoder = try decoderForNextElement(ofType: T.self)
-        let result = try T(from: decoder)
+        switch T.self {
+        case is Date.Type:
+            let retrievedValue = try getNextValue(ofType: Date.self)
+            if case let Value.Scalar(.Timestamp(intValue)) = retrievedValue {
+                currentIndex += 1
+                return Date(timeIntervalSince1970: Double(intValue)) as! T
+            } else {
+                throw DecodingError.typeMismatch(T.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(T.self) from \(retrievedValue), but it wasn't a `.timestamp`."
+                ))
+            }
+        case is Data.Type:
+            let retrievedValue = try getNextValue(ofType: Data.self)
+            if case let Value.Scalar(.Bytes(data)) = retrievedValue {
+                currentIndex += 1
+                return data as! T
+            } else {
+                throw DecodingError.typeMismatch(T.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(T.self) from \(retrievedValue), but it wasn't a `.data`."
+                ))
+            }
+        case is Counter.Type:
+            let retrievedValue = try getNextValue(ofType: Counter.self)
+            if case let Value.Scalar(.Counter(counterValue)) = retrievedValue {
+                currentIndex += 1
+                return Counter(counterValue) as! T
+            } else {
+                throw DecodingError.typeMismatch(T.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(T.self) from \(retrievedValue), but it wasn't a `.counter`."
+                ))
+            }
+        default:
+            let decoder = try decoderForNextElement(ofType: T.self)
+            let result = try T(from: decoder)
 
-        // FIXME: search for and capture flows for Date, Counter, Data, and Text
-
-        // Because of the requirement that the index not be incremented unless
-        // decoding the desired result type succeeds, it can not be a tail call.
-        // Hopefully the compiler still optimizes well enough that the result
-        // doesn't get copied around.
-        currentIndex += 1
-        return result
+            // Because of the requirement that the index not be incremented unless
+            // decoding the desired result type succeeds, it can not be a tail call.
+            // Hopefully the compiler still optimizes well enough that the result
+            // doesn't get copied around.
+            currentIndex += 1
+            return result
+        }
     }
 
     mutating func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type) throws
