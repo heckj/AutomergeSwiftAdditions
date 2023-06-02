@@ -153,6 +153,17 @@ struct AutomergeKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProt
                     debugDescription: "Expected to decode \(T.self) from \(retrievedValue), but it wasn't a `.counter`."
                 ))
             }
+        case is Text.Type:
+            let retrievedValue = try getValue(forKey: key)
+            if case let Value.Object(objectId, .Text) = retrievedValue {
+                let stringValue = try impl.doc.text(obj: objectId)
+                return Text(stringValue) as! T
+            } else {
+                throw DecodingError.typeMismatch(T.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(T.self) from \(retrievedValue), but it wasn't a `.text` object."
+                ))
+            }
         default:
             let decoder = try decoderForKey(key)
             return try T(from: decoder)
