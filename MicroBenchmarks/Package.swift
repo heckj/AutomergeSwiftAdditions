@@ -15,7 +15,7 @@ let package = Package(
 
     dependencies: [
         .package(url: "https://github.com/ordo-one/package-benchmark.git", .upToNextMajor(from: "1.4.0")),
-        .package(url: "https://github.com/heckj/AutomergeSwiftAdditions.git", branch: "main"),
+        .package(url: "https://github.com/heckj/AutomergeSwiftAdditions", branch: "optimizationCheck"),
     ],
 
     targets: [

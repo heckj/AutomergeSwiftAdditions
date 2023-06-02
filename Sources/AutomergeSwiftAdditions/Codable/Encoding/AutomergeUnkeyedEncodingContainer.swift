@@ -6,7 +6,6 @@ import Foundation
 
 struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     let impl: AutomergeEncoderImpl
-    let array: AutomergeArray
     let codingPath: [CodingKey]
     /// The Automerge document that the encoder writes into.
     let document: Document
@@ -19,11 +18,10 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     let lookupError: Error?
 
     private(set) var count: Int = 0
-    private var firstValueWritten: Bool = false
 
     init(impl: AutomergeEncoderImpl, codingPath: [CodingKey], doc: Document) {
         self.impl = impl
-        array = impl.array!
+        // array = impl.array!
         self.codingPath = codingPath
         self.document = doc
         switch AnyCodingKey.retrieveObjectId(document: doc, path: codingPath, containerType: .Index) {
@@ -38,9 +36,8 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     }
 
     // used for nested containers
-    init(impl: AutomergeEncoderImpl, array: AutomergeArray, codingPath: [CodingKey], doc: Document) {
+    init(impl: AutomergeEncoderImpl, array _: AutomergeArray, codingPath: [CodingKey], doc: Document) {
         self.impl = impl
-        self.array = array
         self.codingPath = codingPath
         self.document = doc
         switch AnyCodingKey.retrieveObjectId(document: doc, path: codingPath, containerType: .Index) {
@@ -120,12 +117,6 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         default:
             try value.encode(to: newEncoder)
         }
-
-        guard let value = newEncoder.value else {
-            preconditionFailure()
-        }
-
-        array.append(value)
         count += 1
     }
 
@@ -133,10 +124,8 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey
     {
         let newPath = impl.codingPath + [ArrayKey(index: count)]
-        let object = array.appendObject()
         let nestedContainer = AutomergeKeyedEncodingContainer<NestedKey>(
             impl: impl,
-            object: object,
             codingPath: newPath,
             doc: self.document
         )
@@ -145,10 +134,8 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
 
     mutating func nestedUnkeyedContainer() -> UnkeyedEncodingContainer {
         let newPath = impl.codingPath + [ArrayKey(index: count)]
-        let array = array.appendArray()
         let nestedContainer = AutomergeUnkeyedEncodingContainer(
             impl: impl,
-            array: array,
             codingPath: newPath,
             doc: self.document
         )
@@ -157,17 +144,5 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
 
     mutating func superEncoder() -> Encoder {
         preconditionFailure()
-    }
-}
-
-extension AutomergeUnkeyedEncodingContainer {
-    @inline(__always) private mutating func encodeFixedWidthInteger<N: FixedWidthInteger>(_ value: N) throws {
-        array.append(.int(Int64(value.description)!))
-    }
-
-    @inline(__always) private mutating func encodeFloatingPoint<N: FloatingPoint>(_ value: N)
-        throws where N: CustomStringConvertible
-    {
-        array.append(.double(Double(value.description)!))
     }
 }

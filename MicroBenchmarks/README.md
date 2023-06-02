@@ -11,5 +11,7 @@ Creating the `initial` baseline:
 Comparing a current run against the stored baseline `initial`:
 
     swift package benchmark baseline compare initial
+    swift package benchmark baseline compare coderbaseline
+    swift package benchmark baseline check coderbaseline
 
 
