@@ -16,6 +16,39 @@ public enum PathParseError: Error {
 }
 
 extension Document {
+    public func lookupPath2(path: String) throws -> ObjId? {
+        let codingPath = try AnyCodingKey.parsePath(path)
+        if codingPath.isEmpty {
+            return ObjId.ROOT
+        }
+        let result = AnyCodingKey.retrieveObjectId(
+            document: self,
+            path: codingPath,
+            containerType: .Value,
+            strategy: .readonly
+        )
+        switch result {
+        case .success(let (objectId, finalCodingKey)):
+            let existingValue: Value?
+            // get any existing value - type of the `get` call is based on the key type
+            if let indexValue = finalCodingKey.intValue {
+                existingValue = try get(obj: objectId, index: UInt64(indexValue))
+            } else {
+                existingValue = try get(obj: objectId, key: finalCodingKey.stringValue)
+            }
+            // if the result found is an Automerge container (Text, List, or Object)
+            // then return the value
+            if case let .Object(finalObjectId, _) = existingValue {
+                return finalObjectId
+            } else {
+                // Otherwise, return nil for any leaf nodes (scalar values or missing schema)
+                return nil
+            }
+        case .failure:
+            return nil
+        }
+    }
+
     /// Looks up the objectId represented by the path string you provide.
     /// - Parameter path: A string representation of the location within an Automerge document.
     /// - Returns: The objectId at the schema location you provide, or nil if the path is valid and no object exists in
@@ -113,20 +146,6 @@ extension Sequence where Element == Automerge.PathElement {
                 return String("[\(idx)]")
             case let .Key(key):
                 return key
-            }
-        }.joined(separator: ".")
-        return ".\(path)"
-    }
-}
-
-extension Sequence where Element: CodingKey {
-    /// Returns a string that represents the schema path.
-    func stringPath() -> String {
-        let path = map { pathElement in
-            if let idx = pathElement.intValue {
-                return String("[\(idx)]")
-            } else {
-                return pathElement.stringValue
             }
         }.joined(separator: ".")
         return ".\(path)"
