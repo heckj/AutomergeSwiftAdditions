@@ -96,150 +96,126 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         try document.put(obj: objectId, key: key.stringValue, value: .Null)
     }
 
-//
-//    mutating func encode(_ value: Bool, forKey key: Self.Key) throws {
-//        guard let objectId = self.objectId else {
-//            throw reportBestError()
-//        }
-//        // this is where we want to call into AM to set the value on the objectId for the key provided
-//        object.set(.bool(value), for: key.stringValue)
-//        // This writes the value into the Automerge document as the encoding process advances.
-//        try document.put(obj: objectId, key: key.stringValue, value: .Boolean(value))
-//    }
-//
-//    mutating func encode(_ value: String, forKey key: Self.Key) throws {
-//        guard let objectId = self.objectId else {
-//            throw reportBestError()
-//        }
-//        // this is where we want to call into AM to set the value on the objectId for the key provided
-//        object.set(.string(value), for: key.stringValue)
-//        // This writes the value into the Automerge document as the encoding process advances.
-//        try document.put(obj: objectId, key: key.stringValue, value: .String(value))
-//
-//        // NOTE(heckj): This override of the generic encode() is keyed by the type within the schema
-//        // and writes into Automerge as a ScalarValue of the String instead of as an Automerge
-//        // collaborative text instance. We may prefer to default to creating a nested Automerge Text
-//        // object in these cases, or have some other indicator that we can use to distinguish when a
-//        // String type is expected to be stored as a scalar value versus Text.
-//    }
-//
-//    mutating func encode(_ value: Double, forKey key: Self.Key) throws {
-//        guard let objectId = self.objectId else {
-//            throw reportBestError()
-//        }
-//        guard !value.isNaN, !value.isInfinite else {
-//            throw EncodingError.invalidValue(value, .init(
-//                codingPath: codingPath + [key],
-//                debugDescription: "Unable to encode Double.\(value) at \(codingPath) into an Automerge F64."
-//            ))
-//        }
-//        object.set(.double(value), for: key.stringValue)
-//        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-//    }
-//
-//    mutating func encode(_ value: Float, forKey key: Self.Key) throws {
-//        guard let objectId = self.objectId else {
-//            throw reportBestError()
-//        }
-//        guard !value.isNaN, !value.isInfinite else {
-//            throw EncodingError.invalidValue(value, .init(
-//                codingPath: codingPath + [key],
-//                debugDescription: "Unable to encode Float.\(value) directly in JSON."
-//            ))
-//        }
-//        object.set(.double(Double(value)), for: key.stringValue)
-//        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-//    }
-//
-//    mutating func encode(_ value: Int, forKey key: Self.Key) throws {
-//        guard let objectId = self.objectId else {
-//            throw reportBestError()
-//        }
-//
-//        object.set(.int(Int64(value.description)!), for: key.stringValue)
-//        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-//    }
-//
-//    mutating func encode(_ value: Int8, forKey key: Self.Key) throws {
-//        guard let objectId = objectId else {
-//            throw reportBestError()
-//        }
-//
-//        object.set(.int(Int64(value.description)!), for: key.stringValue)
-//        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-//    }
-//
-//    mutating func encode(_ value: Int16, forKey key: Self.Key) throws {
-//        guard let objectId = objectId else {
-//            throw reportBestError()
-//        }
-//
-//        object.set(.int(Int64(value.description)!), for: key.stringValue)
-//        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-//    }
-//
-//    mutating func encode(_ value: Int32, forKey key: Self.Key) throws {
-//        guard let objectId = objectId else {
-//            throw reportBestError()
-//        }
-//
-//        object.set(.int(Int64(value.description)!), for: key.stringValue)
-//        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-//    }
-//
-//    mutating func encode(_ value: Int64, forKey key: Self.Key) throws {
-//        guard let objectId = self.objectId else {
-//            throw reportBestError()
-//        }
-//
-//        object.set(.int(Int64(value.description)!), for: key.stringValue)
-//        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-//    }
-//
-//    mutating func encode(_ value: UInt, forKey key: Self.Key) throws {
-//        guard let objectId = self.objectId else {
-//            throw reportBestError()
-//        }
-//
-//        object.set(.int(Int64(value.description)!), for: key.stringValue)
-//        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-//    }
-//
-//    mutating func encode(_ value: UInt8, forKey key: Self.Key) throws {
-//        guard let objectId = self.objectId else {
-//            throw reportBestError()
-//        }
-//
-//        object.set(.int(Int64(value.description)!), for: key.stringValue)
-//        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-//    }
-//
-//    mutating func encode(_ value: UInt16, forKey key: Self.Key) throws {
-//        guard let objectId = objectId else {
-//            throw reportBestError()
-//        }
-//
-//        object.set(.int(Int64(value.description)!), for: key.stringValue)
-//        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-//    }
-//
-    ////    mutating func encode(_ value: UInt32, forKey key: Self.Key) throws {
-    ////        guard let objectId = self.objectId else {
-    ////            throw reportBestError()
-    ////        }
-    ////
-    ////        object.set(.int(Int64(value.description)!), for: key.stringValue)
-    ////        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-    ////    }
-    ////
-    ////    mutating func encode(_ value: UInt64, forKey key: Self.Key) throws {
-    ////        guard let objectId = objectId else {
-    ////            throw reportBestError()
-    ////        }
-    ////
-    ////        object.set(.int(Int64(value.description)!), for: key.stringValue)
-    ////        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
-    ////    }
+
+    mutating func encode(_ value: Bool, forKey key: Self.Key) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try document.put(obj: objectId, key: key.stringValue, value: .Boolean(value))
+    }
+
+    mutating func encode(_ value: String, forKey key: Self.Key) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        try document.put(obj: objectId, key: key.stringValue, value: .String(value))
+    }
+
+    mutating func encode(_ value: Double, forKey key: Self.Key) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        guard !value.isNaN, !value.isInfinite else {
+            throw EncodingError.invalidValue(value, .init(
+                codingPath: codingPath + [key],
+                debugDescription: "Unable to encode Double.\(value) at \(codingPath) into an Automerge F64."
+            ))
+        }
+        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
+    }
+
+    mutating func encode(_ value: Float, forKey key: Self.Key) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+        guard !value.isNaN, !value.isInfinite else {
+            throw EncodingError.invalidValue(value, .init(
+                codingPath: codingPath + [key],
+                debugDescription: "Unable to encode Float.\(value) directly in JSON."
+            ))
+        }
+        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
+    }
+
+    mutating func encode(_ value: Int, forKey key: Self.Key) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+
+        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
+    }
+
+    mutating func encode(_ value: Int8, forKey key: Self.Key) throws {
+        guard let objectId = objectId else {
+            throw reportBestError()
+        }
+
+        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
+    }
+
+    mutating func encode(_ value: Int16, forKey key: Self.Key) throws {
+        guard let objectId = objectId else {
+            throw reportBestError()
+        }
+
+        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
+    }
+
+    mutating func encode(_ value: Int32, forKey key: Self.Key) throws {
+        guard let objectId = objectId else {
+            throw reportBestError()
+        }
+
+        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
+    }
+
+    mutating func encode(_ value: Int64, forKey key: Self.Key) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+
+        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
+    }
+
+    mutating func encode(_ value: UInt, forKey key: Self.Key) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+
+        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
+    }
+
+    mutating func encode(_ value: UInt8, forKey key: Self.Key) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+
+        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
+    }
+
+    mutating func encode(_ value: UInt16, forKey key: Self.Key) throws {
+        guard let objectId = objectId else {
+            throw reportBestError()
+        }
+
+        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
+    }
+
+    mutating func encode(_ value: UInt32, forKey key: Self.Key) throws {
+        guard let objectId = self.objectId else {
+            throw reportBestError()
+        }
+
+        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
+    }
+
+    mutating func encode(_ value: UInt64, forKey key: Self.Key) throws {
+        guard let objectId = objectId else {
+            throw reportBestError()
+        }
+
+        try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
+    }
 
     mutating func encode<T: Encodable>(_ value: T, forKey key: Self.Key) throws {
         let newPath = impl.codingPath + [key]
