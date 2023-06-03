@@ -244,7 +244,7 @@ final class AutomergeEncoderTests: XCTestCase {
         try automergeEncoder.encode(sample)
     }
 
-    func testTextUpdateWithEncoding() throws {
+    func testTextUpdateWithEncoding_Object() throws {
         let doc = Document()
         struct TestModel: Codable {
             var notes: Text
@@ -282,7 +282,51 @@ final class AutomergeEncoderTests: XCTestCase {
         }
     }
 
-    func testTextEncodingMismatch() throws {
+    func testTextUpdateWithEncoding_List() throws {
+        let doc = Document()
+        struct TestModel: Codable {
+            var notes: [Text]
+        }
+        var model = TestModel(notes: [Text("Hello")])
+        let automergeEncoder = AutomergeEncoder(doc: doc)
+
+        try automergeEncoder.encode(model)
+
+        if case let .Object(listNode, nodeType) = try doc.get(obj: ObjId.ROOT, key: "notes"),
+           case let .Object(textNode, .Text) = try doc.get(obj: listNode, index: 0)
+        {
+            XCTAssertEqual(nodeType, .List)
+            XCTAssertEqual(try doc.text(obj: textNode), "Hello")
+        } else {
+            try XCTFail("Didn't find an object at \(String(describing: doc.get(obj: ObjId.ROOT, key: "notes")))")
+        }
+
+        model.notes = [Text("Hello World!")]
+        try automergeEncoder.encode(model)
+
+        if case let .Object(listNode, nodeType) = try doc.get(obj: ObjId.ROOT, key: "notes"),
+           case let .Object(textNode, .Text) = try doc.get(obj: listNode, index: 0)
+        {
+            XCTAssertEqual(nodeType, .List)
+            XCTAssertEqual(try doc.text(obj: textNode), "Hello World!")
+        } else {
+            try XCTFail("Didn't find an object at \(String(describing: doc.get(obj: ObjId.ROOT, key: "notes")))")
+        }
+
+        model.notes = [Text("Wassup World?")]
+        try automergeEncoder.encode(model)
+
+        if case let .Object(listNode, nodeType) = try doc.get(obj: ObjId.ROOT, key: "notes"),
+           case let .Object(textNode, .Text) = try doc.get(obj: listNode, index: 0)
+        {
+            XCTAssertEqual(nodeType, .List)
+            XCTAssertEqual(try doc.text(obj: textNode), "Wassup World?")
+        } else {
+            try XCTFail("Didn't find an object at \(String(describing: doc.get(obj: ObjId.ROOT, key: "notes")))")
+        }
+    }
+
+    func testTextEncodingMismatch_object() throws {
         let doc = Document()
         let automergeEncoder = AutomergeEncoder(doc: doc)
 
@@ -296,6 +340,29 @@ final class AutomergeEncoderTests: XCTestCase {
         let model = InitialTestModel(notes: "Hello")
         try automergeEncoder.encode(model)
         let followupModel = UpdatedTestModel(notes: Text("Hello"))
+
+        XCTAssertThrowsError(
+            try automergeEncoder.encode(followupModel),
+            "Expected mismatched schema to throw error"
+        ) { error in
+            print(error)
+        }
+    }
+
+    func testTextEncodingMismatch_list() throws {
+        let doc = Document()
+        let automergeEncoder = AutomergeEncoder(doc: doc)
+
+        struct InitialTestModel: Codable {
+            var notes: [String]
+        }
+        struct UpdatedTestModel: Codable {
+            var notes: [Text]
+        }
+
+        let model = InitialTestModel(notes: ["Hello"])
+        try automergeEncoder.encode(model)
+        let followupModel = UpdatedTestModel(notes: [Text("Hello")])
 
         XCTAssertThrowsError(
             try automergeEncoder.encode(followupModel),
