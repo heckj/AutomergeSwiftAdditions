@@ -13,6 +13,10 @@ struct SimpleStruct: Codable {
     let count: Int
 }
 
+struct TextModel: Codable {
+    let notes: Text
+}
+
 let sample = SimpleStruct(name: "henry", duration: 3.14159, flag: true, count: 5)
 
 let benchmarks = {
@@ -32,6 +36,17 @@ let benchmarks = {
             let automergeEncoder = AutomergeEncoder(doc: doc)
 
             try blackHole(automergeEncoder.encode(layeredSample))
+        }
+    }
+
+    Benchmark("TextEncode") { benchmark in
+        let textSample = TextModel(notes: Text("Hello World!"))
+        let textSampleUpdate = TextModel(notes: Text("Wassup World?"))
+        let doc = Document()
+        let automergeEncoder = AutomergeEncoder(doc: doc)
+        for _ in benchmark.scaledIterations {
+            try blackHole(automergeEncoder.encode(textSample))
+            try blackHole(automergeEncoder.encode(textSampleUpdate))
         }
     }
 
