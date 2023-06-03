@@ -1,0 +1,49 @@
+import Automerge
+@testable import AutomergeSwiftAdditions
+import XCTest
+
+final class Document_PathElementConversionTests: XCTestCase {
+    func testPathElementListToPath() throws {
+        let doc = Document()
+        let list = try! doc.putObject(obj: ObjId.ROOT, key: "list", ty: .List)
+        let nestedMap = try! doc.insertObject(obj: list, index: 0, ty: .Map)
+        let deeplyNestedText = try! doc.putObject(obj: nestedMap, key: "notes", ty: .Text)
+        let pathToList = try! doc.path(obj: nestedMap)
+        XCTAssertEqual(
+            pathToList,
+            [
+                PathElement(
+                    obj: ObjId.ROOT,
+                    prop: .Key("list")
+                ),
+                PathElement(
+                    obj: list,
+                    prop: .Index(0)
+                ),
+            ]
+        )
+        XCTAssertEqual(pathToList.stringPath(), ".list.[0]")
+
+        let pathToText = try! doc.path(obj: deeplyNestedText)
+        // print("textPath: \(pathToText)")
+        XCTAssertEqual(
+            pathToText,
+            [
+                PathElement(
+                    obj: ObjId.ROOT,
+                    prop: .Key("list")
+                ),
+                PathElement(
+                    obj: list,
+                    prop: .Index(0)
+                ),
+                PathElement(
+                    obj: nestedMap,
+                    prop: .Key("notes")
+                ),
+            ]
+        )
+
+        XCTAssertEqual(pathToText.stringPath(), ".list.[0].notes")
+    }
+}

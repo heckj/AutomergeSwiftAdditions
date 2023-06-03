@@ -1,3 +1,4 @@
+import struct Automerge.PathElement
 import enum Automerge.Prop
 
 // rough equivalent to an opaque path - serves a similar function to Automerge.PathElement
@@ -8,16 +9,16 @@ import enum Automerge.Prop
 public struct AnyCodingKey: Equatable {
     private let pathElement: Automerge.Prop
 
+    /// Creates a generalized Coding Key from an Automerge Property.
+    /// - Parameter pathProperty: The Automerge property to convert.
     init(_ pathProperty: Automerge.Prop) {
         pathElement = pathProperty
     }
 
-    /// Indicates whether this instance represents an index into an un-keyed container.
-    var isIndex: Bool {
-        if case .Index = pathElement {
-            return true
-        }
-        return false
+    /// Creates a generalized Coding Key from an Automerge Path Element.
+    /// - Parameter element: The Automerge path element to convert.
+    init(_ element: Automerge.PathElement) {
+        pathElement = element.prop
     }
 
     /// Creates a new schema path element from a generic coding key.
@@ -91,6 +92,34 @@ extension AnyCodingKey: CodingKey {
     }
 }
 
+public extension AnyCodingKey {
+    /// Parses a string into an array of generic coding path elements.
+    /// - Parameter path: The string to parse.
+    /// - Returns: An array of coding path elements corresponding to the string.
+    static func parsePath(_ path: String) throws -> [AnyCodingKey] {
+        // breaks up the provided path, breaking on '.' and parsing the results into a series
+        // of AnyCodingKey
+        try path
+            .split(separator: ".")
+            .map { String($0) }
+            .map { strValue in
+                if let firstChar = strValue.first, firstChar.isASCII, firstChar.isLetter {
+                    return AnyCodingKey(strValue)
+                } else if strValue.first == "[", strValue.last == "]" {
+                    let start = strValue.index(after: strValue.startIndex)
+                    let end = strValue.index(before: strValue.endIndex)
+                    let substring = String(strValue[start ..< end])
+                    if !substring.isEmpty, let parsedIndexValue = UInt64(substring) {
+                        return AnyCodingKey(parsedIndexValue)
+                    } else {
+                        throw PathParseError.emptyListIndex(String(strValue))
+                    }
+                }
+                throw PathParseError.invalidPathElement(String(strValue))
+            }
+    }
+}
+
 extension AnyCodingKey: CustomStringConvertible {
     /// A string description of the schema path element.
     public var description: String {
@@ -111,5 +140,16 @@ extension AnyCodingKey: Hashable {
         case let .Key(strVal):
             hasher.combine(strVal)
         }
+    }
+}
+
+extension Sequence where Element: CodingKey {
+    /// Returns a string that represents the schema path.
+    func stringPath() -> String {
+        let path = map { pathElement in
+            AnyCodingKey(pathElement).description
+        }
+        .joined(separator: ".")
+        return ".\(path)"
     }
 }
