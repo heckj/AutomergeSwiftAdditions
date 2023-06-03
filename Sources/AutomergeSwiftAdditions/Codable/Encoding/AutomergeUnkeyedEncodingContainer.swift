@@ -108,7 +108,7 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
                 }
                 textNodeId = textId
             } else {
-                textNodeId = try document.putObject(obj: objectId, index: UInt64(count), ty: .Text)
+                textNodeId = try document.insertObject(obj: objectId, index: UInt64(count), ty: .Text)
             }
 
             let currentText = try! document.text(obj: textNodeId).utf8
