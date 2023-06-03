@@ -97,21 +97,30 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
             // Capture and override the default encodable pathing for Counter since
             // Automerge supports it as a primitive value type.
             let downcastText = value as! Text
-            // FIXME: check to see if the object exists here before just splatting a new one into place
-            let textNode = try document.putObject(obj: objectId, index: UInt64(count), ty: .Text)
 
-            // FIXME: externalize this code and make common between encoding containers
-            // Iterate through
-            let currentText = try! document.text(obj: textNode).utf8
+            let textNodeId: ObjId
+            if let existingNode = try document.get(obj: objectId, index: UInt64(count)) {
+                guard case let .Object(textId, .Text) = existingNode else {
+                    throw CodingKeyLookupError
+                        .mismatchedSchema(
+                            "Text Encoding on KeyedContainer at \(self.codingPath) exists and is \(existingNode), not Text."
+                        )
+                }
+                textNodeId = textId
+            } else {
+                textNodeId = try document.putObject(obj: objectId, index: UInt64(count), ty: .Text)
+            }
+
+            let currentText = try! document.text(obj: textNodeId).utf8
             let diff: CollectionDifference<String.UTF8View.Element> = downcastText.value.utf8
                 .difference(from: currentText)
             for change in diff {
                 switch change {
                 case let .insert(offset, element, _):
                     let char = String(bytes: [element], encoding: .utf8)
-                    try document.spliceText(obj: textNode, start: UInt64(offset), delete: 0, value: char)
+                    try document.spliceText(obj: textNodeId, start: UInt64(offset), delete: 0, value: char)
                 case let .remove(offset, _, _):
-                    try document.spliceText(obj: textNode, start: UInt64(offset), delete: 1)
+                    try document.spliceText(obj: textNodeId, start: UInt64(offset), delete: 1)
                 }
             }
         default:
