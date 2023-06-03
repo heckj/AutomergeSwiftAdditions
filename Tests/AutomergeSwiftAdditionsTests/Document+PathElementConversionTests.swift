@@ -46,4 +46,19 @@ final class Document_PathElementConversionTests: XCTestCase {
 
         XCTAssertEqual(pathToText.stringPath(), ".list.[0].notes")
     }
+
+    func testPathElementListToAnyCodingKey() throws {
+        let doc = Document()
+        let list = try! doc.putObject(obj: ObjId.ROOT, key: "list", ty: .List)
+        let nestedMap = try! doc.insertObject(obj: list, index: 0, ty: .Map)
+        let deeplyNestedText = try! doc.putObject(obj: nestedMap, key: "notes", ty: .Text)
+        let pathToList = try! doc.path(obj: deeplyNestedText)
+        XCTAssertEqual(pathToList.count, 3)
+
+        let converted = pathToList.map { AnyCodingKey($0) }
+        XCTAssertEqual(converted.count, 3)
+
+        XCTAssertEqual(pathToList.stringPath(), converted.stringPath())
+        XCTAssertEqual(converted.stringPath(), ".list.[0].notes")
+    }
 }
