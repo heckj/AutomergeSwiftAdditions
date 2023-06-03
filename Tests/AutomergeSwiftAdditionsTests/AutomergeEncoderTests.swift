@@ -281,4 +281,27 @@ final class AutomergeEncoderTests: XCTestCase {
             try XCTFail("Didn't find an object at \(String(describing: doc.get(obj: ObjId.ROOT, key: "notes")))")
         }
     }
+
+    func testTextEncodingMismatch() throws {
+        let doc = Document()
+        let automergeEncoder = AutomergeEncoder(doc: doc)
+
+        struct InitialTestModel: Codable {
+            var notes: String
+        }
+        struct UpdatedTestModel: Codable {
+            var notes: Text
+        }
+
+        let model = InitialTestModel(notes: "Hello")
+        try automergeEncoder.encode(model)
+        let followupModel = UpdatedTestModel(notes: Text("Hello"))
+
+        XCTAssertThrowsError(
+            try automergeEncoder.encode(followupModel),
+            "Expected mismatched schema to throw error"
+        ) { error in
+            print(error)
+        }
+    }
 }
