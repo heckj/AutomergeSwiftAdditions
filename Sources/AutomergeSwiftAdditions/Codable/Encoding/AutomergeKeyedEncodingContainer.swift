@@ -59,22 +59,6 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         tracePrint("Establishing Keyed Encoding Container for path \(codingPath.map { AnyCodingKey($0) }))")
     }
 
-    // used for nested containers
-    init(impl: AutomergeEncoderImpl, object _: AutomergeObject, codingPath: [CodingKey], doc: Document) {
-        self.impl = impl
-        // self.object = object
-        self.codingPath = codingPath
-        self.document = doc
-        switch AnyCodingKey.retrieveObjectId(document: doc, path: codingPath, containerType: .Key) {
-        case let .success((objId, _)):
-            self.objectId = objId
-            self.lookupError = nil
-        case let .failure(capturedError):
-            self.objectId = nil
-            self.lookupError = capturedError
-        }
-    }
-
     fileprivate func reportBestError() -> Error {
         // Returns the best value it can from a lookup error scenario.
         if let containerLookupError = self.lookupError {
