@@ -1,5 +1,6 @@
 import struct Automerge.PathElement
 import enum Automerge.Prop
+import Foundation
 
 // rough equivalent to an opaque path - serves a similar function to Automerge.PathElement
 // but from an external, path-only point of view to reference or build a potentially existing
@@ -92,6 +93,24 @@ extension AnyCodingKey: CodingKey {
     }
 }
 
+/// Path Errors
+public enum PathParseError: LocalizedError {
+    /// The path element is not valid.
+    case InvalidPathElement(String)
+    /// The path element, structured as a Index location, doesn't include an index value.
+    case EmptyListIndex(String)
+
+    /// A localized message describing the error.
+    public var errorDescription: String? {
+        switch self {
+        case let .InvalidPathElement(str):
+            return str
+        case let .EmptyListIndex(str):
+            return str
+        }
+    }
+}
+
 public extension AnyCodingKey {
     /// Parses a string into an array of generic coding path elements.
     /// - Parameter path: The string to parse.
@@ -112,10 +131,10 @@ public extension AnyCodingKey {
                     if !substring.isEmpty, let parsedIndexValue = UInt64(substring) {
                         return AnyCodingKey(parsedIndexValue)
                     } else {
-                        throw PathParseError.emptyListIndex(String(strValue))
+                        throw PathParseError.EmptyListIndex(String(strValue))
                     }
                 }
-                throw PathParseError.invalidPathElement(String(strValue))
+                throw PathParseError.InvalidPathElement(String(strValue))
             }
     }
 }
