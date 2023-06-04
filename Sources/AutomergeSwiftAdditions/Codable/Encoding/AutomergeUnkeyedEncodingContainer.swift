@@ -35,21 +35,6 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         tracePrint("Establishing Unkeyed Encoding Container for path \(codingPath.map { AnyCodingKey($0) }))")
     }
 
-    // used for nested containers
-    init(impl: AutomergeEncoderImpl, array _: AutomergeArray, codingPath: [CodingKey], doc: Document) {
-        self.impl = impl
-        self.codingPath = codingPath
-        self.document = doc
-        switch AnyCodingKey.retrieveObjectId(document: doc, path: codingPath, containerType: .Index) {
-        case let .success((objId, _)):
-            self.objectId = objId
-            self.lookupError = nil
-        case let .failure(capturedError):
-            self.objectId = nil
-            self.lookupError = capturedError
-        }
-    }
-
     fileprivate func reportBestError() -> Error {
         // Returns the best value it can from a lookup error scenario.
         if let containerLookupError = self.lookupError {
@@ -67,7 +52,7 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     mutating func encodeNil() throws {}
 
     mutating func encode<T>(_ value: T) throws where T: Encodable {
-        let newPath = impl.codingPath + [ArrayKey(index: count)]
+        let newPath = impl.codingPath + [AnyCodingKey(UInt64(count))]
         let newEncoder = AutomergeEncoderImpl(
             userInfo: impl.userInfo,
             codingPath: newPath,
@@ -132,7 +117,7 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     mutating func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type) ->
         KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey
     {
-        let newPath = impl.codingPath + [ArrayKey(index: count)]
+        let newPath = impl.codingPath + [AnyCodingKey(UInt64(count))]
         let nestedContainer = AutomergeKeyedEncodingContainer<NestedKey>(
             impl: impl,
             codingPath: newPath,
@@ -142,7 +127,7 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     }
 
     mutating func nestedUnkeyedContainer() -> UnkeyedEncodingContainer {
-        let newPath = impl.codingPath + [ArrayKey(index: count)]
+        let newPath = impl.codingPath + [AnyCodingKey(UInt64(count))]
         let nestedContainer = AutomergeUnkeyedEncodingContainer(
             impl: impl,
             codingPath: newPath,

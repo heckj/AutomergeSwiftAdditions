@@ -209,7 +209,7 @@ extension AutomergeUnkeyedDecodingContainer {
         ofType _: T.Type,
         isNested _: Bool = false
     ) throws -> AutomergeDecoderImpl {
-        let newPath = codingPath + [ArrayKey(index: currentIndex)]
+        let newPath = codingPath + [AnyCodingKey(UInt64(currentIndex))]
 
         return AutomergeDecoderImpl(
             doc: impl.doc,
@@ -244,7 +244,7 @@ extension AutomergeUnkeyedDecodingContainer {
                 throw DecodingError.valueNotFound(
                     T.self,
                     .init(
-                        codingPath: [ArrayKey(index: currentIndex)],
+                        codingPath: [AnyCodingKey(UInt64(currentIndex))],
                         debugDescription: "Unkeyed container is at end.",
                         underlyingError: nil
                     )
@@ -266,7 +266,7 @@ extension AutomergeUnkeyedDecodingContainer {
     }
 
     @inline(__always) private func createTypeMismatchError(type: Any.Type, value: Value) -> DecodingError {
-        let codingPath = codingPath + [ArrayKey(index: currentIndex)]
+        let codingPath = codingPath + [AnyCodingKey(UInt64(currentIndex))]
         return DecodingError.typeMismatch(type, .init(
             codingPath: codingPath,
             debugDescription: "Expected to decode \(type) but found \(value) instead."

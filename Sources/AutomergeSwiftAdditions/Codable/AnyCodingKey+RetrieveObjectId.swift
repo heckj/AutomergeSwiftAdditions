@@ -9,6 +9,8 @@ func tracePrint(indent: Int = 0, _ stringval: String) {
     #endif
 }
 
+// FIXME: migrate the static function to an extension on Document
+
 extension AnyCodingKey {
     /// An enumeration that represents the type of encoding container.
     @usableFromInline enum EncodingContainerType {
@@ -39,6 +41,12 @@ extension AnyCodingKey {
         containerType: EncodingContainerType,
         strategy: SchemaStrategy = .default
     ) -> Result<(ObjId, AnyCodingKey), Error> {
+        // FIXME: refactor the signature (and code flow) to return just an ObjId or Error
+        // with .Value container type returning second-to-last ObjectId, and expecting the
+        // caller to know they'll need to special case whatever they do with the final piece.
+
+        // CONSIDER: making a method that takes an objectId and CodingKey and returns the Value?
+
         // This method returns a Result type because the Codable protocol constrains the
         // container initializers to not throw on initialization.
         // Instead we stash the lookup failure into the container, and throw the relevant
