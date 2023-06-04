@@ -28,6 +28,11 @@ final class RetrieveObjectIdTests: XCTestCase {
         let nestedMap = try! doc.insertObject(obj: list, index: 0, ty: .Map)
         setupCache["nestedMap"] = nestedMap
 
+        let nestedText = try! doc.insertObject(obj: list, index: 1, ty: .Text)
+        setupCache["nestedText"] = nestedText
+
+        let _ = try! doc.insert(obj: list, index: 2, value: .String("alex"))
+
         try! doc.put(obj: nestedMap, key: "image", value: .Bytes(Data()))
         let deeplyNestedText = try! doc.putObject(obj: nestedMap, key: "notes", ty: .Text)
         setupCache["deeplyNestedText"] = deeplyNestedText
@@ -35,7 +40,7 @@ final class RetrieveObjectIdTests: XCTestCase {
 
     func testSetupDocPath() throws {
         let pathToText = try! doc.path(obj: setupCache["deeplyNestedText"]!).stringPath()
-        XCTAssertEqual(setupCache.count, 4)
+        XCTAssertEqual(setupCache.count, 5)
         XCTAssertEqual(pathToText, ".list.[0].notes")
     }
 
@@ -89,6 +94,34 @@ final class RetrieveObjectIdTests: XCTestCase {
         }
     }
 
+    func testLookupThroughTextinList() throws {
+        let result = doc.retrieveObjectId(
+            path: [AnyCodingKey("list"), AnyCodingKey(1), AnyCodingKey("name")],
+            containerType: .Value,
+            strategy: .readonly
+        )
+        switch result {
+        case let .success(success):
+            XCTFail("Expected invalid lookup error, received: \(success)")
+        case .failure:
+            break
+        }
+    }
+
+    func testLookupThroughScalarinList() throws {
+        let result = doc.retrieveObjectId(
+            path: [AnyCodingKey("list"), AnyCodingKey(2), AnyCodingKey("name")],
+            containerType: .Key,
+            strategy: .readonly
+        )
+        switch result {
+        case let .success(success):
+            XCTFail("Expected invalid lookup error, received: \(success)")
+        case .failure:
+            break
+        }
+    }
+
     func testLookupThroughScalar() throws {
         let result = doc.retrieveObjectId(
             path: [AnyCodingKey("joe"), AnyCodingKey("age")],
@@ -107,6 +140,20 @@ final class RetrieveObjectIdTests: XCTestCase {
         let result = doc.retrieveObjectId(
             path: [AnyCodingKey("list"), AnyCodingKey(2), AnyCodingKey("name")],
             containerType: .Value,
+            strategy: .readonly
+        )
+        switch result {
+        case let .success(success):
+            XCTFail("Expected invalid lookup error, received: \(success)")
+        case .failure:
+            break
+        }
+    }
+
+    func testLookupBeyondBoundsIndexReadonly() throws {
+        let result = doc.retrieveObjectId(
+            path: [AnyCodingKey("list"), AnyCodingKey(4), AnyCodingKey("name")],
+            containerType: .Index,
             strategy: .readonly
         )
         switch result {
@@ -142,8 +189,7 @@ final class RetrieveObjectIdTests: XCTestCase {
 
     func testCreateSchemaWhereNull() throws {
         let newCodingPath: [AnyCodingKey] = [
-            AnyCodingKey("list"),
-            AnyCodingKey(1),
+            AnyCodingKey("alpha"),
         ]
 
         let result = doc.retrieveObjectId(
@@ -155,9 +201,95 @@ final class RetrieveObjectIdTests: XCTestCase {
         switch result {
         case let .success(objectId):
             let pathToNewMap = try! doc.path(obj: objectId).stringPath()
-            XCTAssertEqual(pathToNewMap, ".list.[1]")
+            XCTAssertEqual(pathToNewMap, ".alpha")
         case let .failure(err):
             XCTFail("Failure looking up new path location: \(err)")
+        }
+    }
+
+    func testCreateSchemaWhereNullFailure() throws {
+        let newCodingPath: [AnyCodingKey] = [
+            AnyCodingKey("alpha"),
+        ]
+
+        let result = doc.retrieveObjectId(
+            path: newCodingPath,
+            containerType: .Key,
+            strategy: .readonly
+        )
+
+        switch result {
+        case let .success(objectId):
+            let pathToNewMap = try! doc.path(obj: objectId).stringPath()
+            XCTFail("Expected failure, but received output \(pathToNewMap)")
+        case .failure:
+            break
+        }
+    }
+
+    func testCreateSchemaWhereNullInList() throws {
+        let newCodingPath: [AnyCodingKey] = [
+            AnyCodingKey("list"),
+            AnyCodingKey(3),
+            AnyCodingKey("a"),
+        ]
+
+        let result = doc.retrieveObjectId(
+            path: newCodingPath,
+            containerType: .Value,
+            strategy: .createWhenNeeded
+        )
+
+        switch result {
+        case let .success(objectId):
+            let pathToNewMap = try! doc.path(obj: objectId).stringPath()
+            XCTAssertEqual(pathToNewMap, ".list.[3]")
+        case let .failure(err):
+            XCTFail("Failure looking up new path location: \(err)")
+        }
+    }
+
+    func testCreateListSchemaWhereNullInList() throws {
+        let newCodingPath: [AnyCodingKey] = [
+            AnyCodingKey("list"),
+            AnyCodingKey(3),
+            AnyCodingKey(0),
+        ]
+
+        let result = doc.retrieveObjectId(
+            path: newCodingPath,
+            containerType: .Index,
+            strategy: .createWhenNeeded
+        )
+
+        switch result {
+        case let .success(objectId):
+            let pathToNewMap = try! doc.path(obj: objectId).stringPath()
+            XCTAssertEqual(pathToNewMap, ".list.[3].[0]")
+        case let .failure(err):
+            XCTFail("Failure looking up new path location: \(err)")
+        }
+    }
+
+    func testCreateListSchemaWhereNullInListFailureReadOnly() throws {
+        let newCodingPath: [AnyCodingKey] = [
+            AnyCodingKey("list"),
+            AnyCodingKey(3),
+            AnyCodingKey(0),
+        ]
+
+        let result = doc.retrieveObjectId(
+            path: newCodingPath,
+            containerType: .Index,
+            strategy: .readonly
+        )
+
+        switch result {
+        case let .success(objectId):
+            let pathToObject = try! doc.path(obj: objectId).stringPath()
+            XCTFail("expected failure, but found schema \(pathToObject)")
+        case .failure:
+            break
         }
     }
 
