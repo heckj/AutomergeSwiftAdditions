@@ -252,6 +252,26 @@ final class RetrieveObjectIdTests: XCTestCase {
         }
     }
 
+    func testCreateSchemaWhereNullFailureReadOnly() throws {
+        let newCodingPath: [AnyCodingKey] = [
+            AnyCodingKey("alpha"),
+        ]
+
+        let result = doc.retrieveObjectId(
+            path: newCodingPath,
+            containerType: .Key,
+            strategy: .readonly
+        )
+
+        switch result {
+        case let .success(objectId):
+            let pathToNewMap = try! doc.path(obj: objectId).stringPath()
+            XCTFail("Expected failure, but received output \(pathToNewMap)")
+        case .failure:
+            break
+        }
+    }
+
     func testCreateSchemaWhereNullFailure() throws {
         let newCodingPath: [AnyCodingKey] = [
             AnyCodingKey("topMap"),
