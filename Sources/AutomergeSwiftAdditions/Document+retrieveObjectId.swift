@@ -9,6 +9,17 @@ func tracePrint(indent: Int = 0, _ stringval: String) {
     #endif
 }
 
+// // MARK: Cache for Object Id Lookups
+//
+// typealias CacheKey = [AnyCodingKey]
+// var cache: [CacheKey: ObjId] = [:]
+//
+// func upsert(_ key: CacheKey, value: ObjId) {
+//    if cache[key] == nil {
+//        cache[key] = value
+//    }
+// }
+
 extension Document {
     /// Returns an Automerge objectId for the location within the document.
     ///

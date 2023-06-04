@@ -1,6 +1,10 @@
 import Foundation
 
-public enum CodingKeyLookupError: LocalizedError {
+public enum CodingKeyLookupError: LocalizedError, Equatable {
+    public static func == (lhs: CodingKeyLookupError, rhs: CodingKeyLookupError) -> Bool {
+        lhs.errorDescription == rhs.errorDescription
+    }
+
     /// An error that represents a coding container was unable to look up a relevant Automerge objectId and was unable
     /// to capture a more specific error.
     case UnexpectedLookupFailure(String)
