@@ -24,17 +24,24 @@ extension AnyCodingKey {
 
     /// Returns an Automerge objectId for the location within the document.
     ///
-    /// The function looks up Automerge schema while optionally creating schema if needed, and reporting on errors with
-    /// conflicting schema.
+    /// The function looks up an Automerge Object Id for a specific schema location, optionally creating schema if needed.
+    /// The combination of `path` and `containerType` determine the `ObjId` returned:
+    /// - when requesting an objectId with the type ``EncodingContainerType/Value``, the object Id
+    /// from the second to last coding key element is returned, expecting the call-site to do any further look ups based
+    /// on the final coding key.
+    /// - when requesting an objectId with types ``EncodingContainerType/Index`` or
+    /// ``EncodingContainerType/Key``, the object Id is derived from the last coding key element,
+    /// and the `containerType` is checked to verify it matches the Automerge schema.
+    ///
     /// Control the pattern of when to create schema and what errors to throw by setting the `strategy` property.
     ///
     /// - Parameters:
     ///   - path: An array of instances conforming to CodingKey that make up the schema path.
-    ///   - type: The container type for the lookup, which effects what is returned and at what level of the path.
+    ///   - containerType: The container type for the lookup, which effects what is returned and at what level of the path.
     ///   - strategy: The strategy for creating schema during encoding if it doesn't exist or conflicts with existing
     /// schema. The strategy defaults to ``SchemaStrategy/default``.
-    /// - Returns: A result type that contains a tuple of an Automerge object Id of the relevant container and the final
-    /// CodingKey value, or an error if the retrieval failed or there was conflicting schema within in the document.
+    /// - Returns: A result type that contains a tuple of an Automerge object Id of the relevant container, or an error
+    /// if the retrieval failed or there was conflicting schema within in the document.
     @inlinable static func retrieveObjectId(
         document: Document,
         path: [CodingKey],
