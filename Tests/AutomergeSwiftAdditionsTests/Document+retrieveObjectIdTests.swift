@@ -19,6 +19,9 @@ final class RetrieveObjectIdTests: XCTestCase {
 
         let _ = try! doc.put(obj: ObjId.ROOT, key: "name", value: .String("joe"))
 
+        let topMap = try! doc.putObject(obj: ObjId.ROOT, key: "topMap", ty: .Map)
+        setupCache["topMap"] = topMap
+
         let description = try! doc.putObject(obj: ObjId.ROOT, key: "description", ty: .Text)
         setupCache["description"] = description
 
@@ -40,7 +43,7 @@ final class RetrieveObjectIdTests: XCTestCase {
 
     func testSetupDocPath() throws {
         let pathToText = try! doc.path(obj: setupCache["deeplyNestedText"]!).stringPath()
-        XCTAssertEqual(setupCache.count, 5)
+        XCTAssertEqual(setupCache.count, 6)
         XCTAssertEqual(pathToText, ".list.[0].notes")
     }
 
@@ -54,7 +57,7 @@ final class RetrieveObjectIdTests: XCTestCase {
         let result = doc.retrieveObjectId(path: [AnyCodingKey("list")], containerType: .Key, strategy: .override)
         switch result {
         case let .success(success):
-            XCTFail("Expected override not implemented error, received: \(success)")
+            XCTFail("Expected invalid lookup error, received: \(try! doc.path(obj: success).stringPath())")
         case .failure:
             break
         }
@@ -64,7 +67,7 @@ final class RetrieveObjectIdTests: XCTestCase {
         let result = doc.retrieveObjectId(path: [], containerType: .Index, strategy: .readonly)
         switch result {
         case let .success(success):
-            XCTFail("Expected invalid lookup error, received: \(success)")
+            XCTFail("Expected invalid lookup error, received: \(try! doc.path(obj: success).stringPath())")
         case .failure:
             break
         }
@@ -74,7 +77,7 @@ final class RetrieveObjectIdTests: XCTestCase {
         let result = doc.retrieveObjectId(path: [], containerType: .Value, strategy: .override)
         switch result {
         case let .success(success):
-            XCTFail("Expected invalid lookup error, received: \(success)")
+            XCTFail("Expected invalid lookup error, received: \(try! doc.path(obj: success).stringPath())")
         case .failure:
             break
         }
@@ -88,13 +91,13 @@ final class RetrieveObjectIdTests: XCTestCase {
         )
         switch result {
         case let .success(success):
-            XCTFail("Expected invalid lookup error, received: \(success)")
+            XCTFail("Expected invalid lookup error, received: \(try! doc.path(obj: success).stringPath())")
         case .failure:
             break
         }
     }
 
-    func testLookupThroughTextinList() throws {
+    func testLookupThroughTextInList() throws {
         let result = doc.retrieveObjectId(
             path: [AnyCodingKey("list"), AnyCodingKey(1), AnyCodingKey("name")],
             containerType: .Value,
@@ -102,35 +105,77 @@ final class RetrieveObjectIdTests: XCTestCase {
         )
         switch result {
         case let .success(success):
-            XCTFail("Expected invalid lookup error, received: \(success)")
+            XCTFail("Expected invalid lookup error, received: \(try! doc.path(obj: success).stringPath())")
         case .failure:
             break
         }
     }
 
-    func testLookupThroughScalarinList() throws {
+    func testLookupObjectThroughScalarInList() throws {
         let result = doc.retrieveObjectId(
             path: [AnyCodingKey("list"), AnyCodingKey(2), AnyCodingKey("name")],
             containerType: .Key,
-            strategy: .readonly
+            strategy: .createWhenNeeded
         )
         switch result {
         case let .success(success):
-            XCTFail("Expected invalid lookup error, received: \(success)")
+            XCTFail("Expected invalid lookup error, received: \(try! doc.path(obj: success).stringPath())")
         case .failure:
             break
         }
     }
 
-    func testLookupThroughScalar() throws {
+    func testLookupListThroughScalarinList() throws {
         let result = doc.retrieveObjectId(
-            path: [AnyCodingKey("joe"), AnyCodingKey("age")],
+            path: [AnyCodingKey("list"), AnyCodingKey(2), AnyCodingKey(0)],
+            containerType: .Index,
+            strategy: .createWhenNeeded
+        )
+        switch result {
+        case let .success(success):
+            XCTFail("Expected invalid lookup error, received: \(try! doc.path(obj: success).stringPath())")
+        case .failure:
+            break
+        }
+    }
+
+    func testLookupValueThroughScalar() throws {
+        let result = doc.retrieveObjectId(
+            path: [AnyCodingKey("name"), AnyCodingKey("age")],
             containerType: .Value,
             strategy: .readonly
         )
         switch result {
         case let .success(success):
-            XCTFail("Expected invalid lookup error, received: \(success)")
+            XCTFail("Expected invalid lookup error, received: \(try! doc.path(obj: success).stringPath())")
+        case .failure:
+            break
+        }
+    }
+
+    func testLookupKeyThroughScalar() throws {
+        let result = doc.retrieveObjectId(
+            path: [AnyCodingKey("name"), AnyCodingKey("age")],
+            containerType: .Key,
+            strategy: .createWhenNeeded
+        )
+        switch result {
+        case let .success(success):
+            XCTFail("Expected invalid lookup error, received: \(try! doc.path(obj: success).stringPath())")
+        case .failure:
+            break
+        }
+    }
+
+    func testLookupListThroughScalar() throws {
+        let result = doc.retrieveObjectId(
+            path: [AnyCodingKey("name"), AnyCodingKey(0)],
+            containerType: .Index,
+            strategy: .createWhenNeeded
+        )
+        switch result {
+        case let .success(success):
+            XCTFail("Expected invalid lookup error, received: \(try! doc.path(obj: success).stringPath())")
         case .failure:
             break
         }
@@ -209,7 +254,8 @@ final class RetrieveObjectIdTests: XCTestCase {
 
     func testCreateSchemaWhereNullFailure() throws {
         let newCodingPath: [AnyCodingKey] = [
-            AnyCodingKey("alpha"),
+            AnyCodingKey("topMap"),
+            AnyCodingKey("beta"),
         ]
 
         let result = doc.retrieveObjectId(
