@@ -9,14 +9,16 @@ class AutomergeEncoderImpl {
     let userInfo: [CodingUserInfoKey: Any]
     let codingPath: [CodingKey]
     let document: Document
+    let schemaStrategy: SchemaStrategy
 
     // indicator that the singleValue has written a value
     var singleValueWritten: Bool = false
 
-    init(userInfo: [CodingUserInfoKey: Any], codingPath: [CodingKey], doc: Document) {
+    init(userInfo: [CodingUserInfoKey: Any], codingPath: [CodingKey], doc: Document, strategy: SchemaStrategy) {
         self.userInfo = userInfo
         self.codingPath = codingPath
         self.document = doc
+        self.schemaStrategy = strategy
         // Clear out any cache on setting up with a new document
         self.cache = [:]
     }

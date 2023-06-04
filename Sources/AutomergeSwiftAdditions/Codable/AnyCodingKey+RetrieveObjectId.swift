@@ -39,7 +39,7 @@ extension AnyCodingKey {
         document: Document,
         path: [CodingKey],
         containerType: EncodingContainerType,
-        strategy: SchemaStrategy = .default
+        strategy: SchemaStrategy
     ) -> Result<(ObjId, AnyCodingKey), Error> {
         // FIXME: refactor the signature (and code flow) to return just an ObjId or Error
         // with .Value container type returning second-to-last ObjectId, and expecting the

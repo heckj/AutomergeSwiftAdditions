@@ -46,7 +46,12 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("notes"),
         ]
 
-        let result = AnyCodingKey.retrieveObjectId(document: doc, path: fullCodingPath, containerType: .Value)
+        let result = AnyCodingKey.retrieveObjectId(
+            document: doc,
+            path: fullCodingPath,
+            containerType: .Value,
+            strategy: .createWhenNeeded
+        )
 
         switch result {
         case let .success((objectId, codingKeyInstance)):
@@ -65,7 +70,12 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey(1),
         ]
 
-        let result = AnyCodingKey.retrieveObjectId(document: doc, path: newCodingPath, containerType: .Key)
+        let result = AnyCodingKey.retrieveObjectId(
+            document: doc,
+            path: newCodingPath,
+            containerType: .Key,
+            strategy: .createWhenNeeded
+        )
 
         switch result {
         case let .success((objectId, codingKeyInstance)):
@@ -85,7 +95,12 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("yellowfish"),
         ]
 
-        let result = AnyCodingKey.retrieveObjectId(document: doc, path: newCodingPath, containerType: .Key)
+        let result = AnyCodingKey.retrieveObjectId(
+            document: doc,
+            path: newCodingPath,
+            containerType: .Key,
+            strategy: .createWhenNeeded
+        )
 
         switch result {
         case let .success((objectId, codingKeyInstance)):
@@ -105,7 +120,12 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey(0),
         ]
 
-        let result = AnyCodingKey.retrieveObjectId(document: doc, path: newCodingPath, containerType: .Index)
+        let result = AnyCodingKey.retrieveObjectId(
+            document: doc,
+            path: newCodingPath,
+            containerType: .Index,
+            strategy: .createWhenNeeded
+        )
 
         switch result {
         case let .success((objectId, codingKeyInstance)):
@@ -125,7 +145,12 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("yellowfish"),
         ]
 
-        let result = AnyCodingKey.retrieveObjectId(document: doc, path: newCodingPath, containerType: .Value)
+        let result = AnyCodingKey.retrieveObjectId(
+            document: doc,
+            path: newCodingPath,
+            containerType: .Value,
+            strategy: .createWhenNeeded
+        )
 
         switch result {
         case let .success((objectId, codingKeyInstance)):
@@ -145,7 +170,12 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("yellowfish"),
         ]
 
-        let result = AnyCodingKey.retrieveObjectId(document: doc, path: newCodingPath, containerType: .Value)
+        let result = AnyCodingKey.retrieveObjectId(
+            document: doc,
+            path: newCodingPath,
+            containerType: .Value,
+            strategy: .createWhenNeeded
+        )
         switch result {
         case .success:
             XCTFail("Expected this to fail with index 5 in a new array")
