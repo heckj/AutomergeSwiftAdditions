@@ -40,7 +40,7 @@ extension AnyCodingKey {
         path: [CodingKey],
         containerType: EncodingContainerType,
         strategy: SchemaStrategy
-    ) -> Result<ObjId, Error> {
+    ) -> Result<ObjId, CodingKeyLookupError> {
         // with .Value container type returning second-to-last ObjectId, and expecting the
         // caller to know they'll need to special case whatever they do with the final piece.
 
@@ -85,7 +85,7 @@ extension AnyCodingKey {
         var previousObjectId = ObjId.ROOT
 
         if strategy == .override {
-            return .failure(CodingKeyLookupError.unexpectedLookupFailure("Override strategy not yet implemented"))
+            return .failure(CodingKeyLookupError.UnexpectedLookupFailure("Override strategy not yet implemented"))
         }
 
         // initial conditions if we're handed an empty path
@@ -96,12 +96,12 @@ extension AnyCodingKey {
             case .Index:
                 return .failure(
                     CodingKeyLookupError
-                        .invalidIndexLookup("An empty path refers to ROOT and is always a map.")
+                        .InvalidIndexLookup("An empty path refers to ROOT and is always a map.")
                 )
             case .Value:
                 return .failure(
                     CodingKeyLookupError
-                        .invalidValueLookup("An empty path refers to ROOT and is always a map.")
+                        .InvalidValueLookup("An empty path refers to ROOT and is always a map.")
                 )
             }
         }
@@ -140,14 +140,14 @@ extension AnyCodingKey {
                     if strategy == .readonly {
                         return .failure(
                             CodingKeyLookupError
-                                .indexOutOfBounds(
+                                .IndexOutOfBounds(
                                     "Index value \(indexValue) is beyond the length: \(document.length(obj: previousObjectId)) and schema is read-only"
                                 )
                         )
                     } else if indexValue > (document.length(obj: previousObjectId) + 1) {
                         return .failure(
                             CodingKeyLookupError
-                                .indexOutOfBounds(
+                                .IndexOutOfBounds(
                                     "Index value \(indexValue) is too far beyond the length: \(document.length(obj: previousObjectId)) to append a new item."
                                 )
                         )
@@ -168,7 +168,7 @@ extension AnyCodingKey {
                                 // If there's remaining values to be looked up, the overall path is invalid.
                                 return .failure(
                                     CodingKeyLookupError
-                                        .pathExtendsThroughText(
+                                        .PathExtendsThroughText(
                                             "Path at \(path[0 ... position]) is a Text object, which is not a container - and the path has additional elements: \(path[(position + 1)...])."
                                         )
                                 )
@@ -183,7 +183,7 @@ extension AnyCodingKey {
                             // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
                             return .failure(
                                 CodingKeyLookupError
-                                    .pathExtendsThroughScalar(
+                                    .PathExtendsThroughScalar(
                                         "Path at \(path[0 ... position]) is a single value, not a container - and the path has additional elements: \(path[(position + 1)...])."
                                     )
                             )
@@ -197,7 +197,7 @@ extension AnyCodingKey {
                             // path is a valid request, there's just nothing there
                             return .failure(
                                 CodingKeyLookupError
-                                    .schemaMissing(
+                                    .SchemaMissing(
                                         "Nothing in schema exists at \(path[0 ... position]) - look u returns nil"
                                     )
                             )
@@ -243,7 +243,7 @@ extension AnyCodingKey {
                         }
                     }
                 } catch {
-                    return .failure(error)
+                    return .failure(.AutomergeDocError(error))
                 }
             } else { // path[position] is a string-based key, so we need to get - or insert - an Object
                 let keyValue = path[position].stringValue
@@ -259,7 +259,7 @@ extension AnyCodingKey {
                             if objType == .Text {
                                 return .failure(
                                     CodingKeyLookupError
-                                        .pathExtendsThroughText(
+                                        .PathExtendsThroughText(
                                             "Path at \(path[0 ... position]) is a Text object, which is not a container - and the path has additional elements: \(path[(position + 1)...])."
                                         )
                                 )
@@ -275,7 +275,7 @@ extension AnyCodingKey {
                             // If there's remaining values to be looked up, the overall path is invalid.
                             return .failure(
                                 CodingKeyLookupError
-                                    .pathExtendsThroughScalar(
+                                    .PathExtendsThroughScalar(
                                         "Path at \(path[0 ... position]) is a single value, not a container - and the path has additional elements: \(path[(position + 1)...])."
                                     )
                             )
@@ -289,7 +289,7 @@ extension AnyCodingKey {
                             // path is a valid request, there's just nothing there
                             return .failure(
                                 CodingKeyLookupError
-                                    .schemaMissing(
+                                    .SchemaMissing(
                                         "Nothing in schema exists at \(path[0 ... position]) - look u returns nil"
                                     )
                             )
@@ -336,7 +336,7 @@ extension AnyCodingKey {
                         }
                     }
                 } catch {
-                    return .failure(error)
+                    return .failure(.AutomergeDocError(error))
                 }
             }
         }
@@ -364,14 +364,14 @@ extension AnyCodingKey {
                     if strategy == .readonly {
                         return .failure(
                             CodingKeyLookupError
-                                .indexOutOfBounds(
+                                .IndexOutOfBounds(
                                     "Index value \(indexValue) is beyond the length: \(document.length(obj: previousObjectId)) and schema is read-only"
                                 )
                         )
                     } else if indexValue > (document.length(obj: previousObjectId) + 1) {
                         return .failure(
                             CodingKeyLookupError
-                                .indexOutOfBounds(
+                                .IndexOutOfBounds(
                                     "Index value \(indexValue) is too far beyond the length: \(document.length(obj: previousObjectId)) to append a new item."
                                 )
                         )
@@ -391,7 +391,7 @@ extension AnyCodingKey {
                             case .Text:
                                 return .failure(
                                     CodingKeyLookupError
-                                        .mismatchedSchema(
+                                        .MismatchedSchema(
                                             "Path at \(path) is a Text object, which is not the List container that we expected."
                                         )
                                 )
@@ -402,7 +402,7 @@ extension AnyCodingKey {
                                 } else {
                                     return .failure(
                                         CodingKeyLookupError
-                                            .mismatchedSchema(
+                                            .MismatchedSchema(
                                                 "Path at \(path) is an object container, not the List container that we expected."
                                             )
                                     )
@@ -416,7 +416,7 @@ extension AnyCodingKey {
                                 } else {
                                     return .failure(
                                         CodingKeyLookupError
-                                            .mismatchedSchema(
+                                            .MismatchedSchema(
                                                 "Path at \(path) is a list container, not the Object container that we expected."
                                             )
                                     )
@@ -426,7 +426,7 @@ extension AnyCodingKey {
                             // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
                             return .failure(
                                 CodingKeyLookupError
-                                    .mismatchedSchema(
+                                    .MismatchedSchema(
                                         "Path at \(path) is an scalar value, which is not the List container that we expected."
                                     )
                             )
@@ -438,7 +438,7 @@ extension AnyCodingKey {
                             // path is a valid request, there's just nothing there
                             return .failure(
                                 CodingKeyLookupError
-                                    .schemaMissing(
+                                    .SchemaMissing(
                                         "Nothing in schema exists at \(path) - look u returns nil"
                                     )
                             )
@@ -473,7 +473,7 @@ extension AnyCodingKey {
                         }
                     }
                 } catch {
-                    return .failure(error)
+                    return .failure(.AutomergeDocError(error))
                 }
             } else { // final path element is a key
                 let keyValue = finalpiece.stringValue
@@ -491,7 +491,7 @@ extension AnyCodingKey {
                             case .Text:
                                 return .failure(
                                     CodingKeyLookupError
-                                        .mismatchedSchema(
+                                        .MismatchedSchema(
                                             "Container at \(path) is a Text object, which is not the List container that we expected."
                                         )
                                 )
@@ -504,7 +504,7 @@ extension AnyCodingKey {
                                 } else {
                                     return .failure(
                                         CodingKeyLookupError
-                                            .mismatchedSchema(
+                                            .MismatchedSchema(
                                                 "Container at \(path) is a Map container, not the List container that we expected."
                                             )
                                     )
@@ -518,7 +518,7 @@ extension AnyCodingKey {
                                 } else {
                                     return .failure(
                                         CodingKeyLookupError
-                                            .mismatchedSchema(
+                                            .MismatchedSchema(
                                                 "Container at \(path) is a List container, not the object container that we expected."
                                             )
                                     )
@@ -528,7 +528,7 @@ extension AnyCodingKey {
                             // If the looked up Value is a Scalar value, then it's a leaf on the schema structure.
                             return .failure(
                                 CodingKeyLookupError
-                                    .mismatchedSchema(
+                                    .MismatchedSchema(
                                         "Item at \(path) is an scalar value, which is not the List container that we expected."
                                     )
                             )
@@ -540,7 +540,7 @@ extension AnyCodingKey {
                             // path is a valid request, there's just nothing there
                             return .failure(
                                 CodingKeyLookupError
-                                    .schemaMissing(
+                                    .SchemaMissing(
                                         "Nothing in schema exists at \(path) - look u returns nil"
                                     )
                             )
@@ -575,7 +575,7 @@ extension AnyCodingKey {
                         }
                     }
                 } catch {
-                    return .failure(error)
+                    return .failure(.AutomergeDocError(error))
                 }
             }
         case .Value:

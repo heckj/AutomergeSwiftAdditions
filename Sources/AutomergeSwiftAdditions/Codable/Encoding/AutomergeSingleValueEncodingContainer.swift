@@ -37,7 +37,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
                 self.objectId = objId
                 self.codingkey = nil
                 self.lookupError = CodingKeyLookupError
-                    .noPathForSingleValue("Attempting to encode a value with an empty coding path.")
+                    .NoPathForSingleValue("Attempting to encode a value with an empty coding path.")
             }
         case let .failure(capturedError):
             self.objectId = nil
@@ -145,7 +145,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             let downcastDate = value as! Date
             guard let codingkey = codingkey else {
                 throw CodingKeyLookupError
-                    .noPathForSingleValue(
+                    .NoPathForSingleValue(
                         "No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self))."
                     )
             }
@@ -160,7 +160,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             let downcastData = value as! Data
             guard let codingkey = codingkey else {
                 throw CodingKeyLookupError
-                    .noPathForSingleValue(
+                    .NoPathForSingleValue(
                         "No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self))."
                     )
             }
@@ -175,7 +175,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             let downcastCounter = value as! Counter
             guard let codingkey = codingkey else {
                 throw CodingKeyLookupError
-                    .noPathForSingleValue(
+                    .NoPathForSingleValue(
                         "No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self))."
                     )
             }
@@ -187,7 +187,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
         case is Text.Type:
             guard let codingkey = codingkey else {
                 throw CodingKeyLookupError
-                    .noPathForSingleValue(
+                    .NoPathForSingleValue(
                         "No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self))."
                     )
             }
@@ -207,7 +207,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             if let existingNode = existingValue {
                 guard case let .Object(textId, .Text) = existingNode else {
                     throw CodingKeyLookupError
-                        .mismatchedSchema(
+                        .MismatchedSchema(
                             "Text Encoding on KeyedContainer at \(self.codingPath) exists and is \(existingNode), not Text."
                         )
                 }
@@ -267,7 +267,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             // If the error wasn't captured for some reason, drop back to a more general error exposing
             // the precondition failure.
             return CodingKeyLookupError
-                .unexpectedLookupFailure(
+                .UnexpectedLookupFailure(
                     "Encoding called on KeyedContainer when ObjectId is nil, and there was no recorded lookup error for the path \(self.codingPath)"
                 )
         }
