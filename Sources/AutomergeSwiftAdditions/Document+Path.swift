@@ -28,8 +28,12 @@ extension Document {
             strategy: .readonly
         )
         switch result {
-        case .success(let (objectId, finalCodingKey)):
+        case let .success(objectId):
             let existingValue: Value?
+            guard let finalCodingKey = codingPath.last else {
+                throw CodingKeyLookupError
+                    .noPathForSingleValue("Attempting to establish a single value container with an empty coding path.")
+            }
             // get any existing value - type of the `get` call is based on the key type
             if let indexValue = finalCodingKey.intValue {
                 existingValue = try get(obj: objectId, index: UInt64(indexValue))

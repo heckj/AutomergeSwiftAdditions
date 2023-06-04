@@ -28,10 +28,17 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
             containerType: .Value,
             strategy: impl.schemaStrategy
         ) {
-        case let .success((objId, codingkey)):
-            self.objectId = objId
-            self.codingkey = codingkey
-            self.lookupError = nil
+        case let .success(objId):
+            if let lastCodingKey = codingPath.last {
+                self.objectId = objId
+                self.codingkey = AnyCodingKey(lastCodingKey)
+                self.lookupError = nil
+            } else {
+                self.objectId = objId
+                self.codingkey = nil
+                self.lookupError = CodingKeyLookupError
+                    .noPathForSingleValue("Attempting to encode a value with an empty coding path.")
+            }
         case let .failure(capturedError):
             self.objectId = nil
             self.codingkey = nil

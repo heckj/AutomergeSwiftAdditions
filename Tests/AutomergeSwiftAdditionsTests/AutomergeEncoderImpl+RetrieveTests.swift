@@ -54,9 +54,8 @@ final class RetrieveObjectIdTests: XCTestCase {
         )
 
         switch result {
-        case let .success((objectId, codingKeyInstance)):
+        case let .success(objectId):
             XCTAssertEqual(objectId, setupCache["nestedMap"])
-            XCTAssertEqual(codingKeyInstance, AnyCodingKey("notes"))
         case .failure:
             XCTFail("Failure looking up full path to notes as a value")
         }
@@ -78,8 +77,7 @@ final class RetrieveObjectIdTests: XCTestCase {
         )
 
         switch result {
-        case let .success((objectId, codingKeyInstance)):
-            XCTAssertEqual(codingKeyInstance, AnyCodingKey.ROOT)
+        case let .success(objectId):
             let pathToNewMap = try! doc.path(obj: objectId).stringPath()
             XCTAssertEqual(pathToNewMap, ".list.[1]")
         case let .failure(err):
@@ -103,8 +101,7 @@ final class RetrieveObjectIdTests: XCTestCase {
         )
 
         switch result {
-        case let .success((objectId, codingKeyInstance)):
-            XCTAssertEqual(codingKeyInstance, AnyCodingKey.ROOT)
+        case let .success(objectId):
             let pathToNewMap = try! doc.path(obj: objectId).stringPath()
             XCTAssertEqual(pathToNewMap, ".redfish.[0].bluefish.yellowfish")
         case let .failure(err):
@@ -128,8 +125,7 @@ final class RetrieveObjectIdTests: XCTestCase {
         )
 
         switch result {
-        case let .success((objectId, codingKeyInstance)):
-            XCTAssertEqual(codingKeyInstance, AnyCodingKey.ROOT)
+        case let .success(objectId):
             let pathToNewMap = try! doc.path(obj: objectId).stringPath()
             XCTAssertEqual(pathToNewMap, ".redfish.[0].bluefish.[0]")
         case let .failure(err):
@@ -153,8 +149,7 @@ final class RetrieveObjectIdTests: XCTestCase {
         )
 
         switch result {
-        case let .success((objectId, codingKeyInstance)):
-            XCTAssertEqual(codingKeyInstance.stringValue, "yellowfish")
+        case let .success(objectId):
             let pathToNewMap = try! doc.path(obj: objectId).stringPath()
             XCTAssertEqual(pathToNewMap, ".redfish.[0].bluefish")
         case let .failure(err):

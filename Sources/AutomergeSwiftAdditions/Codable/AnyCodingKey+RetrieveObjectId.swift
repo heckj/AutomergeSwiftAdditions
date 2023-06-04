@@ -40,8 +40,7 @@ extension AnyCodingKey {
         path: [CodingKey],
         containerType: EncodingContainerType,
         strategy: SchemaStrategy
-    ) -> Result<(ObjId, AnyCodingKey), Error> {
-        // FIXME: refactor the signature (and code flow) to return just an ObjId or Error
+    ) -> Result<ObjId, Error> {
         // with .Value container type returning second-to-last ObjectId, and expecting the
         // caller to know they'll need to special case whatever they do with the final piece.
 
@@ -93,7 +92,7 @@ extension AnyCodingKey {
         if path.isEmpty {
             switch containerType {
             case .Key:
-                return .success((ObjId.ROOT, AnyCodingKey.ROOT))
+                return .success(ObjId.ROOT)
             case .Index:
                 return .failure(
                     CodingKeyLookupError
@@ -399,7 +398,7 @@ extension AnyCodingKey {
                             case .Map:
                                 if containerType == .Key {
                                     tracePrint("Found Object container with ObjectId \(objId).")
-                                    return .success((objId, AnyCodingKey("")))
+                                    return .success(objId)
                                 } else {
                                     return .failure(
                                         CodingKeyLookupError
@@ -413,7 +412,7 @@ extension AnyCodingKey {
                                 //                            objType))
                                 if containerType == .Index {
                                     tracePrint("Found List container with ObjectId \(objId).")
-                                    return .success((objId, AnyCodingKey("")))
+                                    return .success(objId)
                                 } else {
                                     return .failure(
                                         CodingKeyLookupError
@@ -456,7 +455,7 @@ extension AnyCodingKey {
                                     indent: path.count - 1,
                                     "Created new List container with ObjectId \(newObjectId)."
                                 )
-                                return .success((newObjectId, AnyCodingKey("")))
+                                return .success(newObjectId)
                             } else {
                                 // need to create a map within the list
                                 let newObjectId = try document.insertObject(
@@ -469,7 +468,7 @@ extension AnyCodingKey {
                                     indent: path.count - 1,
                                     "Created new Map container with ObjectId \(newObjectId)."
                                 )
-                                return .success((newObjectId, AnyCodingKey("")))
+                                return .success(newObjectId)
                             }
                         }
                     }
@@ -501,7 +500,7 @@ extension AnyCodingKey {
                                     //                            EncoderPathCache.upsert(extendedPath, value: (objId,
                                     //                            objType))
                                     tracePrint(indent: path.count - 1, "Found Map container with ObjectId \(objId).")
-                                    return .success((objId, AnyCodingKey("")))
+                                    return .success(objId)
                                 } else {
                                     return .failure(
                                         CodingKeyLookupError
@@ -515,7 +514,7 @@ extension AnyCodingKey {
                                     //                            EncoderPathCache.upsert(extendedPath, value: (objId,
                                     //                            objType))
                                     tracePrint(indent: path.count - 1, "Found List container with ObjectId \(objId).")
-                                    return .success((objId, AnyCodingKey("")))
+                                    return .success(objId)
                                 } else {
                                     return .failure(
                                         CodingKeyLookupError
@@ -558,7 +557,7 @@ extension AnyCodingKey {
                                     indent: path.count - 1,
                                     "Created new List container with ObjectId \(newObjectId)."
                                 )
-                                return .success((newObjectId, AnyCodingKey("")))
+                                return .success(newObjectId)
                             } else {
                                 // need to create a map within the list
                                 let newObjectId = try document.putObject(
@@ -571,7 +570,7 @@ extension AnyCodingKey {
                                     indent: path.count - 1,
                                     "Created new Map container with ObjectId \(newObjectId)."
                                 )
-                                return .success((newObjectId, AnyCodingKey("")))
+                                return .success(newObjectId)
                             }
                         }
                     }
@@ -583,14 +582,14 @@ extension AnyCodingKey {
             if path.count < 2 {
                 // corner case where the root encoder (equivalent to position -1 in the matchingObjectIds) isn't in the
                 // lookup list
-                return .success((ObjId.ROOT, AnyCodingKey(finalpiece)))
+                return .success(ObjId.ROOT)
             } else {
                 guard let containerObjectId = matchingObjectIds[path.count - 2] else {
                     fatalError(
                         "objectId lookups failed to identify an object Id for the last element in path: \(path)"
                     )
                 }
-                return .success((containerObjectId, AnyCodingKey(finalpiece)))
+                return .success(containerObjectId)
             }
         }
     }
