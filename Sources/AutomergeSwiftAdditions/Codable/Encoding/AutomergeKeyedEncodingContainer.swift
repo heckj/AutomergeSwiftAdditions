@@ -48,8 +48,7 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         self.impl = impl
         self.codingPath = codingPath
         self.document = doc
-        switch AnyCodingKey.retrieveObjectId(
-            document: doc,
+        switch doc.retrieveObjectId(
             path: codingPath,
             containerType: .Key,
             strategy: impl.schemaStrategy

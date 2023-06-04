@@ -38,8 +38,7 @@ extension AutomergeDecoderImpl: Decoder {
     @usableFromInline func container<Key>(keyedBy _: Key.Type) throws ->
         KeyedDecodingContainer<Key> where Key: CodingKey
     {
-        let result = AnyCodingKey.retrieveObjectId(
-            document: self.doc,
+        let result = doc.retrieveObjectId(
             path: codingPath,
             containerType: .Key,
             strategy: .readonly
@@ -66,8 +65,7 @@ extension AutomergeDecoderImpl: Decoder {
     }
 
     @usableFromInline func unkeyedContainer() throws -> UnkeyedDecodingContainer {
-        let result = AnyCodingKey.retrieveObjectId(
-            document: self.doc,
+        let result = doc.retrieveObjectId(
             path: codingPath,
             containerType: .Index,
             strategy: .readonly
@@ -94,8 +92,7 @@ extension AutomergeDecoderImpl: Decoder {
     }
 
     @usableFromInline func singleValueContainer() throws -> SingleValueDecodingContainer {
-        let result = AnyCodingKey.retrieveObjectId(
-            document: self.doc,
+        let result = doc.retrieveObjectId(
             path: codingPath,
             containerType: .Value,
             strategy: .readonly

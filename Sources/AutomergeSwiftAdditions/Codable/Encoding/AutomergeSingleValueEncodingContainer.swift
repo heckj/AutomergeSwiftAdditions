@@ -22,8 +22,7 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
         self.impl = impl
         self.codingPath = codingPath
         self.document = doc
-        switch AnyCodingKey.retrieveObjectId(
-            document: doc,
+        switch doc.retrieveObjectId(
             path: codingPath,
             containerType: .Value,
             strategy: impl.schemaStrategy

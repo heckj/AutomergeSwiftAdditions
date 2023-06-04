@@ -26,7 +26,7 @@ public enum CodingKeyLookupError: LocalizedError {
     case NoPathForSingleValue(String)
     /// An underlying Automerge Document error.
     case AutomergeDocError(Error)
-    
+
     /// A localized message describing the error.
     public var errorDescription: String? {
         switch self {

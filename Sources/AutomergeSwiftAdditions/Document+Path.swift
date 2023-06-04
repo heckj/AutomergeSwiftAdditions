@@ -21,8 +21,7 @@ extension Document {
         if codingPath.isEmpty {
             return ObjId.ROOT
         }
-        let result = AnyCodingKey.retrieveObjectId(
-            document: self,
+        let result = retrieveObjectId(
             path: codingPath,
             containerType: .Value,
             strategy: .readonly

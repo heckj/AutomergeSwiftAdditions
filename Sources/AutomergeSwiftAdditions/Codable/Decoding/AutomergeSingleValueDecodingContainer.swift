@@ -173,8 +173,7 @@ struct AutomergeSingleValueDecodingContainer: SingleValueDecodingContainer {
         case is Text.Type:
             // AutomergeValue in this case only knows that it's a text object, but not the value
             // so we backtrack and retrieve the Object Id for the text and assemble it directly.
-            let result = AnyCodingKey.retrieveObjectId(
-                document: impl.doc,
+            let result = impl.doc.retrieveObjectId(
                 path: codingPath,
                 containerType: .Index,
                 strategy: .readonly
