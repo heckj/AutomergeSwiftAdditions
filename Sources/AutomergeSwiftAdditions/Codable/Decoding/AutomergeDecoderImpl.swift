@@ -104,7 +104,7 @@ extension AutomergeDecoderImpl: Decoder {
         case let .success(objectId):
             guard let finalKey = codingPath.last else {
                 throw CodingKeyLookupError
-                    .noPathForSingleValue("Attempting to establish a single value container with an empty coding path.")
+                    .NoPathForSingleValue("Attempting to establish a single value container with an empty coding path.")
             }
             let finalAutomergeValue: Value?
             if let indexValue = finalKey.intValue {

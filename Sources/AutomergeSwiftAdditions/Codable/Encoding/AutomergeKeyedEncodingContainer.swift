@@ -72,7 +72,7 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
             // If the error wasn't captured for some reason, drop back to a more general error exposing
             // the precondition failure.
             return CodingKeyLookupError
-                .unexpectedLookupFailure(
+                .UnexpectedLookupFailure(
                     "Encoding called on KeyedContainer when ObjectId is nil, and there was no recorded lookup error for the path \(self.codingPath)"
                 )
         }
@@ -257,7 +257,7 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
             if let existingNode = try document.get(obj: objectId, key: key.stringValue) {
                 guard case let .Object(textId, .Text) = existingNode else {
                     throw CodingKeyLookupError
-                        .mismatchedSchema(
+                        .MismatchedSchema(
                             "Text Encoding on KeyedContainer at \(self.codingPath) exists and is \(existingNode), not Text."
                         )
                 }

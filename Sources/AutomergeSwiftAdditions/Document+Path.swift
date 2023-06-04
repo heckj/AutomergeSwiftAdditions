@@ -32,7 +32,7 @@ extension Document {
             let existingValue: Value?
             guard let finalCodingKey = codingPath.last else {
                 throw CodingKeyLookupError
-                    .noPathForSingleValue("Attempting to establish a single value container with an empty coding path.")
+                    .NoPathForSingleValue("Attempting to establish a single value container with an empty coding path.")
             }
             // get any existing value - type of the `get` call is based on the key type
             if let indexValue = finalCodingKey.intValue {

@@ -3,51 +3,57 @@ import Foundation
 public enum CodingKeyLookupError: LocalizedError {
     /// An error that represents a coding container was unable to look up a relevant Automerge objectId and was unable
     /// to capture a more specific error.
-    case unexpectedLookupFailure(String)
+    case UnexpectedLookupFailure(String)
     /// The path element is not valid.
-    case invalidPathElement(String)
+    case InvalidPathElement(String)
     /// The path element, structured as a Index location, doesn't include an index value.
-    case emptyListIndex(String)
+    case EmptyListIndex(String)
     /// The list index requested was longer than the list in the Document.
-    case indexOutOfBounds(String)
-
-    case invalidValueLookup(String)
-    case invalidIndexLookup(String)
-    case pathExtendsThroughText(String)
-    case pathExtendsThroughScalar(String)
-    case mismatchedSchema(String)
-
-    // schema is missing beyond a certain point - only in readOnly mode
-    case schemaMissing(String)
-
+    case IndexOutOfBounds(String)
+    /// The path provided to look up a value is invalid.
+    case InvalidValueLookup(String)
+    /// The path provided to look up an index is invalid.
+    case InvalidIndexLookup(String)
+    /// The path provided extends through Automerge Text, a leaf node in the schema.
+    case PathExtendsThroughText(String)
+    /// The path provided extends through an Automerge ScalarValue, a leaf node in the schema.
+    case PathExtendsThroughScalar(String)
+    /// The path provided doesn't match the schema within the Automerge Document.
+    case MismatchedSchema(String)
+    /// The path provided expected schema within the Automerge document that doesn't exist.
+    case SchemaMissing(String)
     /// No coding path was provided for encoding a single value into the Automerge document.
-    case noPathForSingleValue(String)
-
-    /// A localized message describing what error occurred.
+    case NoPathForSingleValue(String)
+    /// An underlying Automerge Document error.
+    case AutomergeDocError(Error)
+    
+    /// A localized message describing the error.
     public var errorDescription: String? {
         switch self {
-        case let .unexpectedLookupFailure(str):
+        case let .UnexpectedLookupFailure(str):
             return str
-        case let .invalidPathElement(str):
+        case let .InvalidPathElement(str):
             return str
-        case let .emptyListIndex(str):
+        case let .EmptyListIndex(str):
             return str
-        case let .indexOutOfBounds(str):
+        case let .IndexOutOfBounds(str):
             return str
-        case let .invalidValueLookup(str):
+        case let .InvalidValueLookup(str):
             return str
-        case let .invalidIndexLookup(str):
+        case let .InvalidIndexLookup(str):
             return str
-        case let .pathExtendsThroughText(str):
+        case let .PathExtendsThroughText(str):
             return str
-        case let .pathExtendsThroughScalar(str):
+        case let .PathExtendsThroughScalar(str):
             return str
-        case let .schemaMissing(str):
+        case let .SchemaMissing(str):
             return str
-        case let .mismatchedSchema(str):
+        case let .MismatchedSchema(str):
             return str
-        case let .noPathForSingleValue(str):
+        case let .NoPathForSingleValue(str):
             return str
+        case let .AutomergeDocError(err):
+            return "An underlying Automerge error: \(err.localizedDescription)"
         }
     }
 
