@@ -48,7 +48,12 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         self.impl = impl
         self.codingPath = codingPath
         self.document = doc
-        switch AnyCodingKey.retrieveObjectId(document: doc, path: codingPath, containerType: .Key) {
+        switch AnyCodingKey.retrieveObjectId(
+            document: doc,
+            path: codingPath,
+            containerType: .Key,
+            strategy: impl.schemaStrategy
+        ) {
         case let .success((objId, _)):
             self.objectId = objId
             self.lookupError = nil
@@ -225,7 +230,8 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         let newEncoder = AutomergeEncoderImpl(
             userInfo: impl.userInfo,
             codingPath: newPath,
-            doc: self.document
+            doc: self.document,
+            strategy: impl.schemaStrategy
         )
         switch T.self {
         case is Date.Type:

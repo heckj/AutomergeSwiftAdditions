@@ -12,7 +12,7 @@ public enum SchemaStrategy {
     /// path
     /// is a leaf-node
     /// (a scalar value, or a Text instance), then the lookup captures the schema error for later presentation.
-    case `default`
+    case createWhenNeeded
 
     /// Creates schema, irregardless of existing schema.
     ///

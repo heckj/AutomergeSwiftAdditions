@@ -5,7 +5,7 @@ public struct AutomergeEncoder {
     var doc: Document
     var schemaStrategy: SchemaStrategy
 
-    public init(doc: Document, strategy: SchemaStrategy = .default) {
+    public init(doc: Document, strategy: SchemaStrategy = .createWhenNeeded) {
         self.doc = doc
         self.schemaStrategy = strategy
     }
@@ -14,7 +14,8 @@ public struct AutomergeEncoder {
         let encoder = AutomergeEncoderImpl(
             userInfo: userInfo,
             codingPath: [],
-            doc: self.doc
+            doc: self.doc,
+            strategy: self.schemaStrategy
         )
         try value.encode(to: encoder)
     }
