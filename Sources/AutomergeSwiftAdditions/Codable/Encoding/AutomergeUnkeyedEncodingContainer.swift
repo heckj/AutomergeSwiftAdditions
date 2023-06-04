@@ -24,8 +24,7 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         // array = impl.array!
         self.codingPath = codingPath
         self.document = doc
-        switch AnyCodingKey.retrieveObjectId(
-            document: doc,
+        switch doc.retrieveObjectId(
             path: codingPath,
             containerType: .Index,
             strategy: impl.schemaStrategy

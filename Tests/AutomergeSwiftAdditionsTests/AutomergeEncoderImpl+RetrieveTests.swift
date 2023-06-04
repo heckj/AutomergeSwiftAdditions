@@ -46,8 +46,7 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("notes"),
         ]
 
-        let result = AnyCodingKey.retrieveObjectId(
-            document: doc,
+        let result = doc.retrieveObjectId(
             path: fullCodingPath,
             containerType: .Value,
             strategy: .createWhenNeeded
@@ -69,8 +68,7 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey(1),
         ]
 
-        let result = AnyCodingKey.retrieveObjectId(
-            document: doc,
+        let result = doc.retrieveObjectId(
             path: newCodingPath,
             containerType: .Key,
             strategy: .createWhenNeeded
@@ -93,8 +91,7 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("yellowfish"),
         ]
 
-        let result = AnyCodingKey.retrieveObjectId(
-            document: doc,
+        let result = doc.retrieveObjectId(
             path: newCodingPath,
             containerType: .Key,
             strategy: .createWhenNeeded
@@ -117,8 +114,7 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey(0),
         ]
 
-        let result = AnyCodingKey.retrieveObjectId(
-            document: doc,
+        let result = doc.retrieveObjectId(
             path: newCodingPath,
             containerType: .Index,
             strategy: .createWhenNeeded
@@ -141,8 +137,7 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("yellowfish"),
         ]
 
-        let result = AnyCodingKey.retrieveObjectId(
-            document: doc,
+        let result = doc.retrieveObjectId(
             path: newCodingPath,
             containerType: .Value,
             strategy: .createWhenNeeded
@@ -165,8 +160,7 @@ final class RetrieveObjectIdTests: XCTestCase {
             AnyCodingKey("yellowfish"),
         ]
 
-        let result = AnyCodingKey.retrieveObjectId(
-            document: doc,
+        let result = doc.retrieveObjectId(
             path: newCodingPath,
             containerType: .Value,
             strategy: .createWhenNeeded
