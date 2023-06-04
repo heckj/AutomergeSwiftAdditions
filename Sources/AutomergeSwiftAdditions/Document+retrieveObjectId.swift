@@ -89,15 +89,10 @@ extension Document {
             switch containerType {
             case .Key:
                 return .success(ObjId.ROOT)
-            case .Index:
+            case .Index, .Value:
                 return .failure(
                     CodingKeyLookupError
                         .InvalidIndexLookup("An empty path refers to ROOT and is always a map.")
-                )
-            case .Value:
-                return .failure(
-                    CodingKeyLookupError
-                        .InvalidValueLookup("An empty path refers to ROOT and is always a map.")
                 )
             }
         }
