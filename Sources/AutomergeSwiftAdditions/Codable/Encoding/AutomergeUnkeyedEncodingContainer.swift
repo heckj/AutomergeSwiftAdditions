@@ -30,7 +30,7 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
             containerType: .Index,
             strategy: impl.schemaStrategy
         ) {
-        case let .success((objId, _)):
+        case let .success(objId):
             self.objectId = objId
             self.lookupError = nil
         case let .failure(capturedError):

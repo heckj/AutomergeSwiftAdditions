@@ -180,7 +180,7 @@ struct AutomergeSingleValueDecodingContainer: SingleValueDecodingContainer {
                 strategy: .readonly
             )
             switch result {
-            case let .success((objectId, _)):
+            case let .success(objectId):
                 let type = impl.doc.objectType(obj: objectId)
                 guard type == .Text else {
                     throw DecodingError.dataCorrupted(

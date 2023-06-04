@@ -54,7 +54,7 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
             containerType: .Key,
             strategy: impl.schemaStrategy
         ) {
-        case let .success((objId, _)):
+        case let .success(objId):
             self.objectId = objId
             self.lookupError = nil
         case let .failure(capturedError):

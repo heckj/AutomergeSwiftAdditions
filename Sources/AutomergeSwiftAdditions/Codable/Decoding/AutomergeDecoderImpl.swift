@@ -45,7 +45,7 @@ extension AutomergeDecoderImpl: Decoder {
             strategy: .readonly
         )
         switch result {
-        case let .success((objectId, _)):
+        case let .success(objectId):
             let objectType = doc.objectType(obj: objectId)
             guard case .Map = objectType else {
                 throw DecodingError.typeMismatch([String: AutomergeValue].self, DecodingError.Context(
@@ -73,7 +73,7 @@ extension AutomergeDecoderImpl: Decoder {
             strategy: .readonly
         )
         switch result {
-        case let .success((objectId, _)):
+        case let .success(objectId):
             let objectType = doc.objectType(obj: objectId)
             guard case .List = objectType else {
                 throw DecodingError.typeMismatch([String: AutomergeValue].self, DecodingError.Context(
@@ -101,8 +101,11 @@ extension AutomergeDecoderImpl: Decoder {
             strategy: .readonly
         )
         switch result {
-        case let .success((objectId, finalKey)):
-
+        case let .success(objectId):
+            guard let finalKey = codingPath.last else {
+                throw CodingKeyLookupError
+                    .noPathForSingleValue("Attempting to establish a single value container with an empty coding path.")
+            }
             let finalAutomergeValue: Value?
             if let indexValue = finalKey.intValue {
                 finalAutomergeValue = try doc.get(obj: objectId, index: UInt64(indexValue))
