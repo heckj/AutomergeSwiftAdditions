@@ -161,6 +161,7 @@ struct AutomergeUnkeyedDecodingContainer: UnkeyedDecodingContainer {
             let retrievedValue = try getNextValue(ofType: Text.self)
             if case let Value.Object(objectId, .Text) = retrievedValue {
                 let stringValue = try impl.doc.text(obj: objectId)
+                currentIndex += 1
                 return Text(stringValue) as! T
             } else {
                 throw DecodingError.typeMismatch(T.self, .init(
