@@ -32,17 +32,6 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Boolean(true)))
     }
 
-    func testErrorEncode_Bool() throws {
-        let impl = AutomergeEncoderImpl(
-            userInfo: [:],
-            codingPath: [AnyCodingKey("nothere")],
-            doc: doc,
-            strategy: .readonly
-        )
-        rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
-        XCTAssertThrowsError(try rootKeyedContainer.encode(true, forKey: .value))
-    }
-
     func testSimpleKeyEncode_Float() throws {
         try rootKeyedContainer.encode(Float(4.3), forKey: .value)
         if case let .Scalar(.F64(floatValue)) = try doc.get(obj: ObjId.ROOT, key: "value") {
@@ -73,17 +62,6 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
         XCTAssertThrowsError(
             try rootKeyedContainer.encode(Double.nan, forKey: .value)
         )
-    }
-
-    func testErrorEncode_Double() throws {
-        let impl = AutomergeEncoderImpl(
-            userInfo: [:],
-            codingPath: [AnyCodingKey("nothere")],
-            doc: doc,
-            strategy: .readonly
-        )
-        rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
-        XCTAssertThrowsError(try rootKeyedContainer.encode(Double(8.16), forKey: .value))
     }
 
     func testSimpleKeyEncode_Int8() throws {
@@ -136,6 +114,28 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
 //        try rootKeyedContainer.encode(Counter(4), forKey: .value)
 //        XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Uint(4)))
 //    }
+
+    func testErrorEncode_Bool() throws {
+        let impl = AutomergeEncoderImpl(
+            userInfo: [:],
+            codingPath: [AnyCodingKey("nothere")],
+            doc: doc,
+            strategy: .readonly
+        )
+        rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
+        XCTAssertThrowsError(try rootKeyedContainer.encode(true, forKey: .value))
+    }
+
+    func testErrorEncode_Double() throws {
+        let impl = AutomergeEncoderImpl(
+            userInfo: [:],
+            codingPath: [AnyCodingKey("nothere")],
+            doc: doc,
+            strategy: .readonly
+        )
+        rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
+        XCTAssertThrowsError(try rootKeyedContainer.encode(Double(8.16), forKey: .value))
+    }
 
     func testErrorEncode_Int() throws {
         let impl = AutomergeEncoderImpl(
