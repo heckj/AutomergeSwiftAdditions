@@ -269,6 +269,40 @@ final class AutomergeSingleValueEncoderImplTests: XCTestCase {
         XCTAssertThrowsError(try singleValueContainer.encode(UInt64(8)))
     }
 
+    func testErrorEncode_Text() throws {
+        let impl = AutomergeEncoderImpl(
+            userInfo: [:],
+            codingPath: [AnyCodingKey("nothere"), AnyCodingKey("value")],
+            doc: doc,
+            strategy: .readonly
+        )
+        singleValueContainer = impl.singleValueContainer()
+        XCTAssertThrowsError(try singleValueContainer.encode(Text("hi")))
+    }
+
+    func testErrorEncode_Date() throws {
+        let impl = AutomergeEncoderImpl(
+            userInfo: [:],
+            codingPath: [AnyCodingKey("nothere"), AnyCodingKey("value")],
+            doc: doc,
+            strategy: .readonly
+        )
+        let earlyDate = try Date("1941-04-26T08:17:00Z", strategy: .iso8601)
+        singleValueContainer = impl.singleValueContainer()
+        XCTAssertThrowsError(try singleValueContainer.encode(earlyDate))
+    }
+
+    func testErrorEncode_Data() throws {
+        let impl = AutomergeEncoderImpl(
+            userInfo: [:],
+            codingPath: [AnyCodingKey("nothere"), AnyCodingKey("value")],
+            doc: doc,
+            strategy: .readonly
+        )
+        singleValueContainer = impl.singleValueContainer()
+        XCTAssertThrowsError(try singleValueContainer.encode(Data("Hello".utf8)))
+    }
+
     func testErrorEncode_Codable() throws {
         struct SimpleStruct: Codable {
             let a: String
