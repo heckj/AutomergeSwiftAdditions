@@ -125,4 +125,24 @@ final class AutomergeDecoderTests: XCTestCase {
         XCTAssertEqual(decodedStruct.name, "Joe")
         XCTAssertEqual(decodedStruct.votes, [3, 4, 5])
     }
+
+    func testListOfTextDecode() throws {
+        doc = Document()
+        let list = try! doc.putObject(obj: ObjId.ROOT, key: "list", ty: .List)
+        setupCache["list"] = list
+        let text0 = try! doc.insertObject(obj: list, index: 0, ty: .Text)
+        try doc.spliceText(obj: text0, start: 0, delete: 0, value: "Hello?")
+        let text1 = try! doc.insertObject(obj: list, index: 1, ty: .Text)
+        try doc.spliceText(obj: text1, start: 0, delete: 0, value: "Hello!")
+
+        struct ListOfText: Codable {
+            let list: [Text]
+        }
+
+        let decoder = AutomergeDecoder(doc: doc)
+        let decodedStruct = try decoder.decode(ListOfText.self)
+        XCTAssertEqual(decodedStruct.list.count, 2)
+        XCTAssertEqual(decodedStruct.list[0].description, "Hello?")
+        XCTAssertEqual(decodedStruct.list[1].description, "Hello!")
+    }
 }

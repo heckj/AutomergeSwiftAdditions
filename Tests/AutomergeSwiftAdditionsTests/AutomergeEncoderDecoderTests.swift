@@ -315,19 +315,19 @@ final class AutomergeEncoderDecoderTests: XCTestCase {
         XCTAssertEqual(Data("Hello".utf8), decodedStruct.list.first)
     }
 
-//    func testListOfTextEncodeDecode() throws {
-//        struct WrapperStruct: Codable, Equatable {
-//            let list: [Text]
-//        }
-//
-//        let encoder = AutomergeEncoder(doc: doc)
-//        let decoder = AutomergeDecoder(doc: doc)
-//
-//        let topLevel = WrapperStruct(list: [Text("hi")])
-//
-//        try encoder.encode(topLevel)
-//        let decodedStruct = try decoder.decode(WrapperStruct.self)
-//        XCTAssertEqual(decodedStruct.list.count, 1)
-//        XCTAssertEqual("hi", decodedStruct.list.first?.description)
-//    }
+    func testListOfTextEncodeDecode() throws {
+        struct WrapperStruct: Codable, Equatable {
+            let list: [Text]
+        }
+
+        let encoder = AutomergeEncoder(doc: doc)
+        let decoder = AutomergeDecoder(doc: doc)
+
+        let topLevel = WrapperStruct(list: [Text("hi")])
+
+        try encoder.encode(topLevel)
+        let decodedStruct = try decoder.decode(WrapperStruct.self)
+        XCTAssertEqual(decodedStruct.list.count, 1)
+        XCTAssertEqual("hi", decodedStruct.list.first?.description)
+    }
 }
