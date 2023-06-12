@@ -1,11 +1,16 @@
 import class Automerge.Document
 import struct Automerge.ObjId
 
+import OSLog
+
+let logger = Logger(subsystem: "com.github.heckj.AutomergeSwiftAdditions", category: "codingpath")
+
 @usableFromInline
 func tracePrint(indent: Int = 0, _ stringval: String) {
     #if DEBUG
     let prefix = String(repeating: " ", count: indent)
-    print(prefix, stringval)
+    //print(prefix, stringval)
+    logger.debug("\(prefix, privacy: .public)\(stringval, privacy: .public)")
     #endif
 }
 
