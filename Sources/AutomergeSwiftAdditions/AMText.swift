@@ -98,19 +98,15 @@ func updateText(doc: Document, objId: ObjId, key: String, newText: String) throw
     if case let .Object(textId, .Text) = try! doc.get(obj: objId, key: key) {
         let current = try! doc.text(obj: textId).utf8
         let diff: CollectionDifference<String.UTF8View.Element> = newText.utf8.difference(from: current)
-        var inserted = 0
-        var removed = 0
         for change in diff {
             switch change {
             case let .insert(offset, element, _):
-                let index = offset - removed + inserted
+                let index = offset
                 let char = String(bytes: [element], encoding: .utf8)
                 try! doc.spliceText(obj: textId, start: UInt64(index), delete: 0, value: char)
-                inserted += 1
             case let .remove(offset, _, _):
-                let index = offset - removed + inserted
+                let index = offset
                 try! doc.spliceText(obj: textId, start: UInt64(index), delete: 1)
-                removed += 1
             }
         }
     } else {
