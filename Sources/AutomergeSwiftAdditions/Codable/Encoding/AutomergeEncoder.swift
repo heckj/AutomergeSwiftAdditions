@@ -10,6 +10,14 @@ public struct AutomergeEncoder {
         self.schemaStrategy = strategy
     }
 
+    public func encode<T: Encodable>(_ value: T?) throws {
+        // capture any top-level optional types being encoded, and encode as
+        // the underlying type if the provided value isn't nil.
+        if let definiteValue = value {
+            try self.encode(definiteValue)
+        }
+    }
+
     public func encode<T: Encodable>(_ value: T) throws {
         let encoder = AutomergeEncoderImpl(
             userInfo: userInfo,

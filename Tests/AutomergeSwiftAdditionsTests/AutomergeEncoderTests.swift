@@ -371,4 +371,16 @@ final class AutomergeEncoderTests: XCTestCase {
             print(error)
         }
     }
+
+    func testOptionalTypeEncode() throws {
+        let doc = Document()
+        let automergeEncoder = AutomergeEncoder(doc: doc)
+
+        struct TestModel: Codable {
+            var notes: [String]
+        }
+
+        let model: TestModel? = TestModel(notes: ["Hello"])
+        XCTAssertNoThrow(try automergeEncoder.encode(model))
+    }
 }
