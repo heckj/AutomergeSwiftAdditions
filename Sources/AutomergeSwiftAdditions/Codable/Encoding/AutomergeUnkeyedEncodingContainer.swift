@@ -3,6 +3,9 @@ import class Automerge.Document
 import struct Automerge.ObjId
 import protocol Automerge.ScalarValueRepresentable
 import Foundation
+import OSLog
+
+private let logger = Logger(subsystem: "com.github.heckj.AutomergeSwiftAdditions", category: "AutomergeEncoder")
 
 struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     let impl: AutomergeEncoderImpl
@@ -36,7 +39,7 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
             self.objectId = nil
             self.lookupError = capturedError
         }
-        tracePrint("Establishing Unkeyed Encoding Container for path \(codingPath.map { AnyCodingKey($0) }))")
+        logger.debug("Establishing Unkeyed Encoding Container for path \(codingPath.map { AnyCodingKey($0) })")
     }
 
     fileprivate func reportBestError() -> Error {

@@ -3,7 +3,7 @@ import struct Automerge.ObjId
 
 import OSLog
 
-let logger = Logger(subsystem: "com.github.heckj.AutomergeSwiftAdditions", category: "codingpath")
+private let logger = Logger(subsystem: "com.github.heckj.AutomergeSwiftAdditions", category: "codingpath")
 
 @usableFromInline
 func tracePrint(indent: Int = 0, _ stringval: String) {
