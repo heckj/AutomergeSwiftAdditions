@@ -9,7 +9,7 @@ let logger = Logger(subsystem: "com.github.heckj.AutomergeSwiftAdditions", categ
 func tracePrint(indent: Int = 0, _ stringval: String) {
     #if DEBUG
     let prefix = String(repeating: " ", count: indent)
-    //print(prefix, stringval)
+    // print(prefix, stringval)
     logger.debug("\(prefix, privacy: .public)\(stringval, privacy: .public)")
     #endif
 }
