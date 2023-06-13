@@ -26,9 +26,9 @@ Punchlist:
 - [x] test text encoding variations - insert, delete, mixes - for correct results
 
 - [x] measure (and track) code coverage
-  - [ ] expand code coverage for encoding - corner cases
-  - [ ] encoder to 80% with failure cases
-  - [ ] lookup/schema creation to 80% with failure cases
+  - [x] expand code coverage for encoding - corner cases
+  - [x] encoder to 80% with failure cases
+  - [x] lookup/schema creation to 80% with failure cases
 
 - [ ] expand strategy to allow for strictly type checking when encoding single-value scalar values
 
