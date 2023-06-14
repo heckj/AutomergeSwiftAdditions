@@ -151,10 +151,37 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
                         "No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self))."
                     )
             }
+            let valueToWrite = downcastDate.toScalarValue()
             if let indexToWrite = codingkey.intValue {
-                try document.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastDate.toScalarValue())
+                if let testCurrentValue = try document.get(obj: objectId, index: UInt64(indexToWrite)),
+                   TypeOfAutomergeValue.from(testCurrentValue) != TypeOfAutomergeValue.from(valueToWrite)
+                {
+                    // BLOW UP HERE
+                    throw EncodingError.invalidValue(
+                        value,
+                        EncodingError
+                            .Context(
+                                codingPath: codingPath,
+                                debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.from(valueToWrite)))"
+                            )
+                    )
+                }
+                try document.insert(obj: objectId, index: UInt64(indexToWrite), value: valueToWrite)
             } else {
-                try document.put(obj: objectId, key: codingkey.stringValue, value: downcastDate.toScalarValue())
+                if let testCurrentValue = try document.get(obj: objectId, key: codingkey.stringValue),
+                   TypeOfAutomergeValue.from(testCurrentValue) != TypeOfAutomergeValue.from(valueToWrite)
+                {
+                    // BLOW UP HERE
+                    throw EncodingError.invalidValue(
+                        value,
+                        EncodingError
+                            .Context(
+                                codingPath: codingPath,
+                                debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.from(valueToWrite)))"
+                            )
+                    )
+                }
+                try document.put(obj: objectId, key: codingkey.stringValue, value: valueToWrite)
             }
         case is Data.Type:
             // Capture and override the default encodable pathing for Data since
@@ -166,10 +193,43 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
                         "No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self))."
                     )
             }
+            let valueToWrite = downcastData.toScalarValue()
             if let indexToWrite = codingkey.intValue {
-                try document.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastData.toScalarValue())
+                if impl.cautiousWrite {
+                    if let testCurrentValue = try document.get(obj: objectId, index: UInt64(indexToWrite)),
+                       TypeOfAutomergeValue.from(testCurrentValue) != TypeOfAutomergeValue.from(valueToWrite)
+                    {
+                        // BLOW UP HERE
+                        throw EncodingError.invalidValue(
+                            value,
+                            EncodingError
+                                .Context(
+                                    codingPath: codingPath,
+                                    debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.from(valueToWrite)))"
+                                )
+                        )
+                    }
+                }
+
+                try document.insert(obj: objectId, index: UInt64(indexToWrite), value: valueToWrite)
             } else {
-                try document.put(obj: objectId, key: codingkey.stringValue, value: downcastData.toScalarValue())
+                if impl.cautiousWrite {
+                    if let testCurrentValue = try document.get(obj: objectId, key: codingkey.stringValue),
+                       TypeOfAutomergeValue.from(testCurrentValue) != TypeOfAutomergeValue.from(valueToWrite)
+                    {
+                        // BLOW UP HERE
+                        throw EncodingError.invalidValue(
+                            value,
+                            EncodingError
+                                .Context(
+                                    codingPath: codingPath,
+                                    debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.from(valueToWrite)))"
+                                )
+                        )
+                    }
+                }
+
+                try document.put(obj: objectId, key: codingkey.stringValue, value: valueToWrite)
             }
         case is Counter.Type:
             // Capture and override the default encodable pathing for Counter since
@@ -181,10 +241,41 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
                         "No coding key was found from looking up path \(codingPath) when encoding \(type(of: T.self))."
                     )
             }
+            let valueToWrite = downcastCounter.toScalarValue()
             if let indexToWrite = codingkey.intValue {
-                try document.insert(obj: objectId, index: UInt64(indexToWrite), value: downcastCounter.toScalarValue())
+                if impl.cautiousWrite {
+                    if let testCurrentValue = try document.get(obj: objectId, index: UInt64(indexToWrite)),
+                       TypeOfAutomergeValue.from(testCurrentValue) != TypeOfAutomergeValue.from(valueToWrite)
+                    {
+                        // BLOW UP HERE
+                        throw EncodingError.invalidValue(
+                            value,
+                            EncodingError
+                                .Context(
+                                    codingPath: codingPath,
+                                    debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.from(valueToWrite)))"
+                                )
+                        )
+                    }
+                }
+                try document.insert(obj: objectId, index: UInt64(indexToWrite), value: valueToWrite)
             } else {
-                try document.put(obj: objectId, key: codingkey.stringValue, value: downcastCounter.toScalarValue())
+                if impl.cautiousWrite {
+                    if let testCurrentValue = try document.get(obj: objectId, key: codingkey.stringValue),
+                       TypeOfAutomergeValue.from(testCurrentValue) != TypeOfAutomergeValue.from(valueToWrite)
+                    {
+                        // BLOW UP HERE
+                        throw EncodingError.invalidValue(
+                            value,
+                            EncodingError
+                                .Context(
+                                    codingPath: codingPath,
+                                    debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.from(valueToWrite)))"
+                                )
+                        )
+                    }
+                }
+                try document.put(obj: objectId, key: codingkey.stringValue, value: valueToWrite)
             }
         case is Text.Type:
             guard let codingkey = codingkey else {
@@ -247,10 +338,41 @@ struct AutomergeSingleValueEncodingContainer: SingleValueEncodingContainer {
         guard let objectId = self.objectId, let codingkey = self.codingkey else {
             throw reportBestError()
         }
+        let valueToWrite = value.toScalarValue()
         if let indexToWrite = codingkey.intValue {
-            try document.insert(obj: objectId, index: UInt64(indexToWrite), value: value.toScalarValue())
+            if impl.cautiousWrite {
+                if let testCurrentValue = try document.get(obj: objectId, index: UInt64(indexToWrite)),
+                   TypeOfAutomergeValue.from(testCurrentValue) != TypeOfAutomergeValue.from(valueToWrite)
+                {
+                    // BLOW UP HERE
+                    throw EncodingError.invalidValue(
+                        value,
+                        EncodingError
+                            .Context(
+                                codingPath: codingPath,
+                                debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.from(valueToWrite)))"
+                            )
+                    )
+                }
+            }
+            try document.insert(obj: objectId, index: UInt64(indexToWrite), value: valueToWrite)
         } else {
-            try document.put(obj: objectId, key: codingkey.stringValue, value: value.toScalarValue())
+            if impl.cautiousWrite {
+                if let testCurrentValue = try document.get(obj: objectId, key: codingkey.stringValue),
+                   TypeOfAutomergeValue.from(testCurrentValue) != TypeOfAutomergeValue.from(valueToWrite)
+                {
+                    // BLOW UP HERE
+                    throw EncodingError.invalidValue(
+                        value,
+                        EncodingError
+                            .Context(
+                                codingPath: codingPath,
+                                debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.from(valueToWrite)))"
+                            )
+                    )
+                }
+            }
+            try document.put(obj: objectId, key: codingkey.stringValue, value: valueToWrite)
         }
     }
 
