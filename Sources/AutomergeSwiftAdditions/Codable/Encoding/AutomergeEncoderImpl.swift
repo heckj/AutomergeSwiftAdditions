@@ -5,20 +5,28 @@ import struct Automerge.ObjId
 ///
 /// Instances of the class capture one of the various kinds of schema value types - single value, array, or object.
 /// The instance also tracks the dynamic state associated with that value as it encodes types you provide.
-class AutomergeEncoderImpl {
+final class AutomergeEncoderImpl {
     let userInfo: [CodingUserInfoKey: Any]
     let codingPath: [CodingKey]
     let document: Document
     let schemaStrategy: SchemaStrategy
+    let cautiousWrite: Bool
 
     // indicator that the singleValue has written a value
     var singleValueWritten: Bool = false
 
-    init(userInfo: [CodingUserInfoKey: Any], codingPath: [CodingKey], doc: Document, strategy: SchemaStrategy) {
+    init(
+        userInfo: [CodingUserInfoKey: Any],
+        codingPath: [CodingKey],
+        doc: Document,
+        strategy: SchemaStrategy,
+        cautiousWrite: Bool
+    ) {
         self.userInfo = userInfo
         self.codingPath = codingPath
         self.document = doc
         self.schemaStrategy = strategy
+        self.cautiousWrite = cautiousWrite
     }
 }
 

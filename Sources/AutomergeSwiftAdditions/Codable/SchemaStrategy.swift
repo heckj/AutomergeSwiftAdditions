@@ -2,8 +2,6 @@
 /// as
 /// compared to expected encoding.
 public enum SchemaStrategy {
-    // What we do while looking up if there's a schema mismatch:
-
     /// Creates schema where none exists, errors on schema mismatch.
     ///
     /// Basic schema checking for containers that creates relevant objects in Automerge at the relevant path doesn't
