@@ -30,7 +30,7 @@ Punchlist:
   - [x] encoder to 80% with failure cases
   - [x] lookup/schema creation to 80% with failure cases
 
-- [ ] expand strategy to allow for strictly type checking when encoding single-value scalar values
+- [x] expand strategy to allow for strictly type checking when encoding single-value scalar values
 
 - [x] strip out encoder duplicate structure that's created but not needed
   - [x] check performance impact for removing that extra stuff
