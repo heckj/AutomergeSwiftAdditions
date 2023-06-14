@@ -126,11 +126,11 @@ extension AutomergeDecoderImpl: Decoder {
                 finalAutomergeValue = try doc.get(obj: objectId, key: finalKey.stringValue)
             }
             guard let value = finalAutomergeValue else {
-                throw DecodingError.dataCorrupted(
-                    DecodingError.Context(
-                        codingPath: self.codingPath,
-                        debugDescription: "Attempted to read value at \(objectId) with coding key: \(finalKey), and no value was returned."
-                    )
+                return AutomergeSingleValueDecodingContainer(
+                    impl: self,
+                    codingPath: self.codingPath,
+                    automergeValue: AutomergeValue.null,
+                    objectId: objectId
                 )
             }
             if case let .Object(textObjectId, .Text) = finalAutomergeValue {

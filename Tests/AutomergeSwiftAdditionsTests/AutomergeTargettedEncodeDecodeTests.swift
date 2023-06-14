@@ -90,4 +90,47 @@ final class AutomergeTargettedEncodeDecodeTests: XCTestCase {
         let decodedCounter = try automergeDecoder.decode(Counter.self, from: [AnyCodingKey("counter")])
         XCTAssertEqual(decodedCounter, exampleCounter)
     }
+
+    func testTargetedDecodeOfInts() throws {
+        try doc.put(obj: ObjId.ROOT, key: "int", value: .Int(34))
+
+        let automergeDecoder = AutomergeDecoder(doc: doc)
+
+        XCTAssertEqual(try automergeDecoder.decode(Int.self, from: [AnyCodingKey("int")]), 34)
+        XCTAssertEqual(try automergeDecoder.decode(Int64.self, from: [AnyCodingKey("int")]), 34)
+        XCTAssertEqual(try automergeDecoder.decode(Int8.self, from: [AnyCodingKey("int")]), 34)
+        XCTAssertEqual(try automergeDecoder.decode(Int16.self, from: [AnyCodingKey("int")]), 34)
+        XCTAssertEqual(try automergeDecoder.decode(Int32.self, from: [AnyCodingKey("int")]), 34)
+    }
+
+    func testTargetedDecodeOfUInts() throws {
+        try doc.put(obj: ObjId.ROOT, key: "int", value: .Uint(34))
+
+        let automergeDecoder = AutomergeDecoder(doc: doc)
+
+        XCTAssertEqual(try automergeDecoder.decode(UInt.self, from: [AnyCodingKey("int")]), 34)
+        XCTAssertEqual(try automergeDecoder.decode(UInt64.self, from: [AnyCodingKey("int")]), 34)
+        XCTAssertEqual(try automergeDecoder.decode(UInt8.self, from: [AnyCodingKey("int")]), 34)
+        XCTAssertEqual(try automergeDecoder.decode(UInt16.self, from: [AnyCodingKey("int")]), 34)
+        XCTAssertEqual(try automergeDecoder.decode(UInt32.self, from: [AnyCodingKey("int")]), 34)
+    }
+
+    func testTargetedDecodeOfFloats() throws {
+        try doc.put(obj: ObjId.ROOT, key: "double", value: .F64(3.4))
+
+        let automergeDecoder = AutomergeDecoder(doc: doc)
+
+        XCTAssertEqual(try automergeDecoder.decode(Double.self, from: [AnyCodingKey("double")]), 3.4, accuracy: 0.1)
+        XCTAssertEqual(try automergeDecoder.decode(Float.self, from: [AnyCodingKey("double")]), 3.4, accuracy: 0.1)
+    }
+
+    func testTargetedDecodeOfOptionalInt() throws {
+        try doc.put(obj: ObjId.ROOT, key: "int", value: .Int(34))
+
+        let automergeDecoder = AutomergeDecoder(doc: doc)
+
+        XCTAssertEqual(try automergeDecoder.decode(Int?.self, from: [AnyCodingKey("int")]), 34)
+        let nothing = try automergeDecoder.decode(Int?.self, from: [AnyCodingKey("blarg")])
+        XCTAssertNil(nothing)
+    }
 }
