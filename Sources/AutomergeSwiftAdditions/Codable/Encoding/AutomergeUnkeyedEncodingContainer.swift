@@ -76,17 +76,60 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
             // Capture and override the default encodable pathing for Date since
             // Automerge supports it as a primitive value type.
             let downcastDate = value as! Date
-            try self.document.insert(obj: objectId, index: UInt64(count), value: downcastDate.toScalarValue())
+            let valueToWrite = downcastDate.toScalarValue()
+            if let testCurrentValue = try document.get(obj: objectId, index: UInt64(count)),
+               TypeOfAutomergeValue.from(testCurrentValue) != TypeOfAutomergeValue.from(valueToWrite)
+            {
+                // BLOW UP HERE
+                throw EncodingError.invalidValue(
+                    value,
+                    EncodingError
+                        .Context(
+                            codingPath: codingPath,
+                            debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.from(valueToWrite)))"
+                        )
+                )
+            }
+            try self.document.insert(obj: objectId, index: UInt64(count), value: valueToWrite)
         case is Data.Type:
             // Capture and override the default encodable pathing for Data since
             // Automerge supports it as a primitive value type.
             let downcastData = value as! Data
-            try self.document.insert(obj: objectId, index: UInt64(count), value: downcastData.toScalarValue())
+            let valueToWrite = downcastData.toScalarValue()
+            if let testCurrentValue = try document.get(obj: objectId, index: UInt64(count)),
+               TypeOfAutomergeValue.from(testCurrentValue) != TypeOfAutomergeValue.from(valueToWrite)
+            {
+                // BLOW UP HERE
+                throw EncodingError.invalidValue(
+                    value,
+                    EncodingError
+                        .Context(
+                            codingPath: codingPath,
+                            debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.from(valueToWrite)))"
+                        )
+                )
+            }
+
+            try self.document.insert(obj: objectId, index: UInt64(count), value: valueToWrite)
         case is Counter.Type:
             // Capture and override the default encodable pathing for Counter since
             // Automerge supports it as a primitive value type.
             let downcastCounter = value as! Counter
-            try self.document.insert(obj: objectId, index: UInt64(count), value: downcastCounter.toScalarValue())
+            let valueToWrite = downcastCounter.toScalarValue()
+            if let testCurrentValue = try document.get(obj: objectId, index: UInt64(count)),
+               TypeOfAutomergeValue.from(testCurrentValue) != TypeOfAutomergeValue.from(valueToWrite)
+            {
+                // BLOW UP HERE
+                throw EncodingError.invalidValue(
+                    value,
+                    EncodingError
+                        .Context(
+                            codingPath: codingPath,
+                            debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.from(valueToWrite)))"
+                        )
+                )
+            }
+            try self.document.insert(obj: objectId, index: UInt64(count), value: valueToWrite)
         case is Text.Type:
             // Capture and override the default encodable pathing for Counter since
             // Automerge supports it as a primitive value type.

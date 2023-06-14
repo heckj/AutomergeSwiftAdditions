@@ -80,6 +80,22 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         }
     }
 
+    fileprivate func checkTypeMatch<T>(value: T, objectId: ObjId, key: Self.Key, type _: TypeOfAutomergeValue) throws {
+        if let testCurrentValue = try document.get(obj: objectId, key: key.stringValue),
+           TypeOfAutomergeValue.from(testCurrentValue) != .string
+        {
+            // BLOW UP HERE
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError
+                    .Context(
+                        codingPath: codingPath,
+                        debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.string))"
+                    )
+            )
+        }
+    }
+
     mutating func encodeNil(forKey key: Self.Key) throws {
         guard let objectId = self.objectId else {
             throw reportBestError()
@@ -91,12 +107,18 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         guard let objectId = self.objectId else {
             throw reportBestError()
         }
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .bool)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: .Boolean(value))
     }
 
     mutating func encode(_ value: String, forKey key: Self.Key) throws {
         guard let objectId = self.objectId else {
             throw reportBestError()
+        }
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .string)
         }
         try document.put(obj: objectId, key: key.stringValue, value: .String(value))
     }
@@ -111,6 +133,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
                 debugDescription: "Unable to encode Double.\(value) at \(codingPath) into an Automerge F64."
             ))
         }
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .double)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
@@ -124,6 +149,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
                 debugDescription: "Unable to encode Float.\(value) directly in JSON."
             ))
         }
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .double)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
@@ -131,7 +159,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         guard let objectId = self.objectId else {
             throw reportBestError()
         }
-
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .int)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
@@ -139,7 +169,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         guard let objectId = objectId else {
             throw reportBestError()
         }
-
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .int)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
@@ -147,7 +179,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         guard let objectId = objectId else {
             throw reportBestError()
         }
-
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .int)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
@@ -155,7 +189,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         guard let objectId = objectId else {
             throw reportBestError()
         }
-
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .int)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
@@ -163,7 +199,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         guard let objectId = self.objectId else {
             throw reportBestError()
         }
-
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .int)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
@@ -171,7 +209,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         guard let objectId = self.objectId else {
             throw reportBestError()
         }
-
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .uint)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
@@ -179,7 +219,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         guard let objectId = self.objectId else {
             throw reportBestError()
         }
-
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .uint)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
@@ -187,7 +229,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         guard let objectId = objectId else {
             throw reportBestError()
         }
-
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .uint)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
@@ -195,7 +239,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         guard let objectId = self.objectId else {
             throw reportBestError()
         }
-
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .uint)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
@@ -203,7 +249,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         guard let objectId = objectId else {
             throw reportBestError()
         }
-
+        if impl.cautiousWrite {
+            try checkTypeMatch(value: value, objectId: objectId, key: key, type: .uint)
+        }
         try document.put(obj: objectId, key: key.stringValue, value: value.toScalarValue())
     }
 
@@ -241,16 +289,25 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
             // Capture and override the default encodable pathing for Date since
             // Automerge supports it as a primitive value type.
             let downcastDate = value as! Date
+            if impl.cautiousWrite {
+                try checkTypeMatch(value: value, objectId: objectId, key: key, type: .timestamp)
+            }
             try document.put(obj: objectId, key: key.stringValue, value: downcastDate.toScalarValue())
         case is Data.Type:
             // Capture and override the default encodable pathing for Data since
             // Automerge supports it as a primitive value type.
             let downcastData = value as! Data
+            if impl.cautiousWrite {
+                try checkTypeMatch(value: value, objectId: objectId, key: key, type: .bytes)
+            }
             try document.put(obj: objectId, key: key.stringValue, value: downcastData.toScalarValue())
         case is Counter.Type:
             // Capture and override the default encodable pathing for Counter since
             // Automerge supports it as a primitive value type.
             let downcastCounter = value as! Counter
+            if impl.cautiousWrite {
+                try checkTypeMatch(value: value, objectId: objectId, key: key, type: .counter)
+            }
             try document.put(obj: objectId, key: key.stringValue, value: downcastCounter.toScalarValue())
         case is Text.Type:
             // Capture and override the default encodable pathing for Counter since
