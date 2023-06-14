@@ -30,7 +30,15 @@ import Foundation
     }
 
     @inlinable public func decode<T: Decodable>(_: T.Type) throws -> T {
-        try T(from: self)
+        // FIXME: need to special case a few types: Data, Date, Counter, and Text
+        // At least to allow the direct decoding of these values from an Automerge doc.
+        switch T.self {
+        case is Text.Type:
+            let directContainer = try singleValueContainer()
+            return try directContainer.decode(T.self)
+        default:
+            return try T(from: self)
+        }
     }
 }
 
@@ -117,13 +125,26 @@ extension AutomergeDecoderImpl: Decoder {
                     )
                 )
             }
+            if case let .Object(textObjectId, .Text) = finalAutomergeValue {
+                // if we're creating a singleValueContainer to retrieve an
+                // Automerge Text node, then correct the objectId in the container
+                // and retrieve the text to make our lives easier in the decoding.
+                let stringValue = try doc.text(obj: textObjectId)
+                return AutomergeSingleValueDecodingContainer(
+                    impl: self,
+                    codingPath: self.codingPath,
+                    automergeValue: AutomergeValue.string(stringValue),
+                    objectId: textObjectId
+                )
+            } else {
+                return AutomergeSingleValueDecodingContainer(
+                    impl: self,
+                    codingPath: self.codingPath,
+                    automergeValue: AutomergeValue.fromValue(value),
+                    objectId: objectId
+                )
+            }
 
-            return AutomergeSingleValueDecodingContainer(
-                impl: self,
-                codingPath: self.codingPath,
-                automergeValue: AutomergeValue.fromValue(value),
-                objectId: objectId
-            )
         case let .failure(err):
             throw err
         }

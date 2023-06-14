@@ -498,7 +498,7 @@ extension Document {
                                 return .failure(
                                     CodingKeyLookupError
                                         .MismatchedSchema(
-                                            "Container at \(path) is a Text object, which is not the List container that we expected."
+                                            "Container at \(path) is a Text object, which is not the Object container expected."
                                         )
                                 )
                             case .Map:

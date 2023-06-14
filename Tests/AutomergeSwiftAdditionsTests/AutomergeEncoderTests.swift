@@ -1,10 +1,3 @@
-//
-//  AutomergeEncoderImpl+RetrieveTests.swift
-//  AMTravelNotesTests
-//
-//  Created by Joseph Heck on 5/16/23.
-//
-
 import Automerge
 import AutomergeSwiftAdditions
 import XCTest

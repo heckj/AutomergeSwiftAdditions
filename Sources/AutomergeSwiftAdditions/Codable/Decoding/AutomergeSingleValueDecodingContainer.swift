@@ -3,6 +3,7 @@ import class Automerge.Document
 import struct Automerge.ObjId
 import enum Automerge.ObjType
 import protocol Automerge.ScalarValueRepresentable
+import enum Automerge.Value
 import Foundation
 
 struct AutomergeSingleValueDecodingContainer: SingleValueDecodingContainer {
@@ -171,35 +172,15 @@ struct AutomergeSingleValueDecodingContainer: SingleValueDecodingContainer {
                 ))
             }
         case is Text.Type:
-            // AutomergeValue in this case only knows that it's a text object, but not the value
-            // so we backtrack and retrieve the Object Id for the text and assemble it directly.
-            let result = impl.doc.retrieveObjectId(
-                path: codingPath,
-                containerType: .Index,
-                strategy: .readonly
-            )
-            switch result {
-            case let .success(objectId):
-                let type = impl.doc.objectType(obj: objectId)
-                guard type == .Text else {
-                    throw DecodingError.dataCorrupted(
-                        DecodingError.Context(
-                            codingPath: self.codingPath,
-                            debugDescription: "Attempted to read value at \(objectId) with coding key: \(codingPath), but the result wasn't a list (Text)."
-                        )
-                    )
-                }
-                let stringValue = try impl.doc.text(obj: objectId)
+            if case let AutomergeValue.string(stringValue) = value {
                 return Text(stringValue) as! T
-            case let .failure(errFromLookup):
-                throw DecodingError.dataCorrupted(
-                    DecodingError.Context(
-                        codingPath: self.codingPath,
-                        debugDescription: "Attempted to read value at \(objectId) with coding key: \(codingPath), but the result wasn't a list (Text).",
-                        underlyingError: errFromLookup
-                    )
-                )
+            } else {
+                throw DecodingError.typeMismatch(T.self, .init(
+                    codingPath: codingPath,
+                    debugDescription: "Expected to decode \(T.self) from \(value), but it wasn't `.text`."
+                ))
             }
+
         default:
             return try T(from: impl)
         }
