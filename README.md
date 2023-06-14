@@ -37,8 +37,8 @@ Punchlist:
 
 - [x] establish decoder
   - [x] capture and override decoding Text, Data, Date, and Counter
-- [ ] expand encoder to allow "encode at" to aim within the schema
-- [ ] expand decoder to allow "decode from" to select within the schema to decode
+- [x] expand encoder to allow "encode at" to aim within the schema
+- [x] expand decoder to allow "decode from" to select within the schema to decode
 
 - [x] review ScalarValueRepresentable - do we need it to exist with the encoder?
 - [ ] test SwiftUI binding concept - see what making dozens of updates to a ScalarValue does to doc size

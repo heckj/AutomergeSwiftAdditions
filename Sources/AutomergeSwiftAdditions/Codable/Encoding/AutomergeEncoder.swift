@@ -27,4 +27,14 @@ public struct AutomergeEncoder {
         )
         try value.encode(to: encoder)
     }
+
+    public func encode<T: Encodable>(_ value: T, at path: [CodingKey]) throws {
+        let encoder = AutomergeEncoderImpl(
+            userInfo: userInfo,
+            codingPath: path,
+            doc: self.doc,
+            strategy: self.schemaStrategy
+        )
+        try value.encode(to: encoder)
+    }
 }
