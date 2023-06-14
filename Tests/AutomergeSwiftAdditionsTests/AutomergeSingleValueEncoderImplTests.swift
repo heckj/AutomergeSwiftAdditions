@@ -201,7 +201,7 @@ final class AutomergeSingleValueEncoderImplTests: XCTestCase {
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Timestamp(-905182980)))
 
         let anotherDate = try Date("1942-04-26T08:17:00Z", strategy: .iso8601)
-        try singleValueContainer.encode(anotherDate)
+        try cautiousSingleValueContainer.encode(anotherDate)
     }
 
     func testSimpleKeyEncode_Date_CautiousFailure() throws {
@@ -217,13 +217,13 @@ final class AutomergeSingleValueEncoderImplTests: XCTestCase {
         try singleValueContainer.encode(data)
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Bytes(data)))
 
-        try singleValueContainer.encode(Data("World".utf8))
+        try cautiousSingleValueContainer.encode(Data("World".utf8))
     }
 
     func testSimpleKeyEncode_Data_CautiousFailure() throws {
         try doc.put(obj: ObjId.ROOT, key: "value", value: .String("40"))
         XCTAssertThrowsError(
-            try singleValueContainer.encode(Data("World".utf8))
+            try cautiousSingleValueContainer.encode(Data("World".utf8))
         )
     }
 
@@ -241,13 +241,13 @@ final class AutomergeSingleValueEncoderImplTests: XCTestCase {
         try singleValueContainer.encode(Counter(4))
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Counter(4)))
 
-        try singleValueContainer.encode(Counter(14))
+        try cautiousSingleValueContainer.encode(Counter(14))
     }
 
     func testSimpleKeyEncode_Counter_CautiousFailure() throws {
         try doc.put(obj: ObjId.ROOT, key: "value", value: .String("40"))
         XCTAssertThrowsError(
-            try singleValueContainer.encode(Counter(443))
+            try cautiousSingleValueContainer.encode(Counter(443))
         )
     }
 

@@ -55,8 +55,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             XCTFail("Scalar Float value not retrieved.")
         }
 
-        try rootKeyedContainer.encode(Float(3.4), forKey: .value)
-        try rootKeyedContainer.encode(Double(7.8), forKey: .value)
+        try cautiousKeyedContainer.encode(Float(3.4), forKey: .value)
+        try cautiousKeyedContainer.encode(Double(7.8), forKey: .value)
     }
 
     func testErrorEncode_Float() throws {
@@ -97,7 +97,7 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
         try rootKeyedContainer.encode(Int8(4), forKey: .value)
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Int(4)))
 
-        try rootKeyedContainer.encode(Int8(5), forKey: .value)
+        try cautiousKeyedContainer.encode(Int8(5), forKey: .value)
     }
 
     func testSimpleKeyEncode_Int8_CautiousFailure() throws {
@@ -111,7 +111,7 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
         try rootKeyedContainer.encode(Int16(4), forKey: .value)
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Int(4)))
 
-        try rootKeyedContainer.encode(Int16(5), forKey: .value)
+        try cautiousKeyedContainer.encode(Int16(5), forKey: .value)
     }
 
     func testSimpleKeyEncode_Int16_CautiousFailure() throws {
@@ -139,7 +139,7 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
         try rootKeyedContainer.encode(Int64(4), forKey: .value)
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Int(4)))
 
-        try rootKeyedContainer.encode(Int64(5), forKey: .value)
+        try cautiousKeyedContainer.encode(Int64(5), forKey: .value)
     }
 
     func testSimpleKeyEncode_Int64_CautiousFailure() throws {
@@ -160,7 +160,7 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
         try rootKeyedContainer.encode(UInt(4), forKey: .value)
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Uint(4)))
 
-        try rootKeyedContainer.encode(UInt(5), forKey: .value)
+        try cautiousKeyedContainer.encode(UInt(5), forKey: .value)
     }
 
     func testSimpleKeyEncode_UInt_CautiousFailure() throws {
@@ -174,7 +174,7 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
         try rootKeyedContainer.encode(UInt8(4), forKey: .value)
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Uint(4)))
 
-        try rootKeyedContainer.encode(UInt8(5), forKey: .value)
+        try cautiousKeyedContainer.encode(UInt8(5), forKey: .value)
     }
 
     func testSimpleKeyEncode_UInt8_CautiousFailure() throws {
@@ -188,7 +188,7 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
         try rootKeyedContainer.encode(UInt16(4), forKey: .value)
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Uint(4)))
 
-        try rootKeyedContainer.encode(UInt16(5), forKey: .value)
+        try cautiousKeyedContainer.encode(UInt16(5), forKey: .value)
     }
 
     func testSimpleKeyEncode_UInt16_CautiousFailure() throws {
@@ -201,7 +201,7 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
     func testSimpleKeyEncode_UInt32() throws {
         try rootKeyedContainer.encode(UInt32(4), forKey: .value)
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Uint(4)))
-        try rootKeyedContainer.encode(UInt32(5), forKey: .value)
+        try cautiousKeyedContainer.encode(UInt32(5), forKey: .value)
     }
 
     func testSimpleKeyEncode_UInt32_CautiousFailure() throws {
@@ -214,7 +214,7 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
     func testSimpleKeyEncode_UInt64() throws {
         try rootKeyedContainer.encode(UInt64(4), forKey: .value)
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Uint(4)))
-        try rootKeyedContainer.encode(UInt64(5), forKey: .value)
+        try cautiousKeyedContainer.encode(UInt64(5), forKey: .value)
     }
 
     func testSimpleKeyEncode_UInt64_CautiousFailure() throws {
@@ -228,13 +228,28 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
         try rootKeyedContainer.encode(Counter(4), forKey: .value)
         XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Counter(4)))
 
-        try rootKeyedContainer.encode(Counter(45), forKey: .value)
+        try cautiousKeyedContainer.encode(Counter(45), forKey: .value)
     }
 
     func testSimpleKeyEncode_Counter_CautiousFailure() throws {
         try doc.put(obj: ObjId.ROOT, key: "value", value: .F64(4.0))
         XCTAssertThrowsError(
             try cautiousKeyedContainer.encode(Counter(4), forKey: .value)
+        )
+    }
+
+    func testSimpleKeyEncode_Data() throws {
+        try rootKeyedContainer.encode(Data("Hello".utf8), forKey: .value)
+        XCTAssertEqual(try doc.get(obj: ObjId.ROOT, key: "value"), .Scalar(.Bytes(Data("Hello".utf8))))
+
+        try cautiousKeyedContainer.encode(Data("World".utf8), forKey: .value)
+    }
+
+    func testSimpleKeyEncode_Date_CautiousFailure() throws {
+        try doc.put(obj: ObjId.ROOT, key: "value", value: .F64(4.0))
+        let earlyDate = try Date("1941-04-26T08:17:00Z", strategy: .iso8601)
+        XCTAssertThrowsError(
+            try cautiousKeyedContainer.encode(earlyDate, forKey: .value)
         )
     }
 
