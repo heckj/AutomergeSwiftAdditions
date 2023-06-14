@@ -2,8 +2,8 @@ import struct Automerge.Counter
 import class Automerge.Document
 import struct Automerge.ObjId
 import protocol Automerge.ScalarValueRepresentable
-import Foundation
-import OSLog
+import Foundation // for Date support
+import os // for structured logging
 
 private let logger = Logger(subsystem: "com.github.heckj.AutomergeSwiftAdditions", category: "AutomergeEncoder")
 

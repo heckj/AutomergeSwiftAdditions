@@ -1,5 +1,7 @@
-import Automerge
-import Foundation
+import class Automerge.Document
+import struct Automerge.ObjId
+import struct Automerge.PathElement
+import enum Automerge.Value
 
 public extension Document {
     /// Looks up the objectId represented by the schema path string you provide.

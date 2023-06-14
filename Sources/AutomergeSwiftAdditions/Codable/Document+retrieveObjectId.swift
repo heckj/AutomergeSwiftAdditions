@@ -1,7 +1,7 @@
 import class Automerge.Document
 import struct Automerge.ObjId
 
-import OSLog
+import os // for structured logging
 
 private let logger = Logger(subsystem: "com.github.heckj.AutomergeSwiftAdditions", category: "codingpath")
 

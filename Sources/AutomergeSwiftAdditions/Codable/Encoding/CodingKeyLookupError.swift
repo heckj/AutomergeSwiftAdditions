@@ -1,4 +1,4 @@
-import Foundation
+import Foundation // for LocalizedError
 
 public enum CodingKeyLookupError: LocalizedError, Equatable {
     public static func == (lhs: CodingKeyLookupError, rhs: CodingKeyLookupError) -> Bool {

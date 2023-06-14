@@ -1,6 +1,6 @@
 import struct Automerge.PathElement
 import enum Automerge.Prop
-import Foundation
+import Foundation // for LocalizedError
 
 // rough equivalent to an opaque path - serves a similar function to Automerge.PathElement
 // but from an external, path-only point of view to reference or build a potentially existing
