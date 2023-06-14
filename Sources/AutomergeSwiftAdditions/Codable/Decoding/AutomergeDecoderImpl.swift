@@ -1,3 +1,4 @@
+import struct Automerge.Counter
 import class Automerge.Document
 import struct Automerge.ObjId
 import enum Automerge.Value
@@ -30,10 +31,17 @@ import Foundation
     }
 
     @inlinable public func decode<T: Decodable>(_: T.Type) throws -> T {
-        // FIXME: need to special case a few types: Data, Date, Counter, and Text
-        // At least to allow the direct decoding of these values from an Automerge doc.
         switch T.self {
         case is Text.Type:
+            let directContainer = try singleValueContainer()
+            return try directContainer.decode(T.self)
+        case is Counter.Type:
+            let directContainer = try singleValueContainer()
+            return try directContainer.decode(T.self)
+        case is Data.Type:
+            let directContainer = try singleValueContainer()
+            return try directContainer.decode(T.self)
+        case is Date.Type:
             let directContainer = try singleValueContainer()
             return try directContainer.decode(T.self)
         default:
