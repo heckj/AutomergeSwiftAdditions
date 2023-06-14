@@ -64,7 +64,8 @@ struct AutomergeUnkeyedEncodingContainer: UnkeyedEncodingContainer {
             userInfo: impl.userInfo,
             codingPath: newPath,
             doc: self.document,
-            strategy: impl.schemaStrategy
+            strategy: impl.schemaStrategy,
+            cautiousWrite: impl.cautiousWrite
         )
         guard let objectId = self.objectId else {
             throw reportBestError()

@@ -233,7 +233,8 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
             userInfo: impl.userInfo,
             codingPath: newPath,
             doc: self.document,
-            strategy: impl.schemaStrategy
+            strategy: impl.schemaStrategy,
+            cautiousWrite: impl.cautiousWrite
         )
         switch T.self {
         case is Date.Type:

@@ -22,7 +22,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [],
             doc: doc,
-            strategy: .createWhenNeeded
+            strategy: .createWhenNeeded,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
     }
@@ -46,7 +47,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(Float(3.4), forKey: .value))
@@ -120,7 +122,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(true, forKey: .value))
@@ -131,7 +134,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(Double(8.16), forKey: .value))
@@ -142,7 +146,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(Int(8), forKey: .value))
@@ -153,7 +158,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(Int8(8), forKey: .value))
@@ -164,7 +170,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(Int16(8), forKey: .value))
@@ -175,7 +182,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(Int32(8), forKey: .value))
@@ -186,7 +194,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(Int64(8), forKey: .value))
@@ -197,7 +206,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(UInt(8), forKey: .value))
@@ -208,7 +218,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(UInt8(8), forKey: .value))
@@ -219,7 +230,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(UInt16(8), forKey: .value))
@@ -230,7 +242,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(UInt32(8), forKey: .value))
@@ -241,7 +254,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(UInt64(8), forKey: .value))
@@ -256,7 +270,8 @@ final class AutomergeKeyEncoderImplTests: XCTestCase {
             userInfo: [:],
             codingPath: [AnyCodingKey("nothere")],
             doc: doc,
-            strategy: .readonly
+            strategy: .readonly,
+            cautiousWrite: false
         )
         rootKeyedContainer = impl.container(keyedBy: SampleCodingKeys.self)
         XCTAssertThrowsError(try rootKeyedContainer.encode(SimpleStruct(a: "foo"), forKey: .value))

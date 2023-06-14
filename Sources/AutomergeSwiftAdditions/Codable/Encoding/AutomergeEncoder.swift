@@ -4,10 +4,12 @@ public struct AutomergeEncoder {
     public var userInfo: [CodingUserInfoKey: Any] = [:]
     var doc: Document
     var schemaStrategy: SchemaStrategy
+    var cautiousWrite: Bool
 
-    public init(doc: Document, strategy: SchemaStrategy = .createWhenNeeded) {
+    public init(doc: Document, strategy: SchemaStrategy = .createWhenNeeded, cautiousWrite: Bool = false) {
         self.doc = doc
         self.schemaStrategy = strategy
+        self.cautiousWrite = cautiousWrite
     }
 
     public func encode<T: Encodable>(_ value: T?) throws {
@@ -23,7 +25,8 @@ public struct AutomergeEncoder {
             userInfo: userInfo,
             codingPath: [],
             doc: self.doc,
-            strategy: self.schemaStrategy
+            strategy: self.schemaStrategy,
+            cautiousWrite: self.cautiousWrite
         )
         try value.encode(to: encoder)
     }
@@ -33,7 +36,8 @@ public struct AutomergeEncoder {
             userInfo: userInfo,
             codingPath: path,
             doc: self.doc,
-            strategy: self.schemaStrategy
+            strategy: self.schemaStrategy,
+            cautiousWrite: self.cautiousWrite
         )
         try value.encode(to: encoder)
     }
