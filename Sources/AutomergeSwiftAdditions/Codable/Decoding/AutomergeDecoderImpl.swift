@@ -63,7 +63,7 @@ extension AutomergeDecoderImpl: Decoder {
         case let .success(objectId):
             let objectType = doc.objectType(obj: objectId)
             guard case .Map = objectType else {
-                throw DecodingError.typeMismatch([String: AutomergeValue].self, DecodingError.Context(
+                throw DecodingError.typeMismatch([String: Value].self, DecodingError.Context(
                     codingPath: self.codingPath,
                     debugDescription: "ObjectId \(objectId) returned an type of \(objectType)."
                 ))
@@ -90,7 +90,7 @@ extension AutomergeDecoderImpl: Decoder {
         case let .success(objectId):
             let objectType = doc.objectType(obj: objectId)
             guard case .List = objectType else {
-                throw DecodingError.typeMismatch([String: AutomergeValue].self, DecodingError.Context(
+                throw DecodingError.typeMismatch([String: Value].self, DecodingError.Context(
                     codingPath: self.codingPath,
                     debugDescription: "ObjectId \(objectId) returned an type of \(objectType)."
                 ))
@@ -99,7 +99,6 @@ extension AutomergeDecoderImpl: Decoder {
             return AutomergeUnkeyedDecodingContainer(
                 impl: self,
                 codingPath: self.codingPath,
-                array: [],
                 objectId: objectId
             )
         case let .failure(err):
@@ -129,7 +128,7 @@ extension AutomergeDecoderImpl: Decoder {
                 return AutomergeSingleValueDecodingContainer(
                     impl: self,
                     codingPath: self.codingPath,
-                    automergeValue: AutomergeValue.null,
+                    automergeValue: .Scalar(.Null),
                     objectId: objectId
                 )
             }
@@ -141,14 +140,14 @@ extension AutomergeDecoderImpl: Decoder {
                 return AutomergeSingleValueDecodingContainer(
                     impl: self,
                     codingPath: self.codingPath,
-                    automergeValue: AutomergeValue.string(stringValue),
+                    automergeValue: .Scalar(.String(stringValue)),
                     objectId: textObjectId
                 )
             } else {
                 return AutomergeSingleValueDecodingContainer(
                     impl: self,
                     codingPath: self.codingPath,
-                    automergeValue: AutomergeValue.fromValue(value),
+                    automergeValue: value,
                     objectId: objectId
                 )
             }
