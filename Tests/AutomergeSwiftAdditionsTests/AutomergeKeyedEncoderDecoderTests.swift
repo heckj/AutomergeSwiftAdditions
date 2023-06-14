@@ -4,9 +4,13 @@ import XCTest
 
 final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
     var doc: Document!
+    var encoder: AutomergeEncoder!
+    var decoder: AutomergeDecoder!
 
     override func setUp() {
         doc = Document()
+        encoder = AutomergeEncoder(doc: doc)
+        decoder = AutomergeDecoder(doc: doc)
     }
 
     func testSimpleEncodeDecode() throws {
@@ -20,9 +24,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
             let uuid: UUID
             let notes: Text
         }
-
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
 
         let earlyDate = try Date("1941-04-26T08:17:00Z", strategy: .iso8601)
 
@@ -48,9 +49,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
             let counter: Counter
         }
 
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
-
         let topLevel = WrapperStruct(counter: Counter(5))
 
         try encoder.encode(topLevel)
@@ -63,9 +61,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
             let counter: Counter?
             let anotherOptional: String?
         }
-
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
 
         let topLevel = WrapperStruct(counter: Counter(5), anotherOptional: nil)
 
@@ -80,9 +75,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
             let thing: Float
         }
 
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
-
         let topLevel = WrapperStruct(thing: 3.0)
 
         try encoder.encode(topLevel)
@@ -94,9 +86,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
         struct WrapperStruct: Codable, Equatable {
             let thing: Double
         }
-
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
 
         let topLevel = WrapperStruct(thing: 3.0)
 
@@ -110,9 +99,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
             let thing: Int8
         }
 
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
-
         let topLevel = WrapperStruct(thing: 3)
 
         try encoder.encode(topLevel)
@@ -124,9 +110,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
         struct WrapperStruct: Codable, Equatable {
             let thing: Int16
         }
-
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
 
         let topLevel = WrapperStruct(thing: 3)
 
@@ -140,9 +123,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
             let thing: Int32
         }
 
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
-
         let topLevel = WrapperStruct(thing: 3)
 
         try encoder.encode(topLevel)
@@ -154,9 +134,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
         struct WrapperStruct: Codable, Equatable {
             let thing: Int64
         }
-
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
 
         let topLevel = WrapperStruct(thing: 3)
 
@@ -170,9 +147,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
             let thing: Int
         }
 
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
-
         let topLevel = WrapperStruct(thing: 3)
 
         try encoder.encode(topLevel)
@@ -184,9 +158,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
         struct WrapperStruct: Codable, Equatable {
             let thing: UInt8
         }
-
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
 
         let topLevel = WrapperStruct(thing: 3)
 
@@ -200,9 +171,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
             let thing: UInt16
         }
 
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
-
         let topLevel = WrapperStruct(thing: 3)
 
         try encoder.encode(topLevel)
@@ -214,9 +182,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
         struct WrapperStruct: Codable, Equatable {
             let thing: UInt32
         }
-
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
 
         let topLevel = WrapperStruct(thing: 3)
 
@@ -230,9 +195,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
             let thing: UInt64
         }
 
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
-
         let topLevel = WrapperStruct(thing: 3)
 
         try encoder.encode(topLevel)
@@ -245,9 +207,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
             let thing: UInt
         }
 
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
-
         let topLevel = WrapperStruct(thing: 3)
 
         try encoder.encode(topLevel)
@@ -259,9 +218,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
         struct WrapperStruct: Codable, Equatable {
             let thing: Date
         }
-
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
 
         let earlyDate = try Date("1941-04-26T08:17:00Z", strategy: .iso8601)
         let topLevel = WrapperStruct(thing: earlyDate)
@@ -276,9 +232,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
             let thing: Data
         }
 
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
-
         let topLevel = WrapperStruct(thing: Data("Hello".utf8))
 
         try encoder.encode(topLevel)
@@ -290,9 +243,6 @@ final class AutomergeKeyedEncoderDecoderTests: XCTestCase {
         struct WrapperStruct: Codable, Equatable {
             let thing: Text
         }
-
-        let encoder = AutomergeEncoder(doc: doc)
-        let decoder = AutomergeDecoder(doc: doc)
 
         let topLevel = WrapperStruct(thing: Text("hi"))
 

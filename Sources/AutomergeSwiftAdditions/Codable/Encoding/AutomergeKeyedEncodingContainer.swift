@@ -80,9 +80,9 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
         }
     }
 
-    fileprivate func checkTypeMatch<T>(value: T, objectId: ObjId, key: Self.Key, type _: TypeOfAutomergeValue) throws {
+    fileprivate func checkTypeMatch<T>(value: T, objectId: ObjId, key: Self.Key, type: TypeOfAutomergeValue) throws {
         if let testCurrentValue = try document.get(obj: objectId, key: key.stringValue),
-           TypeOfAutomergeValue.from(testCurrentValue) != .string
+           TypeOfAutomergeValue.from(testCurrentValue) != type
         {
             // BLOW UP HERE
             throw EncodingError.invalidValue(
@@ -90,7 +90,7 @@ struct AutomergeKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProt
                 EncodingError
                     .Context(
                         codingPath: codingPath,
-                        debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(TypeOfAutomergeValue.string))"
+                        debugDescription: "The type in the automerge document (\(TypeOfAutomergeValue.from(testCurrentValue))) doesn't match the type being written (\(type))"
                     )
             )
         }
