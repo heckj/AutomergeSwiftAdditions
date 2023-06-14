@@ -14,7 +14,7 @@ struct AutomergeUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     var isAtEnd: Bool { currentIndex >= (count ?? 0) }
     var currentIndex = 0
 
-    init(impl: AutomergeDecoderImpl, codingPath: [CodingKey], array _: [AutomergeValue], objectId: ObjId) {
+    init(impl: AutomergeDecoderImpl, codingPath: [CodingKey], objectId: ObjId) {
         self.impl = impl
         self.codingPath = codingPath
         self.objectId = objectId

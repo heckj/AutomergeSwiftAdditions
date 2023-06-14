@@ -4,10 +4,11 @@ import Foundation
 public struct Text: Hashable, Codable {
     public var value: String
 
-    // NOTE(heckj): In the near future, we'll have Automerge support for Peritext,
-    // which should map pretty well to AttributedStrings. At that point, this struct
-    // would make a lot more sense exposing an AttributedString by default, with an
-    // optional "slimmed down" regular String from it.
+    // NOTE(heckj): The version Automerge after 2.0 is adding support for "marks"
+    // that apply to runs of text within the .Text primitive. This should map
+    // reasonably well to AttributedStrings. When it's merged, this type
+    // should be a reasonable placeholder from which to derive `AttributedString` and
+    // the flat `String` variations from the underlying data source in Automerge.
 
     /// Creates a new Text instance with the string value you provide.
     /// - Parameter value: The value for the text.

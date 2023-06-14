@@ -28,7 +28,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Automerge", package: "automerge-swifter"),
             ],
-            exclude: ["devnotes.md"]
+            exclude: ["Codable/devnotes.md"]
         ),
         .testTarget(
             name: "AutomergeSwiftAdditionsTests",

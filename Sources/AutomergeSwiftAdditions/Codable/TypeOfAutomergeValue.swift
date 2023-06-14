@@ -1,7 +1,8 @@
 import enum Automerge.ScalarValue
 import enum Automerge.Value
 
-public enum TypeOfAutomergeValue: Equatable, Hashable {
+/// A type that encapsulates only the type information from an Automerge value.
+enum TypeOfAutomergeValue: Equatable, Hashable {
     /// A list CRDT.
     case array
     /// A map CRDT.
@@ -29,7 +30,9 @@ public enum TypeOfAutomergeValue: Equatable, Hashable {
     /// Nil.
     case null
 
-    public static func from(_ val: Value) -> Self {
+    /// Returns the type information from an Automerge Value
+    /// - Parameter val: The value to describe.
+    static func from(_ val: Value) -> Self {
         switch val {
         case let .Object(_, objType):
             switch objType {
@@ -66,7 +69,9 @@ public enum TypeOfAutomergeValue: Equatable, Hashable {
         }
     }
 
-    public static func from(_ val: ScalarValue) -> Self {
+    /// Returns the type information from an Automerge ScalarValue
+    /// - Parameter val: The scalar value to describe.
+    static func from(_ val: ScalarValue) -> Self {
         switch val {
         case .Boolean:
             return .bool

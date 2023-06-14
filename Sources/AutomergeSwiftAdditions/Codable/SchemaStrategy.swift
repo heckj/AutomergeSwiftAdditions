@@ -1,6 +1,5 @@
 /// A type that represents the encoder strategy to establish or error on differences in existing Automerge documents
-/// as
-/// compared to expected encoding.
+/// as compared to expected encoding.
 public enum SchemaStrategy {
     /// Creates schema where none exists, errors on schema mismatch.
     ///
