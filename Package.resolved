@@ -1,0 +1,32 @@
+{
+  "pins" : [
+    {
+      "identity" : "automerge-swifter",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/automerge/automerge-swifter",
+      "state" : {
+        "branch" : "main",
+        "revision" : "c6277fc10957a5c1945e101dfeab695e1372d601"
+      }
+    },
+    {
+      "identity" : "rainbow",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/onevcat/Rainbow",
+      "state" : {
+        "revision" : "e0dada9cd44e3fa7ec3b867e49a8ddbf543e3df3",
+        "version" : "4.0.1"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "fee6933f37fde9a5e12a1e4aeaa93fe60116ff2a",
+        "version" : "1.2.2"
+      }
+    }
+  ],
+  "version" : 2
+}
