@@ -15,8 +15,7 @@ let package = Package(
         .executable(name: "AMInspector", targets: ["AMInspector"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/automerge/automerge-swifter", branch: "main"),
-//        .package(url: "https://github.com/automerge/automerge-swifter", from: "0.0.1"),
+        .package(url: "https://github.com/automerge/automerge-swift", branch: "alpha0.5.0"),
         .package(url: "https://github.com/onevcat/Rainbow", from: "4.0.0"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
     ],
@@ -26,20 +25,20 @@ let package = Package(
         .target(
             name: "AutomergeSwiftAdditions",
             dependencies: [
-                .product(name: "Automerge", package: "automerge-swifter"),
+                .product(name: "Automerge", package: "automerge-swift"),
             ]
         ),
         .testTarget(
             name: "AutomergeSwiftAdditionsTests",
             dependencies: [
                 "AutomergeSwiftAdditions",
-                .product(name: "Automerge", package: "automerge-swifter"),
+                .product(name: "Automerge", package: "automerge-swift"),
             ]
         ),
         .executableTarget(
             name: "AMInspector",
             dependencies: [
-                .product(name: "Automerge", package: "automerge-swifter"),
+                .product(name: "Automerge", package: "automerge-swift"),
                 .product(name: "Rainbow", package: "Rainbow"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
