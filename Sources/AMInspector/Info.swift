@@ -18,10 +18,12 @@ struct WrappedAutomergeDocument: Codable {
 
 func tryDecodingWrappedDoc(from data: Data) -> Document? {
     do {
+        Logger.document.debug("Attempting to decode \(data.count, privacy: .public) bytes as a CBOR encoded Automerge doc")
+        print("Attempting to decode \(data.count) bytes as a CBOR encoded Automerge doc")
         let wrappedDoc = try WrappedAutomergeDocument.fileDecoder.decode(WrappedAutomergeDocument.self, from: data)
-        let doc = try Document(wrappedDoc.data)
-        return doc
+        return tryDecodingRawAutomergeDoc(from: wrappedDoc.data)
     } catch {
+        Logger.document.warning("\(error)")
         print(error)
         return nil
     }
@@ -29,9 +31,12 @@ func tryDecodingWrappedDoc(from data: Data) -> Document? {
 
 func tryDecodingRawAutomergeDoc(from data: Data) -> Document? {
     do {
+        Logger.document.debug("Attempting to decode \(data.count, privacy: .public) bytes as a raw Automerge doc")
+        print("Attempting to decode \(data.count) bytes as a raw Automerge doc")
         let doc = try Document(data)
         return doc
     } catch {
+        Logger.document.error("\(error)")
         print(error)
         return nil
     }
@@ -62,7 +67,7 @@ extension AMInspector {
                 AMInspector.exit(withError: error)
             }
 
-            if let docFromWrap = tryDecodingRawAutomergeDoc(from: data) {
+            if let docFromWrap = tryDecodingWrappedDoc(from: data) {
                 doc = docFromWrap
             } else if let rawDoc = tryDecodingRawAutomergeDoc(from: data) {
                 doc = rawDoc
