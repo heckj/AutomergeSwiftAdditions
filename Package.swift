@@ -17,6 +17,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/automerge/automerge-swift", branch: "alpha0.5.0"),
         .package(url: "https://github.com/onevcat/Rainbow", from: "4.0.0"),
+        .package(url: "https://github.com/outfoxx/PotentCodables", from: "3.1.0"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
     ],
     targets: [
@@ -41,6 +42,7 @@ let package = Package(
                 .product(name: "Automerge", package: "automerge-swift"),
                 .product(name: "Rainbow", package: "Rainbow"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "PotentCBOR", package: "PotentCodables")
             ]
         ),
     ]
