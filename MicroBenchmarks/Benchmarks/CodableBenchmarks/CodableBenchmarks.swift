@@ -14,7 +14,7 @@ struct SimpleStruct: Codable {
 }
 
 struct TextModel: Codable {
-    let notes: Text
+    let notes: AutomergeText
 }
 
 let sample = SimpleStruct(name: "henry", duration: 3.14159, flag: true, count: 5)
@@ -40,8 +40,8 @@ let benchmarks = {
     }
 
     Benchmark("TextEncode") { benchmark in
-        let textSample = TextModel(notes: Text("Hello World!"))
-        let textSampleUpdate = TextModel(notes: Text("Wassup World?"))
+        let textSample = TextModel(notes: AutomergeText("Hello World!"))
+        let textSampleUpdate = TextModel(notes: AutomergeText("Wassup World?"))
         let doc = Document()
         let automergeEncoder = AutomergeEncoder(doc: doc)
         for _ in benchmark.scaledIterations {
