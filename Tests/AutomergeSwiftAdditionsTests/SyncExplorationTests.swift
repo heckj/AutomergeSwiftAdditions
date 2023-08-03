@@ -5,7 +5,7 @@ import XCTest
 struct Vote: Codable {
     var name: String
     var value: Int
-    var data: Data = Data()
+    var data: Data = .init()
 }
 
 struct VoteCollection: Codable {
@@ -18,16 +18,15 @@ extension Data {
     /// - Parameter length: Length of the data in bytes.
     /// - Returns: Generated data of the specified length.
     static func random(length: Int) throws -> Data {
-        return Data((0 ..< length).map { _ in UInt8.random(in: UInt8.min ... UInt8.max) })
+        Data((0 ..< length).map { _ in UInt8.random(in: UInt8.min ... UInt8.max) })
     }
 }
 
 final class SyncExplorationTests: XCTestCase {
-
     var encoder: AutomergeEncoder!
     var decoder: AutomergeDecoder!
     var doc: Document!
-    
+
     override func setUp() async throws {
         doc = Document()
         encoder = AutomergeEncoder(doc: doc)
@@ -35,22 +34,22 @@ final class SyncExplorationTests: XCTestCase {
         try encoder.encode(VoteCollection())
         _ = doc.save()
     }
-    
+
     func testSyncSize() throws {
         let docA = doc.fork()
         let docB = doc.fork()
-        
+
         let docAEnc = AutomergeEncoder(doc: docA)
         let docBEnc = AutomergeEncoder(doc: docB)
         let docBDec = AutomergeDecoder(doc: docB)
-        
+
         print("File size of docA at start is \(docA.save().count) bytes.")
         print("  docA has \(docA.changes().count) changes")
         print("File size of docB at start is \(docB.save().count) bytes.")
         print("  docB has \(docB.changes().count) changes")
         // docA sync to docB
         let syncStateA = SyncState()
-        
+
         if let data = docA.generateSyncMessage(state: syncStateA) {
             print("Size of initial sync message is \(data.count) bytes.")
             let syncStateB = SyncState()
@@ -68,19 +67,19 @@ final class SyncExplorationTests: XCTestCase {
 
         // Add data to each document
         var docAmodel = VoteCollection()
-        docAmodel.votes.append(Vote(name: "a", value: 0, data: try Data.random(length: 8096)))
+        try docAmodel.votes.append(Vote(name: "a", value: 0, data: Data.random(length: 8096)))
         try docAEnc.encode(docAmodel)
         _ = docA.save() // calling this is critical to incrementing # of changes...
-        docAmodel.votes.append(Vote(name: "b", value: 1, data: try Data.random(length: 8096)))
+        try docAmodel.votes.append(Vote(name: "b", value: 1, data: Data.random(length: 8096)))
         try docAEnc.encode(docAmodel)
         _ = docA.save()
-        docAmodel.votes.append(Vote(name: "c", value: -1, data: try Data.random(length: 8096)))
+        try docAmodel.votes.append(Vote(name: "c", value: -1, data: Data.random(length: 8096)))
         try docAEnc.encode(docAmodel)
         _ = docA.save()
-        docAmodel.votes.append(Vote(name: "d", value: 2, data: try Data.random(length: 8096)))
+        try docAmodel.votes.append(Vote(name: "d", value: 2, data: Data.random(length: 8096)))
         try docAEnc.encode(docAmodel)
         _ = docA.save()
-        
+
         print("File size of docA at a->b, a+ is \(docA.save().count) bytes.")
         print("File size of docB at a->b, a+ is \(docB.save().count) bytes.")
         print("  docA has \(docA.changes().count) changes")
@@ -95,23 +94,23 @@ final class SyncExplorationTests: XCTestCase {
                 print(" - \(p)")
             }
         }
-        
+
         print("File size of docA at a->b, a+, a->b is \(docA.save().count) bytes.")
         print("File size of docB at a->b, a+, a->b is \(docB.save().count) bytes.")
         print("  docA has \(docA.changes().count) changes")
         print("  docB has \(docB.changes().count) changes")
 
         var docBmodel = try docBDec.decode(VoteCollection.self)
-        docBmodel.votes.append(Vote(name: "å", value: 3, data: try Data.random(length: 8096)))
+        try docBmodel.votes.append(Vote(name: "å", value: 3, data: Data.random(length: 8096)))
         try docBEnc.encode(docBmodel)
         _ = docB.save()
-        docBmodel.votes.append(Vote(name: "∫", value: 2, data: try Data.random(length: 8096)))
+        try docBmodel.votes.append(Vote(name: "∫", value: 2, data: Data.random(length: 8096)))
         try docBEnc.encode(docBmodel)
         _ = docB.save()
-        docBmodel.votes.append(Vote(name: "ç", value: 1, data: try Data.random(length: 8096)))
+        try docBmodel.votes.append(Vote(name: "ç", value: 1, data: Data.random(length: 8096)))
         try docBEnc.encode(docBmodel)
         _ = docB.save()
-        
+
         print("File size of docA at a->b, a+, a->b, b+ is \(docA.save().count) bytes.")
         print("File size of docB at a->b, a+, a->b, b+ is \(docB.save().count) bytes.")
         print("  docA has \(docA.changes().count) changes")
@@ -121,12 +120,11 @@ final class SyncExplorationTests: XCTestCase {
         if let data = docA.generateSyncMessage(state: syncStateA) {
             print("Size of second sync message, after data is added, is \(data.count) bytes.")
         }
-    
-        
+
         let fullSyncStateA = SyncState()
         let fullSyncStateB = SyncState()
-        
-        print ("FULL SYNC ROUND 1")
+
+        print("FULL SYNC ROUND 1")
         if let data = docA.generateSyncMessage(state: fullSyncStateA) {
             print("Size of a new sync state message, after data added to both models, is \(data.count) bytes.")
             let patchList = try docB.receiveSyncMessageWithPatches(state: fullSyncStateB, message: data)
@@ -144,7 +142,7 @@ final class SyncExplorationTests: XCTestCase {
 //            }
         }
 
-        print ("FULL SYNC ROUND 2")
+        print("FULL SYNC ROUND 2")
         if let data = docA.generateSyncMessage(state: fullSyncStateA) {
             print("Size of a new sync state message, after data added to both models, is \(data.count) bytes.")
             let patchList = try docB.receiveSyncMessageWithPatches(state: fullSyncStateB, message: data)
@@ -162,7 +160,7 @@ final class SyncExplorationTests: XCTestCase {
 //            }
         }
 
-        print ("FULL SYNC ROUND 3")
+        print("FULL SYNC ROUND 3")
         if let data = docA.generateSyncMessage(state: fullSyncStateA) {
             print("Size of a new sync state message, after data added to both models, is \(data.count) bytes.")
             let patchList = try docB.receiveSyncMessageWithPatches(state: fullSyncStateB, message: data)
@@ -179,7 +177,7 @@ final class SyncExplorationTests: XCTestCase {
 //                print(" - \(p) to action \(p.action) at \(p.path)")
 //            }
         }
-        
+
         /*
          File size of docA at start is 121 bytes.
            docA has 1 changes
@@ -219,5 +217,4 @@ final class SyncExplorationTests: XCTestCase {
          FULL SYNC ROUND 3
          */
     }
-
 }

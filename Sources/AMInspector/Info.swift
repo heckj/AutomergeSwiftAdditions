@@ -1,6 +1,41 @@
 import ArgumentParser
 import Automerge
 import Foundation
+import OSLog
+import PotentCBOR
+import PotentCodables
+
+/// A CBOR encoded wrapper around a serialized Automerge document.
+///
+/// The `id` is a unique identifier that provides a "new document" identifier for the purpose of comparing two documents
+/// to determine if they were branched from the same root document.
+struct WrappedAutomergeDocument: Codable {
+    let id: UUID
+    let data: Data
+    static let fileEncoder = CBOREncoder()
+    static let fileDecoder = CBORDecoder()
+}
+
+func tryDecodingWrappedDoc(from data: Data) -> Document? {
+    do {
+        let wrappedDoc = try WrappedAutomergeDocument.fileDecoder.decode(WrappedAutomergeDocument.self, from: data)
+        let doc = try Document(wrappedDoc.data)
+        return doc
+    } catch {
+        print(error)
+        return nil
+    }
+}
+
+func tryDecodingRawAutomergeDoc(from data: Data) -> Document? {
+    do {
+        let doc = try Document(data)
+        return doc
+    } catch {
+        print(error)
+        return nil
+    }
+}
 
 extension AMInspector {
     struct Info: ParsableCommand {
@@ -27,11 +62,13 @@ extension AMInspector {
                 AMInspector.exit(withError: error)
             }
 
-            do {
-                doc = try Document(data)
-            } catch {
+            if let docFromWrap = tryDecodingRawAutomergeDoc(from: data) {
+                doc = docFromWrap
+            } else if let rawDoc = tryDecodingRawAutomergeDoc(from: data) {
+                doc = rawDoc
+            } else {
                 print("\(options.inputFile) is not an Automerge document.")
-                AMInspector.exit(withError: error)
+                AMInspector.exit()
             }
 
             let changesets = doc.heads()

@@ -42,7 +42,7 @@ let package = Package(
                 .product(name: "Automerge", package: "automerge-swift"),
                 .product(name: "Rainbow", package: "Rainbow"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "PotentCBOR", package: "PotentCodables")
+                .product(name: "PotentCodables", package: "PotentCodables"),
             ]
         ),
     ]

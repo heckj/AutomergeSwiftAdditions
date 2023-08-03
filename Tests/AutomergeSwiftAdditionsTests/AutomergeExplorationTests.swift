@@ -10,7 +10,6 @@ import Automerge
 import XCTest
 
 final class AutomergeExplorationTests: XCTestCase {
-
     func testReadBeyondIndex() throws {
         let doc = Document()
         let list = try! doc.putObject(obj: ObjId.ROOT, key: "list", ty: .List)

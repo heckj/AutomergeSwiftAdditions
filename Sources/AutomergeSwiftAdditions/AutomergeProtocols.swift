@@ -25,7 +25,7 @@ public extension HasObj {
     /// Returns a Boolean value that indicates whether it has a reference to a container within an Automerge document.
     /// - Returns: True, if the object Id reference isn't nil, otherwise false.
     func isBound() -> Bool {
-        self.obj != nil
+        obj != nil
     }
 }
 
