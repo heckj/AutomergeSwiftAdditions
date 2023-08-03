@@ -21,12 +21,15 @@ extension AMInspector {
                 AMInspector.exit(withError: error)
             }
 
-            do {
-                doc = try Document(data)
-            } catch {
+            if let docFromWrap = tryDecodingWrappedDoc(from: data) {
+                doc = docFromWrap
+            } else if let rawDoc = tryDecodingRawAutomergeDoc(from: data) {
+                doc = rawDoc
+            } else {
                 print("\(options.inputFile) is not an Automerge document.")
-                AMInspector.exit(withError: error)
+                AMInspector.exit()
             }
+
             do {
                 try walk(doc)
             } catch {
