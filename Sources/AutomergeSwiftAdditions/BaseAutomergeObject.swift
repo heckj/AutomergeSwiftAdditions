@@ -18,7 +18,7 @@ open class BaseAutomergeObject: ObservableAutomergeContainer {
     /// the Automerge document is used.
     public required init(doc: Document, obj: ObjId? = ObjId.ROOT) {
         self.doc = doc
-        self.unboundStorage = [:]
+        unboundStorage = [:]
         if let obj {
             precondition(doc.objectType(obj: obj) == .Map, "The object with id: \(obj) is not a Map CRDT.")
             self.obj = obj
@@ -34,9 +34,9 @@ open class BaseAutomergeObject: ObservableAutomergeContainer {
     ///   referenced by the path is a List type of container.
     public init?(doc: Document, path: String) throws {
         self.doc = doc
-        self.unboundStorage = [:]
+        unboundStorage = [:]
         if let objId = try doc.lookupPath(path: path), doc.objectType(obj: objId) == .Map {
-            self.obj = objId
+            obj = objId
         } else {
             return nil
         }

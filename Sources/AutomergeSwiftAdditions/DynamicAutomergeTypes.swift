@@ -19,14 +19,14 @@ class DynamicAutomergeList: ObservableAutomergeContainer, Sequence, RandomAccess
         }
         self.doc = doc
         self.obj = obj
-        self.unboundStorage = [:]
+        unboundStorage = [:]
     }
 
     init?(doc: Document, path: String) throws {
         self.doc = doc
         if let objId = try doc.lookupPath(path: path), doc.objectType(obj: objId) == .List {
-            self.obj = objId
-            self.unboundStorage = [:]
+            obj = objId
+            unboundStorage = [:]
         } else {
             return nil
         }
@@ -35,8 +35,8 @@ class DynamicAutomergeList: ObservableAutomergeContainer, Sequence, RandomAccess
     init?(doc: Document, _ automergeType: UnifiedAutomergeEnumType) throws {
         self.doc = doc
         if case let .List(objId) = automergeType {
-            self.obj = objId
-            self.unboundStorage = [:]
+            obj = objId
+            unboundStorage = [:]
         } else {
             return nil
         }
@@ -48,7 +48,7 @@ class DynamicAutomergeList: ObservableAutomergeContainer, Sequence, RandomAccess
 
     /// Returns an iterator over the elements of this sequence.
     func makeIterator() -> AmListIterator<Element> {
-        AmListIterator(doc: self.doc, objId: self.obj)
+        AmListIterator(doc: doc, objId: obj)
     }
 
     struct AmListIterator<Element>: IteratorProtocol {
@@ -60,11 +60,11 @@ class DynamicAutomergeList: ObservableAutomergeContainer, Sequence, RandomAccess
         init(doc: Document, objId: ObjId?) {
             self.doc = doc
             self.objId = objId
-            self.cursorIndex = 0
+            cursorIndex = 0
             if objId != nil {
-                self.length = doc.length(obj: objId!)
+                length = doc.length(obj: objId!)
             } else {
-                self.length = 0
+                length = 0
             }
         }
 
@@ -72,7 +72,7 @@ class DynamicAutomergeList: ObservableAutomergeContainer, Sequence, RandomAccess
             if cursorIndex >= length || objId == nil {
                 return nil
             }
-            self.cursorIndex += 1
+            cursorIndex += 1
             if let result = try! doc.get(obj: objId!, index: cursorIndex) {
                 do {
                     return try result.automergeType as? Element
@@ -102,15 +102,15 @@ class DynamicAutomergeList: ObservableAutomergeContainer, Sequence, RandomAccess
     }
 
     var endIndex: UInt64 {
-        guard let objId = self.obj else {
+        guard let objId = obj else {
             return 0
         }
-        return self.doc.length(obj: objId)
+        return doc.length(obj: objId)
     }
 
     subscript(position: UInt64) -> UnifiedAutomergeEnumType? {
         do {
-            if let objId = self.obj, let amvalue = try self.doc.get(obj: objId, index: position) {
+            if let objId = obj, let amvalue = try doc.get(obj: objId, index: position) {
                 return try amvalue.automergeType
             }
         } catch {
@@ -131,21 +131,21 @@ class DynamicAutomergeMap: ObservableAutomergeContainer, Sequence, Collection {
     required init(doc: Document, obj: ObjId?) {
         self.doc = doc
         self.obj = obj
-        self.unboundStorage = [:]
+        unboundStorage = [:]
         if obj != nil {
-            self._keys = doc.keys(obj: obj!)
+            _keys = doc.keys(obj: obj!)
             precondition(doc.objectType(obj: obj!) == .Map, "The object with id: \(obj!) is not a Map CRDT.")
         } else {
-            self._keys = []
+            _keys = []
         }
     }
 
     init?(doc: Document, path: String) throws {
         self.doc = doc
         if let objId = try doc.lookupPath(path: path), doc.objectType(obj: objId) == .Map {
-            self.obj = objId
-            self.unboundStorage = [:]
-            self._keys = doc.keys(obj: objId)
+            obj = objId
+            unboundStorage = [:]
+            _keys = doc.keys(obj: objId)
         } else {
             return nil
         }
@@ -154,9 +154,9 @@ class DynamicAutomergeMap: ObservableAutomergeContainer, Sequence, Collection {
     init?(doc: Document, _ automergeType: UnifiedAutomergeEnumType) throws {
         self.doc = doc
         if case let .Map(objId) = automergeType {
-            self.obj = objId
-            self.unboundStorage = [:]
-            self._keys = doc.keys(obj: objId)
+            obj = objId
+            unboundStorage = [:]
+            _keys = doc.keys(obj: objId)
         } else {
             return nil
         }
@@ -169,7 +169,7 @@ class DynamicAutomergeMap: ObservableAutomergeContainer, Sequence, Collection {
 
     /// Returns an iterator over the elements of this sequence.
     func makeIterator() -> AmMapIterator<Element> {
-        AmMapIterator(doc: self.doc, objId: self.obj)
+        AmMapIterator(doc: doc, objId: obj)
     }
 
     struct AmMapIterator<Element>: IteratorProtocol {
@@ -182,21 +182,21 @@ class DynamicAutomergeMap: ObservableAutomergeContainer, Sequence, Collection {
         init(doc: Document, objId: ObjId?) {
             self.doc = doc
             self.objId = objId
-            self.cursorIndex = 0
+            cursorIndex = 0
             if objId != nil {
-                self.length = doc.length(obj: objId!)
-                self.keys = doc.keys(obj: objId!)
+                length = doc.length(obj: objId!)
+                keys = doc.keys(obj: objId!)
             } else {
-                self.length = 0
-                self.keys = []
+                length = 0
+                keys = []
             }
         }
 
         mutating func next() -> Element? {
-            if cursorIndex >= length, self.objId != nil {
+            if cursorIndex >= length, objId != nil {
                 return nil
             }
-            self.cursorIndex += 1
+            cursorIndex += 1
             let currentKey = keys[Int(cursorIndex)]
             if let result = try! doc.get(obj: objId!, key: currentKey) {
                 do {
@@ -228,8 +228,8 @@ class DynamicAutomergeMap: ObservableAutomergeContainer, Sequence, Collection {
     }
 
     subscript(position: Int) -> (String, UnifiedAutomergeEnumType?) {
-        let currentKey = self._keys[position]
-        if let objId = self.obj, let result = try! doc.get(obj: objId, key: currentKey) {
+        let currentKey = _keys[position]
+        if let objId = obj, let result = try! doc.get(obj: objId, key: currentKey) {
             do {
                 let amrep = try result.automergeType
                 return (currentKey, amrep)
@@ -279,7 +279,7 @@ class DynamicAutomergeObject: ObservableAutomergeContainer {
 
     subscript(dynamicMember member: String) -> UnifiedAutomergeEnumType? {
         do {
-            if let objId = self.obj, let amValue = try doc.get(obj: objId, key: member) {
+            if let objId = obj, let amValue = try doc.get(obj: objId, key: member) {
                 return try amValue.automergeType
             }
         } catch {

@@ -17,10 +17,10 @@ open class AutomergeList<T: AutomergeRepresentable>: ObservableAutomergeContaine
             precondition(obj != ObjId.ROOT, "A list object can't be bound to the Root of an Automerge document.")
             precondition(doc.objectType(obj: obj) == .List, "The object with id: \(obj) is not a List CRDT.")
             self.obj = obj
-            self.length = doc.length(obj: obj)
+            length = doc.length(obj: obj)
         } else {
             self.obj = nil
-            self.length = 0
+            length = 0
         }
         // TODO: add validation of schema - that all list entries are convertible to type `T`
     }
@@ -28,8 +28,8 @@ open class AutomergeList<T: AutomergeRepresentable>: ObservableAutomergeContaine
     public init?(doc: Document, path: String) throws {
         self.doc = doc
         if let objId = try doc.lookupPath(path: path), doc.objectType(obj: objId) == .List {
-            self.obj = objId
-            self.length = doc.length(obj: objId)
+            obj = objId
+            length = doc.length(obj: objId)
             // TODO: add validation of schema - that all list entries are convertible to type `T`
         } else {
             return nil
@@ -40,7 +40,7 @@ open class AutomergeList<T: AutomergeRepresentable>: ObservableAutomergeContaine
 
     /// Returns an iterator over the elements of this sequence.
     public func makeIterator() -> AmListIterator<T> {
-        AmListIterator(doc: self.doc, objId: self.obj)
+        AmListIterator(doc: doc, objId: obj)
     }
 
     public struct AmListIterator<Element>: IteratorProtocol {
@@ -52,11 +52,11 @@ open class AutomergeList<T: AutomergeRepresentable>: ObservableAutomergeContaine
         init(doc: Document, objId: ObjId?) {
             self.doc = doc
             self.objId = objId
-            self.cursorIndex = 0
+            cursorIndex = 0
             if let objId {
-                self.length = doc.length(obj: objId)
+                length = doc.length(obj: objId)
             } else {
-                self.length = 0
+                length = 0
             }
         }
 
@@ -64,8 +64,8 @@ open class AutomergeList<T: AutomergeRepresentable>: ObservableAutomergeContaine
             if cursorIndex >= length {
                 return nil
             }
-            if let objId = self.objId {
-                self.cursorIndex += 1
+            if let objId = objId {
+                cursorIndex += 1
                 if let result = try! doc.get(obj: objId, index: cursorIndex) {
                     do {
                         return try result.automergeType as? Element
@@ -104,8 +104,8 @@ extension AutomergeList: RandomAccessCollection {
 
     public subscript(position: UInt64) -> T {
         do {
-            guard let amvalue = try self.doc.get(obj: self.obj!, index: position) else {
-                fatalError("Unable to access list \(self.obj!) at index \(position)")
+            guard let amvalue = try doc.get(obj: obj!, index: position) else {
+                fatalError("Unable to access list \(obj!) at index \(position)")
             }
             return try T.fromValue(amvalue)
         } catch {
