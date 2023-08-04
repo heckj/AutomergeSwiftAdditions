@@ -49,6 +49,7 @@ extension AMInspector {
             let whitequote = "\"".white.bold
             switch doc.objectType(obj: objId) {
             case .Map:
+                print("\(indentString){".white.bold)
                 for (key, value) in try doc.mapEntries(obj: objId) {
                     if case let Value.Scalar(scalarValue) = value {
                         print(
@@ -61,6 +62,7 @@ extension AMInspector {
                         print("\(indentString)}".white.bold)
                     }
                 }
+                print("\(indentString)}".white.bold)
             case .List:
                 if doc.length(obj: objId) == 0 {
                     print("\(indentString)[]".white.bold)

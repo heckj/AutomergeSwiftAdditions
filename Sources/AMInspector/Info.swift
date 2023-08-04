@@ -18,7 +18,8 @@ struct WrappedAutomergeDocument: Codable {
 
 func tryDecodingWrappedDoc(from data: Data) -> Document? {
     do {
-        Logger.document.debug("Attempting to decode \(data.count, privacy: .public) bytes as a CBOR encoded Automerge doc")
+        Logger.document
+            .debug("Attempting to decode \(data.count, privacy: .public) bytes as a CBOR encoded Automerge doc")
         print("Attempting to decode \(data.count) bytes as a CBOR encoded Automerge doc")
         let wrappedDoc = try WrappedAutomergeDocument.fileDecoder.decode(WrappedAutomergeDocument.self, from: data)
         return tryDecodingRawAutomergeDoc(from: wrappedDoc.data)
