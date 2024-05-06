@@ -22,8 +22,8 @@ import AppKit
 //   }
 
 class TravelNotesModel: BaseAutomergeObject, Identifiable {
-    @AmScalarProp("id") var id: UUID
-    @AmScalarProp("title") var title: String
+//    @AmScalarProp("id") var id: UUID
+//    @AmScalarProp("title") var title: String
     @AmText("summary") var notes: String
     @AmObj("meta") var subObject: BaseAutomergeObject
 

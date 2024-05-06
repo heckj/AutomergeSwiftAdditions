@@ -5,6 +5,7 @@ import struct SwiftUI.Binding
 import class Automerge.Document
 import struct Automerge.ObjId
 import enum Automerge.ScalarValue
+
 // import protocol Automerge.ScalarValueRepresentable
 import enum Automerge.Value
 

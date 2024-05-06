@@ -44,9 +44,9 @@ final class SyncExplorationTests: XCTestCase {
         let docBDec = AutomergeDecoder(doc: docB)
 
         print("File size of docA at start is \(docA.save().count) bytes.")
-        print("  docA has \(docA.changes().count) changes")
+        print("  docA has \(docA.getHistory().count) changes")
         print("File size of docB at start is \(docB.save().count) bytes.")
-        print("  docB has \(docB.changes().count) changes")
+        print("  docB has \(docB.getHistory().count) changes")
         // docA sync to docB
         let syncStateA = SyncState()
 
@@ -62,8 +62,8 @@ final class SyncExplorationTests: XCTestCase {
 
         print("File size of docA at a->b is \(docA.save().count) bytes.")
         print("File size of docB at a->b is \(docB.save().count) bytes.")
-        print("  docA has \(docA.changes().count) changes")
-        print("  docB has \(docB.changes().count) changes")
+        print("  docA has \(docA.getHistory().count) changes")
+        print("  docB has \(docB.getHistory().count) changes")
 
         // Add data to each document
         var docAmodel = VoteCollection()
@@ -82,8 +82,8 @@ final class SyncExplorationTests: XCTestCase {
 
         print("File size of docA at a->b, a+ is \(docA.save().count) bytes.")
         print("File size of docB at a->b, a+ is \(docB.save().count) bytes.")
-        print("  docA has \(docA.changes().count) changes")
-        print("  docB has \(docB.changes().count) changes")
+        print("  docA has \(docA.getHistory().count) changes")
+        print("  docB has \(docB.getHistory().count) changes")
 
         if let data = docA.generateSyncMessage(state: SyncState()) {
             print("Size of another new sync message, after data added, is \(data.count) bytes.")
@@ -97,8 +97,8 @@ final class SyncExplorationTests: XCTestCase {
 
         print("File size of docA at a->b, a+, a->b is \(docA.save().count) bytes.")
         print("File size of docB at a->b, a+, a->b is \(docB.save().count) bytes.")
-        print("  docA has \(docA.changes().count) changes")
-        print("  docB has \(docB.changes().count) changes")
+        print("  docA has \(docA.getHistory().count) changes")
+        print("  docB has \(docB.getHistory().count) changes")
 
         var docBmodel = try docBDec.decode(VoteCollection.self)
         try docBmodel.votes.append(Vote(name: "å", value: 3, data: Data.random(length: 8096)))
@@ -113,8 +113,8 @@ final class SyncExplorationTests: XCTestCase {
 
         print("File size of docA at a->b, a+, a->b, b+ is \(docA.save().count) bytes.")
         print("File size of docB at a->b, a+, a->b, b+ is \(docB.save().count) bytes.")
-        print("  docA has \(docA.changes().count) changes")
-        print("  docB has \(docB.changes().count) changes")
+        print("  docA has \(docA.getHistory().count) changes")
+        print("  docB has \(docB.getHistory().count) changes")
 
         // docA sync to docB
         if let data = docA.generateSyncMessage(state: syncStateA) {

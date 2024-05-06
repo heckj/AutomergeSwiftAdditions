@@ -56,13 +56,43 @@ public protocol AutomergeRepresentable {
 //    public var failureReason: String? { nil }
 // }
 
+public enum ValueConversionError: LocalizedError {
+    case notBooleanScalarValue(Value)
+    case notStringScalarValue(Value)
+    case notDateScalarValue(Value)
+    case notUIntScalarValue(Value)
+    case notIntScalarValue(Value)
+    case notDoubleScalarValue(Value)
+
+    /// A localized message describing what error occurred.
+    public var errorDescription: String? {
+        switch self {
+        case let .notBooleanScalarValue(val):
+            return "Failed to read the value \(val.debugDescription) as a Boolean."
+        case let .notStringScalarValue(val):
+            return "Failed to read the value \(val.debugDescription) as a String."
+        case let .notDateScalarValue(val):
+            return "Failed to read the value \(val.debugDescription) as Data."
+        case let .notUIntScalarValue(val):
+            return "Failed to read the value \(val.debugDescription) as an UInt."
+        case let .notIntScalarValue(val):
+            return "Failed to read the value \(val.debugDescription) as an Int."
+        case let .notDoubleScalarValue(val):
+            return "Failed to read the value \(val.debugDescription) as an Int."
+        }
+    }
+
+    /// A localized message describing the reason for the failure.
+    public var failureReason: String? { nil }
+}
+
 extension Bool: AutomergeRepresentable {
     public static func fromValue(_ val: Value) throws -> Self {
         switch val {
         case let .Scalar(.Boolean(b)):
             return b
         default:
-            throw BooleanScalarConversionError.notboolValue(val)
+            throw ValueConversionError.notBooleanScalarValue(val)
         }
     }
 
@@ -95,7 +125,7 @@ extension String: AutomergeRepresentable {
         case let .Scalar(.String(s)):
             return s
         default:
-            throw StringScalarConversionError.notstringValue(val)
+            throw ValueConversionError.notStringScalarValue(val)
         }
     }
 
@@ -128,7 +158,7 @@ extension Data: AutomergeRepresentable {
         case let .Scalar(.Bytes(d)):
             return d
         default:
-            throw BytesScalarConversionError.notbytesValue(val)
+            throw ValueConversionError.notDateScalarValue(val)
         }
     }
 
@@ -161,7 +191,7 @@ extension UInt: AutomergeRepresentable {
         case let .Scalar(.Uint(d)):
             return UInt(d)
         default:
-            throw UIntScalarConversionError.notUIntValue(val)
+            throw ValueConversionError.notUIntScalarValue(val)
         }
     }
 
@@ -194,7 +224,7 @@ extension Int: AutomergeRepresentable {
         case let .Scalar(.Int(d)):
             return Int(d)
         default:
-            throw IntScalarConversionError.notIntValue(val)
+            throw ValueConversionError.notIntScalarValue(val)
         }
     }
 
@@ -227,7 +257,7 @@ extension Double: AutomergeRepresentable {
         case let .Scalar(.F64(d)):
             return Double(d)
         default:
-            throw FloatingPointScalarConversionError.notF64Value(val)
+            throw ValueConversionError.notDoubleScalarValue(val)
         }
     }
 
@@ -258,25 +288,24 @@ extension Date: AutomergeRepresentable {
     public static func fromValue(_ val: Value) throws -> Date {
         switch val {
         case let .Scalar(.Timestamp(d)):
-            return Date(timeIntervalSince1970: TimeInterval(d))
+            return d
         default:
-            throw TimestampScalarConversionError.notTimetampValue(val)
+            throw ValueConversionError.notDateScalarValue(val)
         }
     }
 
     public func toValue(doc _: Document, objId _: ObjId) -> Value {
-        .Scalar(.Timestamp(Int64(timeIntervalSince1970)))
+        .Scalar(.Timestamp(self))
     }
 }
 
 extension Counter: AutomergeRepresentable {
-    public typealias ConvertError = CounterScalarConversionError
     public static func fromValue(_ val: Value) throws -> Counter {
         switch val {
         case let .Scalar(.Counter(d)):
-            return Counter(d)
+            return Counter(Int(d))
         default:
-            throw CounterScalarConversionError.notCounterValue(val)
+            throw ValueConversionError.notIntScalarValue(val)
         }
     }
 

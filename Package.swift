@@ -15,7 +15,7 @@ let package = Package(
         .executable(name: "AMInspector", targets: ["AMInspector"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/automerge/automerge-swift", branch: "alpha0.5.0"),
+        .package(url: "https://github.com/automerge/automerge-swift", from: "0.5.0"),
         .package(url: "https://github.com/onevcat/Rainbow", from: "4.0.0"),
         .package(url: "https://github.com/outfoxx/PotentCodables", from: "3.1.0"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),

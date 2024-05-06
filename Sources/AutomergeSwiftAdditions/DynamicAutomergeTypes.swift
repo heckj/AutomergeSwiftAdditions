@@ -8,9 +8,9 @@ import enum Automerge.ScalarValue
 // MARK: Automerge 'List' overlays
 
 class DynamicAutomergeList: ObservableAutomergeContainer, Sequence, RandomAccessCollection {
-    internal var unboundStorage: [String: Automerge.ScalarValue]
-    internal var doc: Document
-    internal var obj: ObjId?
+    var unboundStorage: [String: Automerge.ScalarValue]
+    var doc: Document
+    var obj: ObjId?
 
     required init(doc: Document, obj: ObjId?) {
         if obj != nil {
@@ -123,10 +123,10 @@ class DynamicAutomergeList: ObservableAutomergeContainer, Sequence, RandomAccess
 // MARK: Automerge 'Map' overlays
 
 class DynamicAutomergeMap: ObservableAutomergeContainer, Sequence, Collection {
-    internal var doc: Document
-    internal var obj: ObjId?
+    var doc: Document
+    var obj: ObjId?
     private var _keys: [String]
-    internal var unboundStorage: [String: Automerge.ScalarValue]
+    var unboundStorage: [String: Automerge.ScalarValue]
 
     required init(doc: Document, obj: ObjId?) {
         self.doc = doc
@@ -243,9 +243,9 @@ class DynamicAutomergeMap: ObservableAutomergeContainer, Sequence, Collection {
 
 @dynamicMemberLookup
 class DynamicAutomergeObject: ObservableAutomergeContainer {
-    internal var doc: Document
-    internal var obj: ObjId?
-    internal var unboundStorage: [String: Automerge.ScalarValue]
+    var doc: Document
+    var obj: ObjId?
+    var unboundStorage: [String: Automerge.ScalarValue]
 
     // alternate initializer that accepts a path into the Automerge document
     required init(doc: Document, obj: ObjId? = ObjId.ROOT) {

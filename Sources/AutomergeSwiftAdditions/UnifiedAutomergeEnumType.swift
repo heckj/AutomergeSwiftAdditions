@@ -27,7 +27,7 @@ public enum UnifiedAutomergeEnumType: Equatable, Hashable {
     /// An integer counter.
     case Counter(Int64)
     /// A timestamp represented by the milliseconds since UNIX epoch.
-    case Timestamp(Int64)
+    case Timestamp(Date)
     /// A Boolean value.
     case Boolean(Bool)
     /// An unknown, raw scalar type.
@@ -70,8 +70,8 @@ extension Automerge.Value {
                     return .Double(doubleValue)
                 case let .Counter(intValue):
                     return .Counter(intValue)
-                case let .Timestamp(int64Value):
-                    return .Timestamp(int64Value)
+                case let .Timestamp(dateValue):
+                    return .Timestamp(dateValue)
                 case let .Boolean(boolValue):
                     return .Boolean(boolValue)
                 case let .Unknown(typeCode: typeCode, data: data):
