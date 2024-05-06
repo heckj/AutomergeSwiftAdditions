@@ -8,7 +8,7 @@ struct AMInspector: ParsableCommand {
     static var configuration = CommandConfiguration(
         commandName: "AMInspector",
         abstract: "Inspects and prints information about an Automerge file.",
-        subcommands: [Info.self, Dump.self],
+        subcommands: [Info.self, Dump.self, Export.self],
         defaultSubcommand: Info.self
     )
 

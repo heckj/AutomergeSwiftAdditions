@@ -1,11 +1,11 @@
-// swift-tools-version: 5.6
+// swift-tools-version: 5.8
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "AutomergeSwiftAdditions",
-    platforms: [.iOS(.v14), .macOS(.v12)],
+    platforms: [.iOS(.v15), .macOS(.v13)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
@@ -16,6 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/automerge/automerge-swift", from: "0.5.0"),
+        .package(url: "https://github.com/automerge/automerge-repo-swift", branch: "main"),
         .package(url: "https://github.com/onevcat/Rainbow", from: "4.0.0"),
         .package(url: "https://github.com/outfoxx/PotentCodables", from: "3.1.0"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
@@ -40,6 +41,7 @@ let package = Package(
             name: "AMInspector",
             dependencies: [
                 .product(name: "Automerge", package: "automerge-swift"),
+                .product(name: "AutomergeRepo", package: "automerge-repo-swift"),
                 .product(name: "Rainbow", package: "Rainbow"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "PotentCodables", package: "PotentCodables"),

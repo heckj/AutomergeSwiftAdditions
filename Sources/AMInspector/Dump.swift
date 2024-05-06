@@ -21,7 +21,9 @@ extension AMInspector {
                 AMInspector.exit(withError: error)
             }
 
-            if let docFromWrap = tryDecodingWrappedDoc(from: data) {
+            if let docFromWrap = tryDecodingDocumentIdWrappedDoc(from: data) {
+                doc = docFromWrap
+            } else if let docFromWrap = tryDecodingUUIDWrappedDoc(from: data) {
                 doc = docFromWrap
             } else if let rawDoc = tryDecodingRawAutomergeDoc(from: data) {
                 doc = rawDoc
